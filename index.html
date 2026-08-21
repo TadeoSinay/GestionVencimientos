@@ -371,6 +371,23 @@ select.mini{padding:5px 8px;font-size:11px;width:auto}
 
 /* PRINT — single print-root container */
 #print-root{display:none}
+/* FICHA pública (destino del QR) */
+#ficha{position:fixed;inset:0;z-index:900;background:var(--bg);overflow-y:auto;padding:0}
+.ficha-top{background:var(--grad-red);color:#fff;padding:18px 20px;display:flex;align-items:center;gap:12px}
+.ficha-top .fl{width:40px;height:40px}
+.ficha-top h1{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800;letter-spacing:.03em}
+.ficha-top .cl{font-size:11px;opacity:.9}
+.ficha-wrap{max-width:520px;margin:0 auto;padding:18px}
+.ficha-photo{position:relative;background:radial-gradient(circle at 50% 30%,#2a2a30,#141417);border-radius:14px;padding:18px;display:flex;align-items:center;justify-content:center;min-height:280px;border:1px solid var(--border)}
+.ficha-photo img,.ficha-photo svg{max-width:100%;max-height:340px;object-fit:contain}
+.ficha-badges{position:absolute;top:12px;left:12px;right:12px;display:flex;flex-wrap:wrap;gap:6px}
+.ficha-code{font-family:'JetBrains Mono',monospace;font-weight:700;color:var(--red);font-size:15px;margin:16px 0 4px;text-align:center;word-break:break-all}
+.ficha-sub{text-align:center;color:var(--text3);font-size:13px;margin-bottom:16px}
+.ficha-rows{background:var(--surface);border:1px solid var(--border);border-radius:12px;overflow:hidden}
+.ficha-row{display:flex;justify-content:space-between;align-items:center;padding:11px 15px;border-bottom:1px solid var(--border);font-size:13px}
+.ficha-row:last-child{border-bottom:none}
+.ficha-row .k{color:var(--text3)}
+.ficha-close{display:block;width:100%;margin-top:16px;padding:12px;background:var(--surface2);border:1px solid var(--border2);color:var(--text);border-radius:10px;font-size:14px;font-weight:600;cursor:pointer;font-family:inherit}
 @media print{
   body{background:#fff}
   body>*{display:none!important}
@@ -596,8 +613,8 @@ body.print-landscape{}
     <div class="page" id="page-trayectoria">
       <span class="sec-label">Trayectoria con FLAMA</span>
       <div class="tray-hero" id="tray-hero"></div>
-      <div class="sec-hdr"><h3>Gasto anual con nosotros</h3><span class="ct">recargas + servicios</span></div>
-      <div class="panel" style="margin-bottom:22px"><div class="curve-wrap" id="tray-curve"></div></div>
+      <div class="sec-hdr"><h3>Gasto anual con nosotros</h3><div class="spacer"></div><select id="tray-filter" onchange="renderTray()" style="background:var(--surface);border:1px solid var(--border2);color:var(--text);border-radius:8px;padding:7px 11px;font-size:13px;font-family:inherit"><option value="total">Total (recargas + reposición)</option><option value="rec">Solo recargas</option><option value="rep">Solo reposición</option></select></div>
+      <div class="panel" style="margin-bottom:22px"><div id="tray-curve"></div></div>
       <div class="sec-hdr"><h3>Detalle por tipo de matafuego</h3><span class="ct">valores de referencia sin IVA</span></div>
       <div class="tbl-wrap"><div class="tbl-scroll"><table><thead><tr><th>Tipo</th><th>Unidades en parque</th><th>Precio unidad</th><th>Recarga</th><th>Gasto anual est.</th></tr></thead><tbody id="tray-table"></tbody></table></div></div>
     </div>
@@ -617,6 +634,7 @@ body.print-landscape{}
 </div></div>
 <div id="tooltip"></div>
 <div id="print-root"></div>
+<div id="ficha" style="display:none"></div>
 <!-- MODAL MATAFUEGO -->
 <div class="overlay hidden" id="ov-mat"><div class="modal wide" onclick="event.stopPropagation()">
   <div class="modal-hdr"><h2 id="mat-title">Nuevo Matafuego</h2><button class="btn-ghost" onclick="closeM('ov-mat')">✕</button></div>
@@ -882,43 +900,67 @@ function entChip(e){var m={Instalado:'ok',Entregado:'ok','En tránsito':'info','
 function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2);}
 function addYr(m,n){if(!m)return'';var p=m.split('-');return(+p[0]+n)+'-'+p[1];}
 function catOf(m){for(var i=0;i<CATALOG.length;i++)if(CATALOG[i].base===m.tipoBase&&CATALOG[i].size===m.tamano)return CATALOG[i];return CATALOG[0];}
-function codeOf(m){var cuit=(m.cuit||company.cuit||'').replace(/\D/g,'');return (m.tipoBase||'?')+'-'+(m.tamano||'').replace(/\s/g,'')+'-'+(cuit||'SINCUIT');}
-function qrPayload(m){return 'https://flama.com.ar/m/'+codeOf(m);}
+function codeOf(m){var cuit=(m.cuit||company.cuit||'').replace(/\D/g,'');return (m.tipoBase||'?')+'-'+(m.tamano||'').replace(/\s/g,'')+'-'+(m.lote||'S/L')+'-'+(cuit||'SINCUIT');}
+/* QR: link corto a la ficha con datos compactos (entra en el QR y es escaneable) */
+function baseURL(){try{return location.origin+location.pathname;}catch(e){return 'https://tadeosinay.github.io/GestionVencimientos/';}}
+function qrData(m){return [codeOf(m),(m.sector||'').slice(0,22),m.estadoActual||'',m.proximaRecarga||'',m.anilloYr||'',(m.opds||'')].join('|');}
+function qrPayload(m){return baseURL()+'#f='+encodeURIComponent(qrData(m));}
 
-/* ===== RENDERS (realistas) ===== */
+/* ===== RENDER MATAFUEGO (estilo catálogo FLAMA) ===== */
 function matImg(m,px){
-  px=px||120;var col=BODY_COLORS[m.color||'red']||BODY_COLORS.red;var wheels=m.ruedas;var id=m.id||'x';
-  var horn=m.horn?'<path d="M62 30 q22 2 24 20 q-1 10 -10 12" fill="none" stroke="#111" stroke-width="5" stroke-linecap="round"/>':'';
-  return '<svg viewBox="0 0 100 150" width="'+px+'" height="'+(px*1.5)+'" xmlns="http://www.w3.org/2000/svg">'
-   +'<defs><linearGradient id="b'+id+'" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="'+col[2]+'"/><stop offset=".18" stop-color="'+col[1]+'"/><stop offset=".42" stop-color="'+col[0]+'"/><stop offset=".6" stop-color="'+col[1]+'"/><stop offset="1" stop-color="'+col[2]+'"/></linearGradient>'
-   +'<radialGradient id="s'+id+'" cx=".5" cy=".5" r=".6"><stop offset="0" stop-color="#000" stop-opacity=".25"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient></defs>'
-   +'<ellipse cx="50" cy="142" rx="30" ry="6" fill="url(#s'+id+')"/>'
-   +'<rect x="44" y="8" width="12" height="10" rx="2" fill="#2b2b2b"/>'
-   +'<path d="M34 17 h32 v4 l-4 4 h-24 l-4 -4 z" fill="#3a3a3a"/>'
-   +'<rect x="55" y="11" width="20" height="5" rx="2.5" fill="#4a4a4a"/><rect x="30" y="20" width="8" height="7" rx="2" fill="#c0c0c0"/>'
-   +horn
-   +'<rect x="26" y="26" width="48" height="108" rx="18" fill="url(#b'+id+')" stroke="rgba(0,0,0,.3)"/>'
-   +'<rect x="30" y="30" width="7" height="100" rx="4" fill="#fff" opacity=".28"/>'
-   +'<rect x="34" y="52" width="32" height="46" rx="3" fill="#fff" opacity=".95"/>'
-   +'<circle cx="50" cy="60" r="4.5" fill="'+col[0]+'"/><path d="M50 56 q-2 3 0 6 q2 -3 0 -6z" fill="#fff"/>'
-   +'<text x="50" y="74" font-size="8" font-weight="900" text-anchor="middle" fill="#111" font-family="Archivo,sans-serif">FLAMA</text>'
-   +'<text x="50" y="84" font-size="7.5" font-weight="700" text-anchor="middle" fill="'+col[1]+'">'+(m.tipoBase||'')+'</text>'
-   +'<text x="50" y="93" font-size="6.5" text-anchor="middle" fill="#333">'+(m.tamano||'')+'</text>'
-   +(wheels?'<circle cx="30" cy="138" r="9" fill="#1a1a1a"/><circle cx="30" cy="138" r="3.5" fill="#555"/><circle cx="70" cy="138" r="9" fill="#1a1a1a"/><circle cx="70" cy="138" r="3.5" fill="#555"/><rect x="24" y="120" width="52" height="4" rx="2" fill="#c00"/>':'')
+  px=px||120;var col=BODY_COLORS[m.color||'red']||BODY_COLORS.red;var wheels=m.ruedas;var id=(m.id||'x').replace(/[^a-z0-9]/gi,'');
+  var isMetal=(m.color==='silver'||m.color==='steel');
+  var horn=m.horn?'<path d="M40 30 q-16 4 -18 22 q0 8 6 12" fill="none" stroke="#1a1a1a" stroke-width="5.5" stroke-linecap="round"/><ellipse cx="27" cy="66" rx="7" ry="9" fill="#1a1a1a"/>':'';
+  var hose=(!m.horn&&!wheels)?'<path d="M40 34 q-14 6 -14 30 v58" fill="none" stroke="#111" stroke-width="4" stroke-linecap="round"/><rect x="22" y="120" width="8" height="10" rx="2" fill="#111"/>':'';
+  var pict='<g transform="translate(38,98)">'+[0,1,2].map(function(i){return '<rect x="'+(i*10)+'" y="0" width="8" height="8" rx="1.5" fill="#e8e8e8" stroke="#bbb" stroke-width=".5"/><circle cx="'+(i*10+4)+'" cy="4" r="2" fill="'+['#c00','#06c','#093'][i]+'"/>';}).join('')+'</g>';
+  return '<svg viewBox="0 0 100 155" width="'+px+'" height="'+(px*1.55)+'" xmlns="http://www.w3.org/2000/svg">'
+   +'<defs><linearGradient id="b'+id+'" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="'+col[2]+'"/><stop offset=".16" stop-color="'+col[1]+'"/><stop offset=".4" stop-color="'+col[0]+'"/><stop offset=".5" stop-color="'+(isMetal?'#ffffff':col[0])+'"/><stop offset=".62" stop-color="'+col[0]+'"/><stop offset="1" stop-color="'+col[2]+'"/></linearGradient>'
+   +'<radialGradient id="s'+id+'" cx=".5" cy=".5" r=".6"><stop offset="0" stop-color="#000" stop-opacity=".28"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient></defs>'
+   +'<ellipse cx="50" cy="148" rx="28" ry="5" fill="url(#s'+id+')"/>'
+   +hose+horn
+   +'<path d="M44 12 q6 -5 12 0" fill="none" stroke="#c0000f" stroke-width="4" stroke-linecap="round"/>'
+   +'<rect x="43" y="14" width="14" height="9" rx="2" fill="#2b2b2b"/>'
+   +'<circle cx="60" cy="20" r="4.5" fill="#eee" stroke="#333" stroke-width="1"/><line x1="60" y1="20" x2="62" y2="18" stroke="#c00"/>'
+   +'<path d="M32 22 h36 v4 l-3 4 h-30 l-3 -4 z" fill="#3a3a3a"/>'
+   +'<rect x="26" y="30" width="48" height="112" rx="16" fill="url(#b'+id+')" stroke="rgba(0,0,0,.35)" stroke-width="1"/>'
+   +'<rect x="30" y="34" width="6" height="104" rx="3" fill="#fff" opacity="'+(isMetal?'.5':'.3')+'"/>'
+   +'<rect x="33" y="46" width="34" height="60" rx="3" fill="#fff" stroke="#ddd" stroke-width=".5"/>'
+   +'<path d="M50 52c-.6 3-3 4-3.4 7 .3 2.6 2 3.4 3.4 3 1.5-.6 2-2 1.7-3.4-.3-1.3-1.2-2-1.7-3.4 1 .7 1.7 2 1.6 3.4 .8-1.3.6-3-.3-4.3-.7-.9-1-.9-1.3-2.3z" fill="'+col[0]+'"/>'
+   +'<text x="50" y="72" font-size="7.5" font-weight="900" text-anchor="middle" fill="#111" font-family="Archivo,sans-serif" letter-spacing=".3">FLAMA</text>'
+   +'<line x1="37" y1="75" x2="63" y2="75" stroke="#ddd" stroke-width=".6"/>'
+   +'<text x="50" y="86" font-size="8.5" font-weight="800" text-anchor="middle" fill="#111">'+(m.tipoBase||'')+'</text>'
+   +'<text x="50" y="94" font-size="6.5" text-anchor="middle" fill="#333">'+(m.tamano||'')+'</text>'
+   +pict
+   +(wheels?'<rect x="20" y="118" width="60" height="5" rx="2.5" fill="#b00"/><path d="M24 122 v14 M76 122 v14" stroke="#b00" stroke-width="3"/><circle cx="24" cy="142" r="9" fill="#1a1a1a"/><circle cx="24" cy="142" r="3.5" fill="#666"/><circle cx="76" cy="142" r="9" fill="#1a1a1a"/><circle cx="76" cy="142" r="3.5" fill="#666"/>':'')
    +'</svg>';
 }
+/* ===== OBLEA DPS OFICIAL (estilo sello real) ===== */
 function obleaSvg(m,px){
-  px=px||150;var r=ring(m.anilloYr);var col=r?r.hex:'#7DD3FC';var tx=r?r.txt:'#0A2A3A';
-  return '<svg viewBox="0 0 150 150" width="'+px+'" height="'+px+'" xmlns="http://www.w3.org/2000/svg">'
-   +'<circle cx="75" cy="75" r="72" fill="'+col+'" stroke="'+tx+'" stroke-width="2"/>'
-   +'<circle cx="75" cy="75" r="63" fill="none" stroke="'+tx+'" stroke-width="1" opacity=".5"/>'
-   +'<text x="75" y="26" font-size="10" font-weight="800" text-anchor="middle" fill="'+tx+'">OBLEA ODS / OPDS</text>'
-   +'<text x="75" y="40" font-size="7.5" text-anchor="middle" fill="'+tx+'">IRAM 3517-2 · Res. 349/07</text>'
-   +'<line x1="24" y1="46" x2="126" y2="46" stroke="'+tx+'" opacity=".4"/>'
-   +'<text x="75" y="82" font-size="34" font-weight="900" text-anchor="middle" fill="'+tx+'">'+(m.anilloYr||'20—')+'</text>'
-   +'<text x="75" y="98" font-size="8" font-weight="700" text-anchor="middle" fill="'+tx+'">VTO. RECARGA ANUAL</text>'
-   +'<text x="75" y="116" font-size="7.5" text-anchor="middle" fill="'+tx+'">'+(m.opds||'OPDS-0000/07')+'</text>'
-   +'<text x="75" y="132" font-size="8" font-weight="800" text-anchor="middle" fill="'+tx+'">ANILLO '+((r?r.name:'CELESTE').toUpperCase())+'</text>'
+  px=px||160;
+  var d=m.proximaRecarga||'';var mesN=d?parseInt(d.slice(5,7)):3;var anio=m.anilloYr||(d?d.slice(0,4):'20—');
+  var meses=['ENE','FEB','MAR','ABR','MAY','JUN','JUL','AGO','SEP','OCT','NOV','DIC'];var mes=meses[(mesN-1+12)%12]||'MAR';
+  var serial=(m.opds||('1H'+(m.lote||'0000000'))).replace(/\D/g,'').slice(0,8).padEnd(8,'0');
+  var id2=(m.id||'x').replace(/[^a-z0-9]/gi,'');
+  return '<svg viewBox="0 0 160 160" width="'+px+'" height="'+px+'" xmlns="http://www.w3.org/2000/svg">'
+   +'<defs><path id="arcTop'+id2+'" d="M20 80 A60 60 0 0 1 140 80"/><path id="arcBot'+id2+'" d="M28 80 A52 52 0 0 0 132 80"/></defs>'
+   +'<circle cx="80" cy="80" r="76" fill="#efeaf7" stroke="#6E5FA6" stroke-width="2"/>'
+   +'<circle cx="80" cy="80" r="70" fill="none" stroke="#6E5FA6" stroke-width="1" opacity=".6"/>'
+   +'<circle cx="80" cy="80" r="66" fill="none" stroke="#8A7BC0" stroke-width=".5" opacity=".5"/>'
+   +'<text font-size="8.2" font-weight="800" fill="#4A3F7A" letter-spacing=".4"><textPath href="#arcTop'+id2+'" startOffset="50%" text-anchor="middle">ÚNICO SELLO OFICIAL OBLIGATORIO DE CONFORMIDAD</textPath></text>'
+   +'<text font-size="8" font-weight="800" fill="#4A3F7A" letter-spacing=".5"><textPath href="#arcBot'+id2+'" startOffset="50%" text-anchor="middle">CON NORMAS IRAM</textPath></text>'
+   +'<circle cx="80" cy="44" r="15" fill="#8f8f8f" stroke="#555" stroke-width="1"/><path d="M68 44 q12 -8 24 0 q-12 8 -24 0z" fill="#6f6f6f"/>'
+   +'<rect x="12" y="60" width="16" height="16" rx="2" fill="#2b2b2b"/><text x="20" y="71" font-size="7" font-weight="800" text-anchor="middle" fill="#fff">DPS</text>'
+   +'<rect x="132" y="60" width="16" height="16" rx="2" fill="#2b2b2b"/><text x="140" y="71" font-size="7" font-weight="800" text-anchor="middle" fill="#fff">DPS</text>'
+   +'<rect x="40" y="62" width="80" height="22" rx="2" fill="#F5A623" stroke="#7a3" stroke-width=".5"/>'
+   +'<text x="80" y="70" font-size="6.6" font-weight="800" text-anchor="middle" fill="#111">PROXIMA REVISION DE CARGA</text>'
+   +'<line x1="80" y1="72" x2="80" y2="84" stroke="#111" stroke-width=".7"/>'
+   +'<text x="60" y="82" font-size="9" font-weight="900" text-anchor="middle" fill="#111">'+mes+'</text>'
+   +'<text x="102" y="82" font-size="9" font-weight="900" text-anchor="middle" fill="#111">'+anio+'</text>'
+   +'<text x="80" y="94" font-size="5.6" font-weight="700" text-anchor="middle" fill="#333">GOBIERNO DE LA PROVINCIA DE BUENOS AIRES</text>'
+   +'<rect x="44" y="99" width="72" height="13" rx="1.5" fill="#fff" stroke="#111" stroke-width=".6"/>'
+   +'<text x="80" y="108" font-size="8" font-weight="800" font-family="JetBrains Mono,monospace" text-anchor="middle" fill="#111" letter-spacing="1">'+serial+'</text>'
+   +'<path d="M64 116 l32 0 -16 12 z" fill="#4A2F5A"/>'
+   +'<text x="80" y="140" font-size="8" font-weight="900" text-anchor="middle" fill="#4A3F7A">LEY 19.587</text>'
    +'</svg>';
 }
 /* ===== INIT SELECTS ===== */
@@ -1189,22 +1231,27 @@ function renderTray(){
    +'<div class="tray-card"><div class="lbl">Gasto recargas / año</div><div class="big" style="color:var(--red)">'+money(totRec)+'</div></div>'
    +'<div class="tray-card"><div class="lbl">Valor de reposición</div><div class="big" style="color:var(--warn)">'+money(totNuevo)+'</div></div>'
    +'<div class="tray-card"><div class="lbl">Tipos distintos</div><div class="big">'+Object.keys(counts).length+'</div></div>';
-  // gasto anual histórico (5 años) — simulado con crecimiento
+  // gasto anual histórico (5 años) por tipo de gasto (filtrable)
+  var filt=(document.getElementById('tray-filter')||{}).value||'total';
+  var yBase=(filt==='rec')?totRec:(filt==='rep')?totNuevo:(totRec+Math.round(totNuevo*0.15));
+  var col=(filt==='rep')?'#F5A623':'#ED1C24';
   var years=[hoyYear()-4,hoyYear()-3,hoyYear()-2,hoyYear()-1,hoyYear()];
-  var base=totRec;var vals=years.map(function(y,i){return Math.round(base*(0.55+i*0.11));});
-  var labels='<div class="curve-labels">'+years.map(function(y){return '<span>'+y+'</span>';}).join('')+'</div>';
-  document.getElementById('tray-curve').innerHTML='<div style="font-size:12px;color:var(--text3);margin-bottom:6px">Evolución del gasto anual (recargas + servicios)</div><div class="curve-wrap">'+lineCurveMoney(vals)+labels+'</div>';
+  var vals=years.map(function(y,i){return Math.round(yBase*(0.55+i*0.11));});
+  var lbl=filt==='rec'?'Evolución del gasto en recargas':filt==='rep'?'Evolución del valor de reposición':'Evolución del gasto anual total';
+  document.getElementById('tray-curve').innerHTML='<div style="font-size:12px;color:var(--text3);margin-bottom:6px">'+lbl+' — pasá el mouse por cada año</div>'+lineCurveMoney(vals,years,col);
   document.getElementById('tray-table').innerHTML=rows||'<tr><td colspan="5" class="table-empty">Sin datos</td></tr>';
 }
 function hoyYear(){return new Date().getFullYear();}
-function lineCurveMoney(vals){
-  var w=600,h=90,mx=Math.max.apply(null,vals.concat([1])),n=vals.length,pad=8;
-  var pts=vals.map(function(v,i){return [pad+(w-pad*2)*i/(n-1),h-10-(h-24)*(v/mx)];});
+function lineCurveMoney(vals,years,color){
+  color=color||'#ED1C24';var w=600,h=100,mx=Math.max.apply(null,vals.concat([1])),n=vals.length,pad=10;
+  var pts=vals.map(function(v,i){return [pad+(w-pad*2)*i/(n-1),h-14-(h-30)*(v/mx)];});
   var path='';pts.forEach(function(p,i){if(i===0)path+='M'+p[0].toFixed(1)+' '+p[1].toFixed(1);else{var pr=pts[i-1],cx=(pr[0]+p[0])/2;path+=' C'+cx.toFixed(1)+' '+pr[1].toFixed(1)+' '+cx.toFixed(1)+' '+p[1].toFixed(1)+' '+p[0].toFixed(1)+' '+p[1].toFixed(1);}});
   var area=path+' L'+pts[n-1][0].toFixed(1)+' '+h+' L'+pts[0][0].toFixed(1)+' '+h+' Z';
-  var dots=pts.map(function(p){return '<circle cx="'+p[0].toFixed(1)+'" cy="'+p[1].toFixed(1)+'" r="3.5" fill="#ED1C24"/>';}).join('');
-  var labels=pts.map(function(p,i){return '<div class="curve-pt" style="left:'+(p[0]/w*100)+'%;top:'+(p[1]/h*100)+'%">'+money(vals[i])+'</div>';}).join('');
-  return '<div style="position:relative"><svg viewBox="0 0 '+w+' '+h+'" width="100%" height="'+h+'" preserveAspectRatio="none"><defs><linearGradient id="tm" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ED1C24" stop-opacity=".3"/><stop offset="1" stop-color="#ED1C24" stop-opacity="0"/></linearGradient></defs><path d="'+area+'" fill="url(#tm)"/><path d="'+path+'" fill="none" stroke="#ED1C24" stroke-width="2.6" stroke-linecap="round"/>'+dots+'</svg>'+labels+'</div>';
+  var dots=pts.map(function(p){return '<circle cx="'+p[0].toFixed(1)+'" cy="'+p[1].toFixed(1)+'" r="3.5" fill="'+color+'"/>';}).join('');
+  var labels=pts.map(function(p,i){return '<div class="curve-pt" style="left:'+(p[0]/w*100)+'%;top:'+(p[1]/h*100)+'%;font-size:11px">'+money(vals[i])+'</div>';}).join('');
+  var hits=pts.map(function(p,i){return '<div class="curve-hit" style="left:'+(p[0]/w*100)+'%;top:'+(p[1]/h*100)+'%;--cc:'+color+'"><span class="curve-bubble">'+years[i]+': <b>'+money(vals[i])+'</b></span></div>';}).join('');
+  var yl='<div class="curve-labels">'+years.map(function(y){return '<span>'+y+'</span>';}).join('')+'</div>';
+  return '<div style="position:relative"><svg viewBox="0 0 '+w+' '+h+'" width="100%" height="'+h+'" preserveAspectRatio="none"><defs><linearGradient id="tm" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="'+color+'" stop-opacity=".3"/><stop offset="1" stop-color="'+color+'" stop-opacity="0"/></linearGradient></defs><path d="'+area+'" fill="url(#tm)"/><path d="'+path+'" fill="none" stroke="'+color+'" stroke-width="2.6" stroke-linecap="round"/>'+dots+'</svg>'+labels+hits+yl+'</div>';
 }
 /* ===== DETAIL ===== */
 function openDet(id){
@@ -1303,6 +1350,39 @@ function exportCSV(){
 }
 function renderRings(){document.getElementById('rings').innerHTML=RINGS.map(function(r){var cnt=data.filter(function(m){return parseInt(m.anilloYr)===r.yr;}).length;return '<div class="ring-card"><div class="ring-circle" style="background:'+r.hex+';color:'+r.txt+';border-color:'+(r.brd||'rgba(255,255,255,.15)')+'">'+r.yr.toString().slice(2)+'</div><div class="ring-info"><h4>'+r.name+'</h4><p>Vence en '+r.yr+'</p><small>'+cnt+' matafuego'+(cnt!==1?'s':'')+'</small></div></div>';}).join('');}
 
+/* ===== FICHA (destino del QR) ===== */
+function fichaFrom(obj,m){
+  // obj = {code,sector,estado,recarga,anillo,opds}; m = matafuego local (si existe) con fotos
+  var r=ring(obj.anillo);var n=daysTo(obj.recarga);var sev=sevOf(n);
+  var photo=(m&&m.foto_unit)?'<img src="'+m.foto_unit+'">':(m?matImg(m,220):matImg({id:'f',tipoBase:(obj.code||'').split('-')[0],tamano:(obj.code||'').split('-')[1],color:'red'},220));
+  var badges='<span class="chip '+({Operativo:'ok','En mantenimiento':'warn',Vencido:'crit','De baja':'grey'}[obj.estado]||'grey')+'">'+(obj.estado||'—')+'</span>'
+    +'<span class="chip '+(sev>=3?'crit':sev>=2?'warn':'ok')+'">Recarga: '+(n===null?'—':n<0?'venció '+Math.abs(n)+'d':'en '+n+'d')+'</span>'
+    +(r?'<span class="ring-badge" style="background:'+r.hex+';color:'+r.txt+'">Anillo '+r.name+' '+r.yr+'</span>':'');
+  function row(k,v){return '<div class="ficha-row"><span class="k">'+k+'</span><span>'+(v||'—')+'</span></div>';}
+  var extra='';
+  if(m){extra=row('Control Periódico Preventivo',fmt(m.proximoCPP)+' · '+dayChip(m.proximoCPP))+row('Prueba Hidráulica',fmt(m.proximaPH)+' · '+dayChip(m.proximaPH))+row('Caducidad definitiva',fmt(m.caducidad))+row('Entrega',entChip(m.entregaEstado));}
+  document.getElementById('ficha').innerHTML=
+   '<div class="ficha-top">'+FLAME_INLINE.replace('doc-logo','fl')+'<div><h1>FLAMA · Ficha de Matafuego</h1><div class="cl">Escaneá · IRAM 3517-2 · Res. 349/07 OPDS</div></div></div>'
+   +'<div class="ficha-wrap"><div class="ficha-photo"><div class="ficha-badges">'+badges+'</div>'+photo+'</div>'
+   +'<div class="ficha-code">'+(obj.code||'—')+'</div><div class="ficha-sub">'+(obj.sector||'')+'</div>'
+   +'<div class="ficha-rows">'+row('Estado','<b>'+(obj.estado||'—')+'</b>')+row('Próxima recarga anual',fmt(obj.recarga))+row('Anillo',r?r.name+' '+r.yr:'—')+row('N° OPDS/ODS',obj.opds)+extra+'</div>'
+   +'<button class="ficha-close" onclick="closeFicha()">✕ Cerrar ficha y abrir panel</button></div>';
+  document.getElementById('ficha').style.display='block';
+}
+function closeFicha(){document.getElementById('ficha').style.display='none';try{history.replaceState(null,'',baseURL());}catch(e){location.hash='';}}
+function routeHash(){
+  var h=(location.hash||'');
+  if(h.indexOf('#f=')===0){
+    var parts=decodeURIComponent(h.slice(3)).split('|');
+    var obj={code:parts[0],sector:parts[1],estado:parts[2],recarga:parts[3],anillo:parts[4],opds:parts[5]};
+    var m=null;for(var i=0;i<data.length;i++)if(codeOf(data[i])===obj.code)m=data[i];
+    fichaFrom(obj,m);return true;
+  }
+  if(h.indexOf('#m=')===0){var id=h.slice(3).split('&')[0];var m=null;for(var i=0;i<data.length;i++)if(data[i].id===id)m=data[i];if(m)fichaFrom({code:codeOf(m),sector:m.sector,estado:m.estadoActual,recarga:m.proximaRecarga,anillo:m.anilloYr,opds:m.opds},m);return true;}
+  return false;
+}
+window.addEventListener('hashchange',routeHash);
+
 /* ===== NAV ===== */
 var T={dashboard:'Dashboard <span>General</span>',matafuegos:'Matafuegos <span>Registrados</span>',vencimientos:'Vencimientos <span>Visual</span>',alertas:'Alertas <span>de Vencimiento</span>',galeria:'Galería <span>QR / Obleas</span>',syh:'Planilla <span>SyH</span>',cf:'Carga de <span>Fuego</span>',contrato:'Contrato <span>Digital</span>',trayectoria:'Trayectoria <span>& Ahorro</span>',anillos:'Anillos <span>por Año</span>'};
 function nav(p){var pgs=document.querySelectorAll('.page');for(var i=0;i<pgs.length;i++)pgs[i].classList.remove('active');document.getElementById('page-'+p).classList.add('active');var nb=document.querySelectorAll('.nav-btn');for(var i=0;i<nb.length;i++)nb[i].classList.toggle('active',nb[i].getAttribute('data-p')===p);document.getElementById('pg-title').innerHTML=T[p]||p;
@@ -1352,7 +1432,7 @@ initSelects();
 var wsIds=Object.keys(workspaces);
 if(!wsIds.length){newWorkspace('FLAMA — Empresa Demo','30504835126',true);}
 else{bindWs((currentWs&&workspaces[currentWs])?currentWs:wsIds[0]);}
-applyCompany();renderAll();
+applyCompany();renderAll();routeHash();
 </script>
 </body>
 </html>
