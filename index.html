@@ -1587,8 +1587,8 @@ function toggleTheme(){var r=document.documentElement;r.dataset.theme=r.dataset.
 function closeM(id){document.getElementById(id).classList.add('hidden');}
 var ovs=document.querySelectorAll('.overlay');for(var oi=0;oi<ovs.length;oi++)ovs[oi].addEventListener('click',function(e){if(e.target===this)closeM(this.id);});
 /* ===== SEED 100 ===== */
-function seed(){
-  if(data.length>0)return;
+function seed(force){
+  if(!force&&data.length>0)return;
   var cuit='30504835126',resp='Ing. García Lucía',mat='20-12345678-9';
   var sectors=['Planta Baja — Pasillo Norte','Planta Alta — Oficinas','Depósito — Zona Carga','Comedor','Sala de Máquinas','Estacionamiento','Cocina Industrial','Laboratorio','Recepción','Pañol','Playa de Carga','Sector Envasado','Archivo','Sala de Servidores','Taller Mecánico','Sala de Caldera','Farmacia','Aula Magna','Pasillo Central','Sala de Guardia','Vestuarios','Portería','Sala de Bombas','Subsuelo','Terraza técnica'];
   var merc=['Automotor','Edificios','Industrias','Supermercados','Hoteles','Salud','Educación'];
@@ -1596,10 +1596,10 @@ function seed(){
   var now=new Date(),out=[];
   for(var i=0;i<100;i++){
     var c=CATALOG[i%CATALOG.length];
-    var offset=[-210,-150,-95,-60,-30,-12,8,18,32,50,70,95,120,150,190,240,300,-45,-8,25,60,110,180,-120,-75][i%25]+((i%3)-1)*5;
+    var offset=[30,75,120,160,200,240,290,330,20,55,95,135,180,220,-8,-18,15,50,-12,110,150,190,-5,25,70][i%25]+((i%3)-1)*3;
     var prox=new Date(now.getFullYear(),now.getMonth(),now.getDate()+offset);
-    var fabYr=2016+(i%9),anilloYr=2024+((i+2)%7);
-    var estado=offset<-5?((i%3===0)?'En mantenimiento':'Vencido'):(i%23===0?'De baja':'Operativo');
+    var fabYr=2019+(i%7),anilloYr=2025+((i+1)%6);
+    var estado=offset<0?((i%2===0)?'En mantenimiento':'Vencido'):(i%40===0?'De baja':'Operativo');
     var alta=new Date(now.getFullYear(),now.getMonth()-(i%6),3+(i%20)).toISOString().split('T')[0];
     var nuevo=(i%6===0)?new Date(now.getFullYear(),now.getMonth()-(i%5),12).toISOString().split('T')[0]:'';
     function chk(g){return g?'✅ Conforme':(i%5===0?'⚠️ Regular':(i%11===0?'❌ No conforme':'✅ Conforme'));}
@@ -1610,9 +1610,9 @@ function seed(){
       entregaEstado:ent,nroPedido:ent==='Pendiente'?'':'REM-0004-'+String(460000+i*13),fentrega:ent==='Pendiente'?'':alta,
       fabricacion:fabYr+'-'+String(1+(i%12)).padStart(2,'0'),instalacion:fabYr+'-06-01',anilloYr:String(anilloYr),
       ultimaRecarga:new Date(prox.getFullYear()-1,prox.getMonth(),prox.getDate()).toISOString().split('T')[0],proximaRecarga:prox.toISOString().split('T')[0],
-      ultimoCPP:new Date(now.getFullYear(),now.getMonth()-3,1).toISOString().split('T')[0],proximoCPP:new Date(now.getFullYear(),now.getMonth()+1+(offset%4),5+(i%20)).toISOString().split('T')[0],
-      ultimaPH:fabYr+'-06-01',proximaPH:(fabYr+5)+'-06-01',caducidad:(fabYr+20)+'-'+String(1+(i%12)).padStart(2,'0'),
-      estadoActual:estado,tieneProvisorio:offset<-30?'si':'no',provDesc:offset<-30?('MAT-PROV-'+(i+1)+' '+c.base+' '+c.size):'',nuevoFecha:nuevo,
+      ultimoCPP:new Date(now.getFullYear(),now.getMonth()-(2+(i%3)),1+(i%20)).toISOString().split('T')[0],proximoCPP:new Date(now.getFullYear(),now.getMonth(),now.getDate()+[20,60,100,140,-6,175,45,90,130,10][i%10]).toISOString().split('T')[0],
+      ultimaPH:new Date(now.getFullYear()-(4-(i%5)),now.getMonth(),15).toISOString().split('T')[0],proximaPH:new Date(now.getFullYear()+(1+(i%5)),now.getMonth(),15).toISOString().split('T')[0],caducidad:(fabYr+20)+'-'+String(1+(i%12)).padStart(2,'0'),
+      estadoActual:estado,tieneProvisorio:offset<0?'si':'no',provDesc:offset<0?('MAT-PROV-'+(i+1)+' '+c.base+' '+c.size):'',nuevoFecha:nuevo,
       fechaAlta:alta,fechaInsp:new Date(now.getFullYear(),now.getMonth()-2,10).toISOString().split('T')[0],responsable:resp,matricula:mat,proximaInsp:new Date(now.getFullYear(),now.getMonth()+4,10).toISOString().split('T')[0],
       obs:offset<0?'Requiere recarga / recambio.':'',
       cPres:chk(i%4),cPrec:chk(i%3),cMang:chk(i%5),cBoq:chk(1),cSop:chk(i%6),cSen:chk(i%3),cEtq:chk(1),cAcc:chk(1),
@@ -1627,9 +1627,20 @@ function renderAll(){renderTrends();renderKpis();renderTbl();renderSyhFilter();r
   var fc=(fijos||[]).filter(function(f){var n=daysTo(f.prox);return n!=null&&n<=30;}).length,fb=document.getElementById('nb-fj');if(fb){if(fc){fb.textContent=fc;fb.classList.add('show');}else fb.classList.remove('show');}}
 /* boot */
 initSelects();
+var SEEDVER='2';
 var wsIds=Object.keys(workspaces);
 if(!wsIds.length){newWorkspace('FLAMA — Empresa Demo','30504835126',true);}
 else{bindWs((currentWs&&workspaces[currentWs])?currentWs:wsIds[0]);}
+// Re-generar SOLO la empresa demo si cambió la versión de datos (no toca empresas creadas por el usuario)
+if(ld('flama_seedver',null)!==SEEDVER){
+  var target=currentWs;
+  Object.keys(workspaces).forEach(function(id){
+    var w=workspaces[id];
+    if(w.company&&w.company.nombre==='FLAMA — Empresa Demo'){bindWs(id);data.length=0;seed(true);fijos.length=0;seedFijos();}
+  });
+  if(workspaces[target])bindWs(target);
+  sv('flama_seedver',SEEDVER);
+}
 if((!fijos||!fijos.length)&&data.length>=50)seedFijos();
 applyCompany();renderAll();routeHash();
 </script>
