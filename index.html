@@ -46,6 +46,9 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;background:radial-grad
 .sb-client .lbl{font-size:8px;text-transform:uppercase;letter-spacing:.14em;color:var(--text3);font-weight:700}
 .sb-client .name{font-size:13px;font-weight:700;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .sb-client .cuit{font-size:10px;color:var(--text3);font-family:'JetBrains Mono',monospace;margin-top:1px}
+.sb-client select{width:100%;margin-top:5px;background:var(--bg2);border:1px solid var(--border2);color:var(--text);border-radius:6px;padding:6px 8px;font-size:12px;font-weight:700;font-family:inherit;outline:none}
+.ws-btn{flex:1;background:var(--bg2);border:1px solid var(--border);color:var(--text2);border-radius:6px;padding:5px 6px;font-size:11px;cursor:pointer;font-family:inherit;transition:all .13s}
+.ws-btn:hover{border-color:var(--red);color:var(--text)}
 .sb-nav{padding:8px 10px;flex:1;overflow-y:auto}
 .sb-group{font-size:8px;font-weight:800;text-transform:uppercase;letter-spacing:.16em;color:var(--text3);padding:14px 10px 6px}
 .nav-btn{display:flex;align-items:center;gap:11px;width:100%;padding:9px 11px;border-radius:8px;background:none;border:none;color:var(--text2);font-size:13px;font-weight:600;cursor:pointer;transition:all .13s;text-align:left;font-family:inherit;margin-bottom:2px;position:relative}
@@ -105,6 +108,12 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;background:radial-grad
 .curve-pt{position:absolute;transform:translate(-50%,-140%);font-size:10px;font-weight:700;color:var(--red);pointer-events:none}
 .curve-labels{display:flex;margin-top:4px}
 .curve-labels span{flex:1;text-align:center;font-size:9px;color:var(--text3);text-transform:uppercase}
+.curve-hit{position:absolute;width:22px;height:22px;transform:translate(-50%,-50%);cursor:pointer;border-radius:50%}
+.curve-hit::after{content:'';position:absolute;left:50%;top:50%;width:9px;height:9px;transform:translate(-50%,-50%);border-radius:50%;background:var(--cc);border:2px solid var(--surface);opacity:0;transition:opacity .12s}
+.curve-hit:hover::after{opacity:1}
+.curve-bubble{position:absolute;bottom:120%;left:50%;transform:translateX(-50%);background:var(--surface);border:1px solid var(--border2);color:var(--text);font-size:11px;padding:3px 8px;border-radius:6px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .12s;z-index:6;box-shadow:var(--sh)}
+.curve-bubble b{color:var(--cc)}
+.curve-hit:hover .curve-bubble{opacity:1}
 .tc-detail{margin-top:14px;padding-top:14px;border-top:1px solid var(--border);display:none}
 .tc-detail.show{display:block;animation:fade .2s}
 .brk-title{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em;margin:10px 0 6px}
@@ -360,19 +369,18 @@ select.mini{padding:5px 8px;font-size:11px;width:auto}
 .logo-upload{width:90px;height:90px;border:2px dashed var(--border2);border-radius:12px;cursor:pointer;overflow:hidden;display:flex;align-items:center;justify-content:center;background:var(--bg2);transition:all .13s;flex-shrink:0}
 .logo-upload:hover{border-color:var(--red)}.logo-upload img{width:100%;height:100%;object-fit:contain;padding:6px}
 
-/* PRINT */
+/* PRINT — single print-root container */
+#print-root{display:none}
 @media print{
   body{background:#fff}
-  body::before,.sb,.topbar,.no-print,#tooltip{display:none!important}
-  .main{margin-left:0!important}.content{padding:0!important}.page{display:none!important}
-  body.pr-syh #page-syh,body.pr-cf #page-cf,body.pr-contract #page-contract,body.pr-qr #qr-print-area{display:block!important}
-  body.pr-syh #page-syh>*:not(.doc-wrap),body.pr-cf #page-cf>*:not(.cf-print),body.pr-contract #page-contract>*:not(.contract-print){display:none!important}
-  body.pr-qr .content>.page:not(#page-galeria){display:none!important}
-  body.pr-qr #page-galeria>*:not(#qr-print-area){display:none!important}
-  body.pr-qr #qr-print-area{display:block!important}
-  .doc,.cf-print,.contract-print{box-shadow:none;border:none;color:#111!important;background:#fff!important}
-  @page{size:A4;margin:12mm}
+  body>*{display:none!important}
+  body>#print-root{display:block!important}
+  #print-root,#print-root .doc{box-shadow:none;border:none;color:#111!important;background:#fff!important}
+  #print-root svg use{display:inline}
 }
+@media print{ body.print-landscape #print-root{} }
+@page{size:A4 portrait;margin:12mm}
+body.print-landscape{}
 #qr-print-area{display:none}
 .qr-print-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:10px}
 .qr-label{border:1px solid #111;border-radius:8px;padding:10px;text-align:center;background:#fff;color:#111;break-inside:avoid}
@@ -402,14 +410,18 @@ select.mini{padding:5px 8px;font-size:11px;width:auto}
 
 <!-- SIDEBAR -->
 <nav class="sb" id="sidebar">
-  <div class="sb-brand" onclick="openCompany()">
+  <div class="sb-brand">
     <div class="logo-box" id="sb-logo"><svg><use href="#flameIcon"/></svg></div>
-    <div><div class="flama-word">FL<span class="tri">A</span>M<span class="tri">A</span></div><div class="sub">Control de Matafuegos</div></div>
+    <div><div class="flama-word">FLAMA</div><div class="sub">Control de Matafuegos</div></div>
   </div>
   <div class="sb-client">
-    <div class="lbl">Cliente</div>
-    <div class="name" id="sb-cli-name">Mi Empresa</div>
-    <div class="cuit" id="sb-cli-cuit">CUIT —</div>
+    <div class="lbl">Empresa activa</div>
+    <select id="ws-select" onchange="switchWs(this.value)"></select>
+    <div class="cuit" id="sb-cli-cuit" style="margin-top:5px">CUIT —</div>
+    <div style="display:flex;gap:6px;margin-top:8px">
+      <button class="ws-btn" onclick="promptNewWs()">＋ Empresa</button>
+      <button class="ws-btn" onclick="openCompany()">⚙️ Editar</button>
+    </div>
   </div>
   <div class="sb-nav">
     <div class="sb-group">Panel</div>
@@ -445,7 +457,7 @@ select.mini{padding:5px 8px;font-size:11px;width:auto}
     <div class="page active" id="page-dashboard">
       <span class="sec-label">Tendencias Históricas</span>
       <div class="trend-grid" id="trend-cards"></div>
-      <span class="sec-label">Estado de la Flota</span>
+      <span class="sec-label">Estado del Parque</span>
       <div class="kpi-row" id="kpis"></div>
       <div class="sec-hdr"><h3>Vencimientos más urgentes</h3><span class="ct">— el más cercano, más rojo</span></div>
       <div class="alerts-list" id="dash-urgent"></div>
@@ -583,12 +595,11 @@ select.mini{padding:5px 8px;font-size:11px;width:auto}
     <!-- TRAYECTORIA -->
     <div class="page" id="page-trayectoria">
       <span class="sec-label">Trayectoria con FLAMA</span>
-      <div class="savings-banner"><div class="ic">🎁</div><div class="txt"><h3 id="save-title">—</h3><p id="save-sub">Cada Control Periódico Preventivo cuesta $8.000 por unidad — en el año 1 FLAMA lo bonifica al 100%.</p></div></div>
       <div class="tray-hero" id="tray-hero"></div>
-      <div class="sec-hdr"><h3>Gasto anual con nosotros</h3><span class="ct">recargas + unidades nuevas</span></div>
+      <div class="sec-hdr"><h3>Gasto anual con nosotros</h3><span class="ct">recargas + servicios</span></div>
       <div class="panel" style="margin-bottom:22px"><div class="curve-wrap" id="tray-curve"></div></div>
-      <div class="sec-hdr"><h3>Detalle de precios por tipo</h3><span class="ct">valores de referencia sin IVA</span></div>
-      <div class="tbl-wrap"><div class="tbl-scroll"><table><thead><tr><th>Tipo</th><th>Unidades</th><th>Precio unidad</th><th>Recarga</th><th>Control Periódico</th><th>Gasto anual est.</th></tr></thead><tbody id="tray-table"></tbody></table></div></div>
+      <div class="sec-hdr"><h3>Detalle por tipo de matafuego</h3><span class="ct">valores de referencia sin IVA</span></div>
+      <div class="tbl-wrap"><div class="tbl-scroll"><table><thead><tr><th>Tipo</th><th>Unidades en parque</th><th>Precio unidad</th><th>Recarga</th><th>Gasto anual est.</th></tr></thead><tbody id="tray-table"></tbody></table></div></div>
     </div>
 
     <!-- ANILLOS -->
@@ -599,7 +610,13 @@ select.mini{padding:5px 8px;font-size:11px;width:auto}
 
   </div>
 </main>
+<!-- MODAL QR -->
+<div class="overlay hidden" id="ov-qr"><div class="modal" style="max-width:440px" onclick="event.stopPropagation()">
+  <div class="modal-hdr"><h2>Código QR</h2><button class="btn-ghost" onclick="closeM('ov-qr')">✕</button></div>
+  <div class="modal-body" id="qr-body" style="text-align:center"></div>
+</div></div>
 <div id="tooltip"></div>
+<div id="print-root"></div>
 <!-- MODAL MATAFUEGO -->
 <div class="overlay hidden" id="ov-mat"><div class="modal wide" onclick="event.stopPropagation()">
   <div class="modal-hdr"><h2 id="mat-title">Nuevo Matafuego</h2><button class="btn-ghost" onclick="closeM('ov-mat')">✕</button></div>
@@ -737,13 +754,12 @@ select.mini{padding:5px 8px;font-size:11px;width:auto}
 <div class="overlay hidden" id="ov-contract"><div class="modal" onclick="event.stopPropagation()">
   <div class="modal-hdr"><h2>✏️ Condiciones del contrato</h2><button class="btn-ghost" onclick="closeM('ov-contract')">✕</button></div>
   <div class="modal-body">
+    <p style="font-size:12px;color:var(--text2);margin-bottom:14px">Acuerdo marco de suministro. No se fijan precios ni cantidades: el volumen y los valores se pactan por orden de compra según lista vigente.</p>
     <div class="fg">
-      <div class="field"><label>Volumen anual comprometido (unidades + recargas)</label><input type="number" id="ct-vol" value="500"></div>
       <div class="field"><label>Plazo de vigencia (meses)</label><input type="number" id="ct-plazo" value="24"></div>
-      <div class="field"><label>Bonificación por volumen (%)</label><input type="number" id="ct-desc" value="16"></div>
-      <div class="field"><label>Control Periódico gratis año 1</label><select id="ct-cpp"><option value="si">Sí — bonificado 100%</option><option value="no">No</option></select></div>
-      <div class="field"><label>Plazo de pago (días)</label><input type="number" id="ct-pago" value="30"></div>
       <div class="field"><label>Jurisdicción</label><input id="ct-juris" value="Tribunales Ordinarios de la Ciudad Autónoma de Buenos Aires"></div>
+      <div class="field"><label>Firmante por FLAMA (nombre y cargo)</label><input id="ct-repFlama" placeholder="Ej: Juan Pérez — Gerente Comercial"></div>
+      <div class="field"><label>Firmante por el Cliente</label><input id="ct-repCli" placeholder="Ej: María López — Apoderada"></div>
     </div>
   </div>
   <div class="modal-ftr"><button class="btn btn-outline" onclick="closeM('ov-contract')">Cancelar</button><button class="btn btn-primary" onclick="saveContract()">Aplicar</button></div>
@@ -822,12 +838,34 @@ var ring=function(y){for(var i=0;i<RINGS.length;i++)if(RINGS[i].yr===parseInt(y)
 var MATERIALS={'Madera / muebles':4400,'Papel / cartón':4000,'Textiles / algodón':4000,'Plástico PVC':5000,'Polietileno / PET':11000,'Goma / caucho':9000,'Espuma poliuretano':6500,'Nafta / gasolina':10500,'Gasoil / diesel':10000,'Alcohol etílico':6400,'Aceite / lubricante':9500,'Pintura / solvente':6000,'Neumáticos':8500,'Pallets madera':4400,'Otros combustibles':4400};
 var PC_MADERA=4400;
 
-/* ===== STORAGE ===== */
+/* ===== PRINT HELPER ===== */
+var FLAME_INLINE='<svg class="doc-logo" viewBox="0 0 100 130" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="pfg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FF7A2E"/><stop offset=".5" stop-color="#ED1C24"/><stop offset="1" stop-color="#8A0F14"/></linearGradient></defs><path fill="url(#pfg)" d="M50 4C48 26 30 34 26 56c-4 20 4 40 24 46 22-6 30-24 26-44-2-10-10-16-12-26 8 6 14 16 13 28 6-10 5-24-2-34C67 16 54 16 50 4z"/></svg>';
+function docLogo(){return company.logo?'<img class="doc-logo" src="'+company.logo+'">':FLAME_INLINE;}
+function printDoc(html,landscape){
+  var st=document.getElementById('print-orient');if(!st){st=document.createElement('style');st.id='print-orient';document.head.appendChild(st);}
+  st.textContent='@page{size:A4 '+(landscape?'landscape':'portrait')+';margin:10mm}';
+  document.getElementById('print-root').innerHTML=html;
+  window.print();
+}
+
+/* ===== STORAGE (multi-empresa) ===== */
 function ld(k,d){try{var v=JSON.parse(localStorage.getItem(k));return v==null?d:v;}catch(e){return d;}}
 function sv(k,v){localStorage.setItem(k,JSON.stringify(v));}
-var data=ld('flama_mats',[]);
-var company=ld('flama_company',{nombre:'Mi Empresa',logo:null,cuit:''});
-var contract=ld('flama_contract',{vol:500,plazo:24,desc:16,cpp:'si',pago:30,juris:'Tribunales Ordinarios de la Ciudad Autónoma de Buenos Aires'});
+/* Cada empresa es un workspace independiente y persistente */
+var workspaces=ld('flama_ws',null);
+var currentWs=ld('flama_current',null);
+function defaultContract(){return {plazo:24,juris:'Tribunales Ordinarios de la Ciudad Autónoma de Buenos Aires',repFlama:'',repCli:''};}
+function migrateOld(){
+  // migración desde versión anterior (single-company) si existía
+  var oldMats=ld('flama_mats',null);
+  if(oldMats&&!workspaces){var oc=ld('flama_company',{nombre:'Mi Empresa',logo:null,cuit:''});var id='ws'+Date.now();workspaces={};workspaces[id]={company:oc,mats:oldMats,contract:defaultContract()};currentWs=id;sv('flama_ws',workspaces);sv('flama_current',currentWs);}
+}
+migrateOld();
+if(!workspaces){workspaces={};}
+var data,company,contract;
+function bindWs(id){currentWs=id;var w=workspaces[id];data=w.mats;company=w.company;contract=w.contract||defaultContract();w.contract=contract;sv('flama_current',currentWs);}
+function persist(){var w=workspaces[currentWs];if(w){w.mats=data;w.company=company;w.contract=contract;}sv('flama_ws',workspaces);sv('flama_current',currentWs);}
+function newWorkspace(nombre,cuit,doSeed){var id='ws'+Date.now()+Math.random().toString(36).slice(2,5);workspaces[id]={company:{nombre:nombre||'Nueva empresa',cuit:cuit||'',logo:null},mats:[],contract:defaultContract()};bindWs(id);if(doSeed)seed();persist();return id;}
 var editId=null,curSlot=null,tmpPh={unit:null,qr:null,oblea:null,remito:null};
 var srtKey='proximaRecarga',srtAsc=true,alFilt='all',galFilt='all',boardMode='estado',logoTarget='company';
 
@@ -900,15 +938,16 @@ function updCode(){var i=document.getElementById('f-tipo').value,cuit=(document.
 /* ===== TREND LINE CURVE ===== */
 function last6(){var a=[],n=new Date();for(var i=5;i>=0;i--){var d=new Date(n.getFullYear(),n.getMonth()-i,1);a.push({key:d.toISOString().slice(0,7),lbl:d.toLocaleDateString('es',{month:'short'})});}return a;}
 function mKey(d){return d?(d.length===7?d:d.slice(0,7)):null;}
-function lineCurve(vals,color){
+function lineCurve(vals,color,months){
   color=color||'#ED1C24';var w=300,h=70,mx=Math.max.apply(null,vals.concat([1])),n=vals.length,pad=6;
   var pts=vals.map(function(v,i){var x=pad+(w-pad*2)*i/(n-1);var y=h-8-(h-18)*(v/mx);return [x,y];});
   var path='';pts.forEach(function(p,i){if(i===0)path+='M'+p[0].toFixed(1)+' '+p[1].toFixed(1);else{var pr=pts[i-1];var cx=(pr[0]+p[0])/2;path+=' C'+cx.toFixed(1)+' '+pr[1].toFixed(1)+' '+cx.toFixed(1)+' '+p[1].toFixed(1)+' '+p[0].toFixed(1)+' '+p[1].toFixed(1);}});
   var area=path+' L'+pts[n-1][0].toFixed(1)+' '+h+' L'+pts[0][0].toFixed(1)+' '+h+' Z';
-  var dots=pts.map(function(p,i){return '<circle cx="'+p[0].toFixed(1)+'" cy="'+p[1].toFixed(1)+'" r="3" fill="'+color+'"/>';}).join('');
+  var dots=pts.map(function(p){return '<circle cx="'+p[0].toFixed(1)+'" cy="'+p[1].toFixed(1)+'" r="3" fill="'+color+'"/>';}).join('');
   var labels=pts.map(function(p,i){return '<div class="curve-pt" style="left:'+(p[0]/w*100)+'%;top:'+(p[1]/h*100)+'%">'+vals[i]+'</div>';}).join('');
+  var hits=pts.map(function(p,i){var lb=(months&&months[i])?months[i]:'';return '<div class="curve-hit" style="left:'+(p[0]/w*100)+'%;top:'+(p[1]/h*100)+'%;--cc:'+color+'"><span class="curve-bubble">'+lb+': <b>'+vals[i]+'</b></span></div>';}).join('');
   var gid='lg'+Math.random().toString(36).slice(2,7);
-  return '<div style="position:relative"><svg viewBox="0 0 '+w+' '+h+'" width="100%" height="'+h+'" preserveAspectRatio="none"><defs><linearGradient id="'+gid+'" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="'+color+'" stop-opacity=".28"/><stop offset="1" stop-color="'+color+'" stop-opacity="0"/></linearGradient></defs><path d="'+area+'" fill="url(#'+gid+')"/><path d="'+path+'" fill="none" stroke="'+color+'" stroke-width="2.4" stroke-linecap="round"/>'+dots+'</svg>'+labels+'</div>';
+  return '<div style="position:relative"><svg viewBox="0 0 '+w+' '+h+'" width="100%" height="'+h+'" preserveAspectRatio="none"><defs><linearGradient id="'+gid+'" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="'+color+'" stop-opacity=".28"/><stop offset="1" stop-color="'+color+'" stop-opacity="0"/></linearGradient></defs><path d="'+area+'" fill="url(#'+gid+')"/><path d="'+path+'" fill="none" stroke="'+color+'" stroke-width="2.4" stroke-linecap="round"/>'+dots+'</svg>'+labels+hits+'</div>';
 }
 function renderTrends(){
   var months=last6();
@@ -916,6 +955,7 @@ function renderTrends(){
   var altas=months.map(function(mo){return data.filter(function(m){return mKey(m.fechaAlta)===mo.key;}).length;});
   var entregas=months.map(function(mo){return data.filter(function(m){return mKey(m.fentrega||m.nuevoFecha)===mo.key;}).length;});
   var lbls='<div class="curve-labels">'+months.map(function(m){return '<span>'+m.lbl+'</span>';}).join('')+'</div>';
+  var mlbls=months.map(function(m){return m.lbl;});
   var peak=months[venc.indexOf(Math.max.apply(null,venc))];
   // breakdown by estado + anillo (item 6, per-client, no rubro)
   var estados=['Operativo','En mantenimiento','Vencido','De baja'];
@@ -926,10 +966,10 @@ function renderTrends(){
   var yrRows=years.map(function(y){var r=ring(y),v=byYr[y],mx=Math.max.apply(null,years.map(function(x){return byYr[x];}).concat([1]));return '<div class="brk-row"><span class="nm"><span class="ring-dot" style="display:inline-block;background:'+(r?r.hex:'#666')+'"></span> '+(r?r.name:y)+' '+y+'</span><div class="brk-bar"><div style="width:'+(v/mx*100)+'%"></div></div><span class="vl">'+v+'</span></div>';}).join('');
   var hasSens=data.some(function(m){return SENSIBLES.indexOf(m.mercado)>=0&&(daysTo(m.proximaRecarga)==null?false:daysTo(m.proximaRecarga)<=90);});
   document.getElementById('trend-cards').innerHTML=
-   '<div class="trend-card"><div class="tc-head"><div><div class="tc-title">Vencimientos por mes</div><div class="tc-big red">'+venc.reduce(function(a,b){return a+b;},0)+'</div><div class="tc-sub">próx. 6 meses · pico en '+peak.lbl+'</div></div><button class="tc-expand" onclick="toggleDetail(\'d-venc\')">Ver detalle ▾</button></div><div class="curve-wrap">'+lineCurve(venc)+lbls+'</div>'
+   '<div class="trend-card"><div class="tc-head"><div><div class="tc-title">Vencimientos por mes</div><div class="tc-big red">'+venc.reduce(function(a,b){return a+b;},0)+'</div><div class="tc-sub">próx. 6 meses · pico en '+peak.lbl+'</div></div><button class="tc-expand" onclick="toggleDetail(\'d-venc\')">Ver detalle ▾</button></div><div class="curve-wrap">'+lineCurve(venc,'#ED1C24',mlbls)+lbls+'</div>'
    +'<div class="tc-detail" id="d-venc"><div style="font-size:12px;font-weight:700;color:var(--text2)">'+(company.nombre||'Cliente')+' · CUIT '+(company.cuit||'—')+'</div><div class="brk-title">Vencimientos ≤90d por estado</div>'+estRows+'<div class="brk-title">Vencimientos ≤90d por anillo</div>'+yrRows+(hasSens?'<button class="coord-btn" onclick="openCoord()">📨 Coordinar recambio — Salud / Educación</button>':'')+'</div></div>'
-   +'<div class="trend-card"><div class="tc-head"><div><div class="tc-title">Matafuegos cargados</div><div class="tc-big ok">'+altas.reduce(function(a,b){return a+b;},0)+'</div><div class="tc-sub">altas · últimos 6 meses</div></div></div><div class="curve-wrap">'+lineCurve(altas,'#22C55E')+lbls+'</div></div>'
-   +'<div class="trend-card"><div class="tc-head"><div><div class="tc-title">Entregas / recambios</div><div class="tc-big warn">'+entregas.reduce(function(a,b){return a+b;},0)+'</div><div class="tc-sub">unidades entregadas</div></div></div><div class="curve-wrap">'+lineCurve(entregas,'#F5A623')+lbls+'</div></div>';
+   +'<div class="trend-card"><div class="tc-head"><div><div class="tc-title">Matafuegos cargados</div><div class="tc-big ok">'+altas.reduce(function(a,b){return a+b;},0)+'</div><div class="tc-sub">altas · últimos 6 meses</div></div></div><div class="curve-wrap">'+lineCurve(altas,'#22C55E',mlbls)+lbls+'</div></div>'
+   +'<div class="trend-card"><div class="tc-head"><div><div class="tc-title">Entregas / recambios</div><div class="tc-big warn">'+entregas.reduce(function(a,b){return a+b;},0)+'</div><div class="tc-sub">unidades entregadas</div></div></div><div class="curve-wrap">'+lineCurve(entregas,'#F5A623',mlbls)+lbls+'</div></div>';
 }
 function toggleDetail(id){document.getElementById(id).classList.toggle('show');}
 
@@ -940,7 +980,7 @@ function renderKpis(){
   var prox=buildAlerts().filter(function(a){return a.days>=0&&a.days<=90;}).length;
   var prov=data.filter(function(m){return m.tieneProvisorio==='si';}).length;
   document.getElementById('kpis').innerHTML=
-   '<div class="kpi"><div class="kpi-lbl">Total flota</div><div class="kpi-val">'+tot+'</div></div>'
+   '<div class="kpi"><div class="kpi-lbl">Parque total</div><div class="kpi-val">'+tot+'</div></div>'
    +'<div class="kpi ok"><div class="kpi-lbl">Operativos</div><div class="kpi-val">'+op+'</div></div>'
    +'<div class="kpi warn"><div class="kpi-lbl">Alertas 90d</div><div class="kpi-val">'+prox+'</div></div>'
    +'<div class="kpi crit"><div class="kpi-lbl">Vencidos</div><div class="kpi-val">'+ven+'</div></div>'
@@ -1005,7 +1045,7 @@ function renderTbl(){
    +'<td><div style="display:flex;gap:2px"><button class="btn-ghost" onclick="openDet(\''+m.id+'\')" title="Ver">👁</button><button class="btn-ghost" onclick="openEdit(\''+m.id+'\')" title="Editar">✏️</button><button class="btn-ghost" onclick="del(\''+m.id+'\')" title="Borrar">🗑</button></div></td></tr>';
   }).join('');
 }
-function del(id){if(!confirm('¿Eliminar este matafuego?'))return;data=data.filter(function(m){return m.id!==id;});sv('flama_mats',data);renderAll();}
+function del(id){if(!confirm('¿Eliminar este matafuego?'))return;data=data.filter(function(m){return m.id!==id;});persist();renderAll();}
 
 /* ===== BOARD ===== */
 function setBoard(mode){boardMode=mode;document.getElementById('vt-estado').classList.toggle('active',mode==='estado');document.getElementById('vt-anillo').classList.toggle('active',mode==='anillo');renderBoard();}
@@ -1028,19 +1068,37 @@ function renderGal(){
     if(galFilt==='all'||galFilt==='oblea')items.push({m:m,t:'Oblea ODS/OPDS',svg:m.foto_oblea?'<img src="'+m.foto_oblea+'">':obleaSvg(m,150)});
   });
   if(!items.length){el.innerHTML='<p style="color:var(--text3);text-align:center;padding:40px;grid-column:1/-1">Sin matafuegos cargados</p>';return;}
-  el.innerHTML=items.map(function(it){return '<div class="gal-card" onclick="openDet(\''+it.m.id+'\')" onmouseenter="showTip(event,\''+it.m.id+'\')" onmousemove="moveTip(event)" onmouseleave="hideTip()"><div class="gal-img"><span class="gal-type">'+it.t+'</span>'+it.svg+'</div><div class="gal-foot"><div class="gal-code">'+codeOf(it.m)+'</div><div class="gal-sec">'+it.m.sector+'</div></div></div>';}).join('');
+  el.innerHTML=items.map(function(it){var act=it.t==='QR real'?'openQR':'openDet';return '<div class="gal-card" onclick="'+act+'(\''+it.m.id+'\')" onmouseenter="showTip(event,\''+it.m.id+'\')" onmousemove="moveTip(event)" onmouseleave="hideTip()"><div class="gal-img"><span class="gal-type">'+it.t+'</span>'+it.svg+'</div><div class="gal-foot"><div class="gal-code">'+codeOf(it.m)+'</div><div class="gal-sec">'+it.m.sector+'</div></div></div>';}).join('');
 }
 function filtGal(t,btn){galFilt=t;var ts=document.querySelectorAll('#page-galeria .tab');for(var i=0;i<ts.length;i++)ts[i].classList.remove('active');btn.classList.add('active');renderGal();}
+function openQR(id){var m=null;for(var i=0;i<data.length;i++)if(data[i].id===id)m=data[i];if(!m)return;var r=ring(m.anilloYr);
+  document.getElementById('qr-body').innerHTML='<div style="background:#fff;border-radius:12px;padding:16px;display:inline-block">'+QRGen.toSvg(qrPayload(m),240)+'</div>'
+   +'<div class="mono" style="font-weight:700;color:var(--red);font-size:15px;margin-top:12px">'+codeOf(m)+'</div>'
+   +'<div style="font-size:12px;color:var(--text2);margin-top:4px">'+m.tipoBase+' '+m.tamano+' · '+m.sector+'</div>'
+   +'<div style="background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:10px;margin-top:12px;text-align:left;font-size:12px">'
+   +'<div style="display:flex;justify-content:space-between;padding:2px 0"><span style="color:var(--text3)">Estado</span><span>'+statChip(m.estadoActual)+'</span></div>'
+   +'<div style="display:flex;justify-content:space-between;padding:2px 0"><span style="color:var(--text3)">Anillo</span><span>'+(r?r.name+' '+r.yr:'—')+'</span></div>'
+   +'<div style="display:flex;justify-content:space-between;padding:2px 0"><span style="color:var(--text3)">Recarga</span><span>'+fmt(m.proximaRecarga)+'</span></div>'
+   +'<div style="display:flex;justify-content:space-between;padding:2px 0"><span style="color:var(--text3)">OPDS/ODS</span><span>'+(m.opds||'—')+'</span></div>'
+   +'</div>'
+   +'<div style="font-size:11px;color:var(--text3);margin-top:10px;word-break:break-all">🔗 '+qrPayload(m)+'</div>'
+   +'<div style="display:flex;gap:8px;margin-top:14px"><button class="btn btn-outline btn-sm" style="flex:1" onclick="closeM(\'ov-qr\');openDet(\''+m.id+'\')">Ver ficha completa</button><button class="btn btn-primary btn-sm" style="flex:1" onclick="printSingleQR(\''+m.id+'\')">🖨 Imprimir QR</button></div>'
+   +'<div style="font-size:10px;color:var(--text3);margin-top:8px">Escaneá con la cámara del celular para abrir la info del matafuego.</div>';
+  document.getElementById('ov-qr').classList.remove('hidden');
+}
+function printSingleQR(id){var m=null;for(var i=0;i<data.length;i++)if(data[i].id===id)m=data[i];if(!m)return;
+  printDoc('<div class="doc" style="text-align:center"><div class="qr-label" style="max-width:300px;margin:40px auto">'+QRGen.toSvg(qrPayload(m),240)+'<div class="qc" style="font-size:14px">'+codeOf(m)+'</div><div class="qs">'+m.lote+' · '+m.sector+'</div></div></div>',false);}
 function printQRs(){
-  document.getElementById('qr-print-area').innerHTML='<div class="doc"><div class="doc-head"><div class="doc-emp">'+(company.logo?'<img class="doc-logo" src="'+company.logo+'">':'<svg class="doc-logo"><use href="#flameIcon"/></svg>')+'<div class="doc-emp-txt">'+(company.nombre||'Empresa')+'<small>CUIT: '+(company.cuit||'—')+'</small></div></div><div class="doc-title"><h2>Etiquetas QR de Matafuegos</h2><p>Códigos para identificación y trazabilidad</p></div><div class="doc-norm"><strong>FLAMA</strong>'+fmt(today())+'</div></div><div class="qr-print-grid">'
+  if(!data.length){alert('No hay matafuegos para imprimir.');return;}
+  var html='<div class="doc"><div class="doc-head"><div class="doc-emp">'+docLogo()+'<div class="doc-emp-txt">'+(company.nombre||'Empresa')+'<small>CUIT: '+(company.cuit||'—')+'</small></div></div><div class="doc-title"><h2>Etiquetas QR de Matafuegos</h2><p>Códigos para identificación y trazabilidad</p></div><div class="doc-norm"><strong>FLAMA</strong>'+fmt(today())+'</div></div><div class="qr-print-grid">'
    +data.map(function(m){return '<div class="qr-label">'+QRGen.toSvg(qrPayload(m),150)+'<div class="qc">'+codeOf(m)+'</div><div class="qs">'+m.lote+' · '+m.sector+'</div></div>';}).join('')+'</div></div>';
-  document.body.classList.add('pr-qr');window.print();setTimeout(function(){document.body.classList.remove('pr-qr');},500);
+  printDoc(html,false);
 }
 /* ===== PLANILLA SYH ===== */
 function renderSyhFilter(){var s=document.getElementById('syh-filter');if(!s)return;var cur=s.value;s.innerHTML='<option value="">Todos los matafuegos</option>'+data.map(function(m){return '<option value="'+m.id+'">'+codeOf(m)+' — '+m.sector+'</option>';}).join('');s.value=cur;}
 function renderSyH(){
   renderSyhFilter();var fid=document.getElementById('syh-filter').value;var rows=fid?data.filter(function(m){return m.id===fid;}):data;var c=company;
-  var logo=c.logo?'<img class="doc-logo" src="'+c.logo+'">':'<svg class="doc-logo"><use href="#flameIcon"/></svg>';
+  var logo=docLogo();
   var checks=['cPres','cPrec','cMang','cBoq','cSop','cSen','cEtq','cAcc'],clbl=['Pres.','Prec.','Mang.','Boq.','Sop.','Señ.','Obl.','Acc.'];
   document.getElementById('planilla').innerHTML=
    '<div class="doc-head"><div class="doc-emp">'+logo+'<div class="doc-emp-txt">'+(c.nombre||'Empresa')+'<small>'+(c.dir||'')+'</small><small>CUIT: '+(c.cuit||'—')+'</small></div></div><div class="doc-title"><h2>Planilla de Control de Matafuegos</h2><p>Registro de Inspecciones — Seguridad e Higiene</p></div><div class="doc-norm"><strong>IRAM 3517-2 (2020)</strong>Ley 19.587 · Dec. 351/79<br>Res. 349/07 OPDS<br>Emisión: '+fmt(today())+(c.syh_nombre?'<br>Resp: '+c.syh_nombre:'')+'</div></div>'
@@ -1051,13 +1109,14 @@ function renderSyH(){
    +'<div class="doc-sign"><div>Firma Responsable SyH<br><small>'+(c.syh_nombre||'________________')+'</small></div><div>Matrícula / CUIL<br><small>'+(c.syh_mat||'________________')+'</small></div><div>Aclaración y sello<br><small>&nbsp;</small></div><div>Fecha<br><small>'+fmt(today())+'</small></div></div>'
    +'<div class="doc-foot"><strong>Plazos IRAM 3517-2:</strong> Control Periódico Preventivo cada 6 meses · Recarga anual (máx. 12 meses) · Prueba hidráulica cada 5 años · Caducidad definitiva a los 20 años de fabricación. Registro obligatorio conforme Ley 19.587 y Decreto 351/79.</div>';
 }
-function printSyH(){document.body.classList.add('pr-syh');window.print();setTimeout(function(){document.body.classList.remove('pr-syh');},500);}
+function printSyH(){renderSyH();printDoc('<div class="doc">'+document.getElementById('planilla').innerHTML+'</div>',true);}
 function uploadPlanillaLogo(){logoTarget='planilla';document.getElementById('planilla-logo-inp').click();}
 
 /* ===== CARGA DE FUEGO ===== */
 var cfRows=[{mat:'Madera / muebles',kg:2000},{mat:'Papel / cartón',kg:800},{mat:'Plástico PVC',kg:400}];
-function renderCFRows(){document.getElementById('cf-rows').innerHTML=cfRows.map(function(r,i){var pc=MATERIALS[r.mat]||PC_MADERA,cal=(r.kg*pc/1000).toFixed(0);return '<tr><td><select onchange="cfSet('+i+',\'mat\',this.value)">'+Object.keys(MATERIALS).map(function(k){return '<option '+(k===r.mat?'selected':'')+'>'+k+'</option>';}).join('')+'</select></td><td><input type="number" value="'+r.kg+'" oninput="cfSet('+i+',\'kg\',this.value)"></td><td class="mono" style="color:var(--text3)">'+pc+'</td><td class="mono" style="font-weight:700">'+cal+'</td><td><button class="mat-del" onclick="cfDel('+i+')">🗑</button></td></tr>';}).join('');}
-function cfSet(i,k,v){cfRows[i][k]=k==='kg'?(+v||0):v;renderCFRows();calcCF();}
+function renderCFRows(){document.getElementById('cf-rows').innerHTML=cfRows.map(function(r,i){var pc=MATERIALS[r.mat]||PC_MADERA,cal=(r.kg*pc/1000).toFixed(0);return '<tr><td><select onchange="cfMat('+i+',this.value)">'+Object.keys(MATERIALS).map(function(k){return '<option '+(k===r.mat?'selected':'')+'>'+k+'</option>';}).join('')+'</select></td><td><input type="number" min="0" value="'+r.kg+'" oninput="cfKg('+i+',this.value)"></td><td class="mono" id="cf-pc-'+i+'" style="color:var(--text3)">'+pc+'</td><td class="mono" id="cf-cal-'+i+'" style="font-weight:700">'+cal+'</td><td><button class="mat-del" onclick="cfDel('+i+')">🗑</button></td></tr>';}).join('');}
+function cfKg(i,v){cfRows[i].kg=(+v||0);var pc=MATERIALS[cfRows[i].mat]||PC_MADERA;var cell=document.getElementById('cf-cal-'+i);if(cell)cell.textContent=(cfRows[i].kg*pc/1000).toFixed(0);calcCF();}
+function cfMat(i,v){cfRows[i].mat=v;var pc=MATERIALS[v]||PC_MADERA;var pcc=document.getElementById('cf-pc-'+i);if(pcc)pcc.textContent=pc;var cell=document.getElementById('cf-cal-'+i);if(cell)cell.textContent=(cfRows[i].kg*pc/1000).toFixed(0);calcCF();}
 function cfDel(i){cfRows.splice(i,1);renderCFRows();calcCF();}
 function addCFRow(){cfRows.push({mat:'Madera / muebles',kg:100});renderCFRows();calcCF();}
 var TAB_A=[{max:15,v:{3:'1 A',4:'1 A',5:'1 A'}},{max:30,v:{3:'2 A',4:'1 A',5:'1 A'}},{max:60,v:{3:'3 A',4:'2 A',5:'1 A'}},{max:100,v:{3:'6 A',4:'4 A',5:'3 A'}},{max:Infinity,v:{3:'a det.',4:'a det.',5:'a det.'}}];
@@ -1083,63 +1142,59 @@ function printCF(){
   var area=+document.getElementById('cf-area').value||1,riesgo=+document.getElementById('cf-riesgo').value,sector=document.getElementById('cf-sector').value,totCal=0;
   cfRows.forEach(function(r){totCal+=(r.kg||0)*(MATERIALS[r.mat]||PC_MADERA);});
   var qf=totCal/(PC_MADERA*area),rowA=TAB_A.filter(function(r){return qf<=r.max;})[0],potA=riesgo<=2?'—':(rowA.v[riesgo]||rowA.v[3]),clas=qf<=15?'BAJA':qf<=60?'MEDIA':qf<=100?'ALTA':'MUY ALTA',c=company;
-  var logo=c.logo?'<img class="doc-logo" src="'+c.logo+'">':'<svg class="doc-logo"><use href="#flameIcon"/></svg>';
-  document.getElementById('cf-print').innerHTML='<div class="doc"><div class="doc-head"><div class="doc-emp">'+logo+'<div class="doc-emp-txt">'+(c.nombre||'Empresa')+'<small>'+(c.dir||'')+'</small><small>CUIT: '+(c.cuit||'—')+'</small></div></div><div class="doc-title"><h2>Estudio de Carga de Fuego</h2><p>'+sector+'</p></div><div class="doc-norm"><strong>Dec. 351/79 Anexo VII</strong>Ley 19.587<br>'+fmt(today())+'</div></div>'
+  var logo=docLogo();
+  var htmlCF='<div class="doc"><div class="doc-head"><div class="doc-emp">'+logo+'<div class="doc-emp-txt">'+(c.nombre||'Empresa')+'<small>'+(c.dir||'')+'</small><small>CUIT: '+(c.cuit||'—')+'</small></div></div><div class="doc-title"><h2>Estudio de Carga de Fuego</h2><p>'+sector+'</p></div><div class="doc-norm"><strong>Dec. 351/79 Anexo VII</strong>Ley 19.587<br>'+fmt(today())+'</div></div>'
    +'<table class="doc-table"><thead><tr><th>Material combustible</th><th>Cantidad (kg)</th><th>Poder calorífico (kcal/kg)</th><th>Calor generado (Mcal)</th></tr></thead><tbody>'+cfRows.map(function(r){return '<tr><td>'+r.mat+'</td><td>'+r.kg+'</td><td>'+(MATERIALS[r.mat]||PC_MADERA)+'</td><td>'+((r.kg||0)*(MATERIALS[r.mat]||PC_MADERA)/1000).toFixed(0)+'</td></tr>';}).join('')+'<tr style="font-weight:800;background:#f0f0f0"><td colspan="3">CALOR TOTAL</td><td>'+(totCal/1000).toFixed(0)+' Mcal</td></tr></tbody></table>'
    +'<div style="display:flex;gap:16px;margin-top:16px"><div style="flex:1;text-align:center;border:2px solid #ED1C24;border-radius:8px;padding:14px"><div style="font-size:11px;color:#666;text-transform:uppercase">Carga de fuego (Qf)</div><div style="font-family:Barlow Condensed;font-size:32px;font-weight:800;color:#ED1C24">'+qf.toFixed(1)+' kg/m²</div></div><div style="flex:1;text-align:center;border:1px solid #ccc;border-radius:8px;padding:14px"><div style="font-size:11px;color:#666;text-transform:uppercase">Superficie</div><div style="font-family:Barlow Condensed;font-size:32px;font-weight:800">'+area+' m²</div></div><div style="flex:1;text-align:center;border:1px solid #ccc;border-radius:8px;padding:14px"><div style="font-size:11px;color:#666;text-transform:uppercase">Clasificación</div><div style="font-family:Barlow Condensed;font-size:26px;font-weight:800">'+clas+'</div></div><div style="flex:1;text-align:center;border:1px solid #ccc;border-radius:8px;padding:14px"><div style="font-size:11px;color:#666;text-transform:uppercase">Potencial extintor</div><div style="font-family:Barlow Condensed;font-size:32px;font-weight:800;color:#ED1C24">'+potA+'</div></div></div>'
    +'<div style="margin-top:14px;font-size:12px;color:#333"><strong>Riesgo:</strong> R'+riesgo+' · <strong>Resistencia al fuego requerida:</strong> '+resistencia(qf,riesgo)+' · <strong>Poder calorífico de referencia (madera):</strong> 4.400 kcal/kg (18,41 MJ/kg)</div>'
    +'<div class="doc-sign"><div>Firma Responsable SyH<br><small>'+(c.syh_nombre||'________________')+'</small></div><div>Matrícula<br><small>'+(c.syh_mat||'________________')+'</small></div><div>Fecha<br><small>'+fmt(today())+'</small></div></div>'
    +'<div class="doc-foot"><strong>Fórmula:</strong> Qf = Σ(Pᵢ × Cᵢ) / (Pc × S) — Pᵢ = peso material (kg), Cᵢ = poder calorífico (kcal/kg), Pc = 4.400 kcal/kg (madera), S = superficie (m²). Conforme Decreto 351/79 Anexo VII, reglamentario de la Ley 19.587.</div></div>';
-  document.getElementById('cf-print').style.display='block';document.body.classList.add('pr-cf');window.print();setTimeout(function(){document.body.classList.remove('pr-cf');document.getElementById('cf-print').style.display='none';},500);
+  printDoc(htmlCF,false);
 }
-/* ===== CONTRATO DIGITAL ===== */
-function editContract(){document.getElementById('ct-vol').value=contract.vol;document.getElementById('ct-plazo').value=contract.plazo;document.getElementById('ct-desc').value=contract.desc;document.getElementById('ct-cpp').value=contract.cpp;document.getElementById('ct-pago').value=contract.pago;document.getElementById('ct-juris').value=contract.juris;document.getElementById('ov-contract').classList.remove('hidden');}
-function saveContract(){contract={vol:+document.getElementById('ct-vol').value||0,plazo:+document.getElementById('ct-plazo').value||0,desc:+document.getElementById('ct-desc').value||0,cpp:document.getElementById('ct-cpp').value,pago:+document.getElementById('ct-pago').value||0,juris:document.getElementById('ct-juris').value};sv('flama_contract',contract);closeM('ov-contract');renderContract();}
-function renderContract(){
-  var c=company,k=contract;var logo=c.logo?'<img class="doc-logo" src="'+c.logo+'">':'<svg class="doc-logo"><use href="#flameIcon"/></svg>';
-  var hoy=new Date();var fechaTxt=hoy.toLocaleDateString('es-AR',{day:'numeric',month:'long',year:'numeric'});
-  document.getElementById('contract-doc').innerHTML='<div class="doc"><div class="doc-head"><div class="doc-emp">'+logo+'<div class="doc-emp-txt">FLAMA S.A.<small>Producción, comercialización y recarga de matafuegos</small><small>CUIT: 30-71000000-0 · Sello IRAM</small></div></div><div class="doc-title"><h2>Contrato de Suministro por Volumen</h2><p>Provisión y mantenimiento de matafuegos</p></div><div class="doc-norm"><strong>CCyC arts. 1176-1186</strong>Firma digital Ley 25.506<br>'+fmt(today())+'</div></div>'
+/* ===== CONTRATO (acuerdo marco, sin valores) ===== */
+function editContract(){document.getElementById('ct-plazo').value=contract.plazo||24;document.getElementById('ct-juris').value=contract.juris||'';document.getElementById('ct-repFlama').value=contract.repFlama||'';document.getElementById('ct-repCli').value=contract.repCli||'';document.getElementById('ov-contract').classList.remove('hidden');}
+function saveContract(){contract.plazo=+document.getElementById('ct-plazo').value||24;contract.juris=document.getElementById('ct-juris').value;contract.repFlama=document.getElementById('ct-repFlama').value;contract.repCli=document.getElementById('ct-repCli').value;persist();closeM('ov-contract');renderContract();}
+function contractHTML(){
+  var c=company,k=contract;var logo=docLogo();
+  var fechaTxt=new Date().toLocaleDateString('es-AR',{day:'numeric',month:'long',year:'numeric'});
+  return '<div class="doc"><div class="doc-head"><div class="doc-emp">'+logo+'<div class="doc-emp-txt">FLAMA S.A.<small>Producción, comercialización y recarga de matafuegos</small><small>Sello IRAM · Hab. OPDS/ODS</small></div></div><div class="doc-title"><h2>Acuerdo Marco de Suministro</h2><p>Provisión y mantenimiento de matafuegos</p></div><div class="doc-norm"><strong>CCyC arts. 1176-1186</strong>Firma digital Ley 25.506<br>'+fmt(today())+'</div></div>'
    +'<div class="contract-body">'
-   +'<p>En la Ciudad Autónoma de Buenos Aires, a los '+fechaTxt+', entre <span class="cl">FLAMA S.A.</span>, CUIT 30-71000000-0, con domicilio en la Ciudad Autónoma de Buenos Aires, en adelante <span class="cl">"EL PROVEEDOR"</span>, por una parte; y <span class="cl">'+(c.nombre||'____________________')+'</span>, CUIT '+(c.cuit||'____________')+', con domicilio en '+(c.dir||'____________________')+', en adelante <span class="cl">"EL CLIENTE"</span>, por la otra; en conjunto <span class="cl">"LAS PARTES"</span>, convienen en celebrar el presente Contrato de Suministro, que se regirá por las siguientes cláusulas:</p>'
-   +'<h3>Primera — Objeto</h3><p>EL PROVEEDOR se obliga a proveer a EL CLIENTE, en forma periódica y continuada, matafuegos nuevos y el servicio de recarga, control periódico preventivo, prueba hidráulica y mantenimiento conforme la Norma IRAM 3517-2, la Ley 19.587 de Higiene y Seguridad y el Decreto 351/79.</p>'
-   +'<h3>Segunda — Volumen comprometido</h3><p>EL CLIENTE se compromete a un volumen mínimo anual de <span class="cl">'+k.vol+' unidades y/o servicios</span> de recarga durante la vigencia del presente. Dicho volumen habilita las bonificaciones previstas en la cláusula Cuarta.</p>'
-   +'<h3>Tercera — Plazo y vigencia</h3><p>El presente tendrá una vigencia de <span class="cl">'+k.plazo+' meses</span> contados desde su suscripción, renovable automáticamente por períodos iguales salvo notificación fehaciente en contrario con treinta (30) días de anticipación.</p>'
-   +'<h3>Cuarta — Precios, bonificaciones y servicio</h3><p>Los precios serán los del listado vigente de EL PROVEEDOR, con una <span class="cl">bonificación por volumen del '+k.desc+'%</span> sobre valores de lista. '+(k.cpp==='si'?'Durante el <span class="cl">primer año de vigencia, el servicio de Control Periódico Preventivo será bonificado al 100%</span> (valor de referencia $'+CPP_COST.toLocaleString('es-AR')+' por unidad por servicio).':'')+' Los valores se ajustarán conforme índices de precios mayoristas publicados por el INDEC.</p>'
-   +'<h3>Quinta — Facturación y pago</h3><p>EL PROVEEDOR facturará mensualmente los suministros y servicios prestados. EL CLIENTE abonará dentro de los <span class="cl">'+k.pago+' días</span> de la fecha de factura, mediante transferencia bancaria o los medios que las partes acuerden.</p>'
-   +'<h3>Sexta — Obligaciones de las partes</h3><p>EL PROVEEDOR garantiza el sello IRAM, la habilitación OPDS/ODS de sus equipos y el cumplimiento de los plazos normativos. EL CLIENTE se obliga a facilitar el acceso a los establecimientos para las inspecciones, a conservar los matafuegos en condiciones de uso y a comunicar bajas o traslados.</p>'
-   +'<h3>Séptima — Trazabilidad</h3><p>Cada matafuego será identificado con código QR y oblea ODS/OPDS, quedando su historial de vencimientos disponible en la plataforma digital de EL PROVEEDOR.</p>'
-   +'<h3>Octava — Rescisión</h3><p>Cualquiera de LAS PARTES podrá rescindir el contrato ante incumplimiento de la otra, previa intimación fehaciente por quince (15) días. El incumplimiento del volumen mínimo facultará a EL PROVEEDOR a readecuar las bonificaciones.</p>'
-   +'<h3>Novena — Firma digital</h3><p>LAS PARTES acuerdan que el presente podrá suscribirse mediante <span class="cl">firma digital o electrónica</span> en los términos de la Ley 25.506 y sus modificatorias, reconociéndole plena validez y eficacia probatoria.</p>'
-   +'<h3>Décima — Jurisdicción</h3><p>Para todos los efectos legales, LAS PARTES se someten a la jurisdicción de los <span class="cl">'+k.juris+'</span>, renunciando a cualquier otro fuero, y constituyen domicilios en los indicados en el encabezado.</p>'
-   +'<p style="margin-top:14px">En prueba de conformidad, se firman dos ejemplares de un mismo tenor y a un solo efecto, en el lugar y fecha indicados.</p>'
+   +'<p>En la Ciudad Autónoma de Buenos Aires, a los '+fechaTxt+', comparecen: por una parte <span class="cl">FLAMA S.A.</span>, con domicilio en la Ciudad Autónoma de Buenos Aires, representada en este acto por '+(k.repFlama||'su representante legal')+', en adelante <span class="cl">«EL PROVEEDOR»</span>; y por la otra, <span class="cl">'+(c.nombre||'____________________')+'</span>, CUIT '+(c.cuit||'____________')+', con domicilio en '+(c.dir||'____________________')+', representada por '+(k.repCli||'su representante legal')+', en adelante <span class="cl">«EL CLIENTE»</span>; en conjunto <span class="cl">«LAS PARTES»</span>, quienes acuerdan celebrar el presente Acuerdo Marco de Suministro, sujeto a las siguientes cláusulas:</p>'
+   +'<h3>Primera — Objeto</h3><p>El presente tiene por objeto establecer las condiciones generales bajo las cuales EL PROVEEDOR suministrará a EL CLIENTE matafuegos y los servicios de recarga, control periódico preventivo, prueba hidráulica y mantenimiento, conforme la Norma IRAM 3517-2, la Ley N° 19.587 de Higiene y Seguridad en el Trabajo y su Decreto Reglamentario N° 351/79.</p>'
+   +'<h3>Segunda — Modalidad de contratación</h3><p>El presente constituye un acuerdo marco. <span class="cl">No fija por sí cantidades ni precios.</span> Cada provisión o servicio se instrumentará mediante órdenes de compra particulares emitidas por EL CLIENTE y aceptadas por EL PROVEEDOR, las que se regirán por este Acuerdo y por la lista de precios vigente al momento de cada operación.</p>'
+   +'<h3>Tercera — Plazo y vigencia</h3><p>El presente tendrá una vigencia de <span class="cl">'+(k.plazo||24)+' (meses)</span> contados desde su suscripción, renovable automáticamente por períodos iguales, salvo notificación fehaciente en contrario de cualquiera de LAS PARTES cursada con treinta (30) días corridos de anticipación a su vencimiento.</p>'
+   +'<h3>Cuarta — Precios y facturación</h3><p>Los precios serán los del listado vigente de EL PROVEEDOR a la fecha de cada orden de compra. Las condiciones comerciales, bonificaciones por volumen y plazos de pago se pactarán por escrito en cada operación o en anexos al presente. La facturación se emitirá conforme la normativa fiscal aplicable.</p>'
+   +'<h3>Quinta — Obligaciones de las partes</h3><p>EL PROVEEDOR garantiza el sello IRAM, la habilitación OPDS/ODS de sus equipos y el cumplimiento de los plazos y procedimientos normativos. EL CLIENTE se obliga a facilitar el acceso a los establecimientos para las inspecciones y servicios, a conservar los matafuegos en condiciones de uso y a comunicar bajas, traslados o siniestros.</p>'
+   +'<h3>Sexta — Trazabilidad y registro</h3><p>Cada matafuego será identificado con código QR y oblea ODS/OPDS. El historial de vencimientos, controles y servicios quedará disponible para EL CLIENTE en la plataforma digital de gestión, sin que ello sustituya los registros que la normativa exija llevar en el establecimiento.</p>'
+   +'<h3>Séptima — Confidencialidad</h3><p>LAS PARTES mantendrán reserva sobre la información comercial y técnica a la que accedan con motivo del presente, obligación que subsistirá luego de su finalización.</p>'
+   +'<h3>Octava — Rescisión</h3><p>Cualquiera de LAS PARTES podrá rescindir el presente ante incumplimiento de la otra, previa intimación fehaciente por quince (15) días corridos para subsanarlo. La rescisión no afectará las órdenes de compra en curso de ejecución.</p>'
+   +'<h3>Novena — Firma digital</h3><p>LAS PARTES acuerdan que el presente y sus anexos podrán suscribirse mediante <span class="cl">firma digital o electrónica</span> en los términos de la Ley N° 25.506 y sus modificatorias, reconociéndoles plena validez y eficacia probatoria, equivalente a la firma manuscrita.</p>'
+   +'<h3>Décima — Jurisdicción y domicilios</h3><p>Para todos los efectos legales derivados del presente, LAS PARTES se someten a la jurisdicción de los <span class="cl">'+(k.juris||'Tribunales Ordinarios competentes')+'</span>, renunciando a cualquier otro fuero, y constituyen domicilios en los indicados en el encabezamiento, donde serán válidas todas las notificaciones.</p>'
+   +'<p style="margin-top:14px">En prueba de conformidad, previa lectura y ratificación, LAS PARTES firman dos (2) ejemplares de un mismo tenor y a un solo efecto, en el lugar y fecha indicados <i>ut supra</i>.</p>'
    +'</div>'
-   +'<div class="doc-sign"><div>FLAMA S.A.<br><small>El Proveedor · Firma digital</small></div><div>'+(c.nombre||'El Cliente')+'<br><small>El Cliente · Firma digital</small></div></div>'
-   +'<div class="doc-foot">Documento generado digitalmente. La firma digital tiene idéntico valor legal que la manuscrita conforme Ley 25.506. Registro de trazabilidad disponible en la plataforma FLAMA Control.</div></div>';
+   +'<div class="doc-sign"><div>_______________________<br><small><strong>'+(k.repFlama||'Por FLAMA S.A.')+'</strong><br>EL PROVEEDOR</small></div><div>_______________________<br><small><strong>'+(k.repCli||(c.nombre||'Por EL CLIENTE'))+'</strong><br>EL CLIENTE</small></div></div>'
+   +'<div class="doc-foot">Documento suscripto digitalmente. La firma digital posee idéntico valor legal que la manuscrita conforme la Ley N° 25.506. Este acuerdo marco no obliga a volúmenes ni montos determinados; los mismos se pactan por orden de compra.</div></div>';
 }
-function printContract(){renderContract();document.body.classList.add('pr-contract');window.print();setTimeout(function(){document.body.classList.remove('pr-contract');},500);}
+function renderContract(){document.getElementById('contract-doc').innerHTML=contractHTML();}
+function printContract(){printDoc(contractHTML(),false);}
 
 /* ===== TRAYECTORIA ===== */
 function renderTray(){
   var counts={};data.forEach(function(m){var key=m.tipoBase+'|'+m.tamano;counts[key]=(counts[key]||0)+1;});
-  var totRec=0,totUnits=0,totCPP=0,rows='';
-  CATALOG.forEach(function(c){var key=c.base+'|'+c.size,n=counts[key]||0;if(!n)return;var recAnual=n*c.pRec;var cppAnual=n*2*CPP_COST;var gastoAnual=recAnual;totRec+=recAnual;totUnits+=n;totCPP+=cppAnual;
-    rows+='<tr><td><strong>'+c.base+' '+c.size+'</strong></td><td>'+n+'</td><td>'+money(c.pFinal)+'</td><td>'+money(c.pRec)+'</td><td>'+money(CPP_COST)+'</td><td class="mono">'+money(gastoAnual)+'</td></tr>';});
-  var ahorroCPP=contract.cpp==='si'?totCPP:0;
-  var ahorroVol=Math.round(totRec*contract.desc/100);
-  var ahorroTotal=ahorroCPP+ahorroVol;
-  document.getElementById('save-title').textContent='Ahorro estimado año 1: '+money(ahorroTotal);
-  document.getElementById('save-sub').innerHTML='Control Periódico Preventivo bonificado: <strong>'+money(ahorroCPP)+'</strong> ('+totUnits+' unidades × 2 servicios × $'+CPP_COST.toLocaleString('es-AR')+') + bonificación por volumen '+contract.desc+'%: <strong>'+money(ahorroVol)+'</strong>.';
+  var totRec=0,totUnits=0,totNuevo=0,rows='';
+  CATALOG.forEach(function(c){var key=c.base+'|'+c.size,n=counts[key]||0;if(!n)return;var recAnual=n*c.pRec;totRec+=recAnual;totUnits+=n;totNuevo+=n*c.pFinal;
+    rows+='<tr><td><strong>'+c.base+' '+c.size+'</strong></td><td>'+n+'</td><td>'+money(c.pFinal)+'</td><td>'+money(c.pRec)+'</td><td class="mono">'+money(recAnual)+'</td></tr>';});
   document.getElementById('tray-hero').innerHTML=
-   '<div class="tray-card"><div class="lbl">Unidades en servicio</div><div class="big">'+totUnits+'</div></div>'
-   +'<div class="tray-card"><div class="lbl">Gasto recargas / año</div><div class="big red" style="color:var(--red)">'+money(totRec)+'</div></div>'
-   +'<div class="tray-card"><div class="lbl">Control Periódico / año</div><div class="big" style="color:var(--warn)">'+money(totCPP)+'</div></div>'
-   +'<div class="tray-card save"><div class="lbl">Ahorro con FLAMA</div><div class="big">'+money(ahorroTotal)+'</div></div>';
+   '<div class="tray-card"><div class="lbl">Unidades en parque</div><div class="big">'+totUnits+'</div></div>'
+   +'<div class="tray-card"><div class="lbl">Gasto recargas / año</div><div class="big" style="color:var(--red)">'+money(totRec)+'</div></div>'
+   +'<div class="tray-card"><div class="lbl">Valor de reposición</div><div class="big" style="color:var(--warn)">'+money(totNuevo)+'</div></div>'
+   +'<div class="tray-card"><div class="lbl">Tipos distintos</div><div class="big">'+Object.keys(counts).length+'</div></div>';
   // gasto anual histórico (5 años) — simulado con crecimiento
   var years=[hoyYear()-4,hoyYear()-3,hoyYear()-2,hoyYear()-1,hoyYear()];
   var base=totRec;var vals=years.map(function(y,i){return Math.round(base*(0.55+i*0.11));});
   var labels='<div class="curve-labels">'+years.map(function(y){return '<span>'+y+'</span>';}).join('')+'</div>';
   document.getElementById('tray-curve').innerHTML='<div style="font-size:12px;color:var(--text3);margin-bottom:6px">Evolución del gasto anual (recargas + servicios)</div><div class="curve-wrap">'+lineCurveMoney(vals)+labels+'</div>';
-  document.getElementById('tray-table').innerHTML=rows||'<tr><td colspan="6" class="table-empty">Sin datos</td></tr>';
+  document.getElementById('tray-table').innerHTML=rows||'<tr><td colspan="5" class="table-empty">Sin datos</td></tr>';
 }
 function hoyYear(){return new Date().getFullYear();}
 function lineCurveMoney(vals){
@@ -1168,7 +1223,7 @@ function openDet(id){
    +'</div><div>'
    +'<div class="det-card" style="margin-bottom:14px"><h4>📅 Plazos IRAM 3517-2</h4><div class="tl">'+tli('Fabricación',m.fabricacion,'dim')+tli('Instalación',m.instalacion,'ok')+tli('Última recarga',m.ultimaRecarga,'ok')+tli('Próxima recarga ★',m.proximaRecarga,dcls(m.proximaRecarga))+tli('Último Control Periódico',m.ultimoCPP,'ok')+tli('Próximo Control Periódico ★',m.proximoCPP,dcls(m.proximoCPP))+tli('Última prueba hidráulica',m.ultimaPH,'ok')+tli('Próxima prueba hidráulica ★',m.proximaPH,dcls(m.proximaPH))+tli('Caducidad definitiva ★',m.caducidad,dcls(m.caducidad))+'</div></div>'
    +(m.tieneProvisorio==='si'?'<div style="background:var(--warn-bg);border:1px solid var(--warn);border-radius:8px;padding:12px;margin-bottom:14px;font-size:12px;color:var(--warn)">🔄 <strong>Provisorio:</strong> '+(m.provDesc||'—')+(m.nuevoFecha?'<br>Nuevo previsto: '+fmt(m.nuevoFecha):'')+'</div>':'')
-   +'<div class="det-card"><h4>📷 Documentación</h4><div class="photo-panel" style="grid-template-columns:1fr 1fr 1fr"><div class="photo-slot filled" style="cursor:default">'+(m.foto_unit?'<img class="preview" src="'+m.foto_unit+'">':matImg(m,110))+'<div class="ph-label">Unidad</div></div><div class="photo-slot filled" style="cursor:default">'+(m.foto_qr?'<img class="preview" src="'+m.foto_qr+'">':QRGen.toSvg(qrPayload(m),120))+'<div class="ph-label">QR real</div></div><div class="photo-slot filled" style="cursor:default">'+(m.foto_oblea?'<img class="preview" src="'+m.foto_oblea+'">':obleaSvg(m,120))+'<div class="ph-label">Oblea ODS/OPDS</div></div></div></div>'
+   +'<div class="det-card"><h4>📷 Documentación</h4><div class="photo-panel" style="grid-template-columns:1fr 1fr 1fr"><div class="photo-slot filled" style="cursor:default">'+(m.foto_unit?'<img class="preview" src="'+m.foto_unit+'">':matImg(m,110))+'<div class="ph-label">Unidad</div></div><div class="photo-slot filled" style="cursor:pointer" onclick="closeM(\'ov-det\');openQR(\''+m.id+'\')" title="Ampliar QR">'+(m.foto_qr?'<img class="preview" src="'+m.foto_qr+'">':QRGen.toSvg(qrPayload(m),120))+'<div class="ph-label">QR real ↗</div></div><div class="photo-slot filled" style="cursor:default">'+(m.foto_oblea?'<img class="preview" src="'+m.foto_oblea+'">':obleaSvg(m,120))+'<div class="ph-label">Oblea ODS/OPDS</div></div></div></div>'
    +'</div></div>';
   document.getElementById('ov-det').classList.remove('hidden');
 }
@@ -1214,7 +1269,7 @@ function saveMat(){
    cPres:gv('cPres'),cPrec:gv('cPrec'),cMang:gv('cMang'),cBoq:gv('cBoq'),cSop:gv('cSop'),cSen:gv('cSen'),cEtq:gv('cEtq'),cAcc:gv('cAcc'),
    foto_unit:tmpPh.unit,foto_qr:tmpPh.qr,foto_oblea:tmpPh.oblea,foto_remito:tmpPh.remito};
   if(editId){data=data.map(function(x){return x.id===editId?m:x;});}else data.push(m);
-  sv('flama_mats',data);closeM('ov-mat');renderAll();
+  persist();closeM('ov-mat');renderAll();
 }
 document.getElementById('f-fab').addEventListener('change',function(){if(this.value)document.getElementById('f-cad').value=addYr(this.value,20);});
 document.getElementById('f-anillo-col').addEventListener('change',function(){document.getElementById('f-anillo-yr').value=this.value;showAnilloPrev();});
@@ -1228,11 +1283,14 @@ function rmPhoto(e,s){e.stopPropagation();tmpPh[s]=null;updSlots();}
 function updSlots(){['unit','qr','oblea','remito'].forEach(function(k){var sl=document.getElementById('ps-'+k);if(!sl)return;var p=sl.querySelector('img.preview');if(p)p.remove();if(tmpPh[k]){sl.classList.add('filled');var img=document.createElement('img');img.src=tmpPh[k];img.className='preview';sl.insertBefore(img,sl.firstChild);}else sl.classList.remove('filled');});}
 
 /* ===== COMPANY ===== */
-function applyCompany(){document.getElementById('sb-cli-name').textContent=company.nombre||'Mi Empresa';document.getElementById('sb-cli-cuit').textContent='CUIT '+(company.cuit||'—');var box=document.getElementById('sb-logo');box.innerHTML=company.logo?'<img src="'+company.logo+'">':'<svg><use href="#flameIcon"/></svg>';}
+function applyCompany(){document.getElementById('sb-cli-cuit').textContent='CUIT '+(company.cuit||'—');var box=document.getElementById('sb-logo');box.innerHTML=company.logo?'<img src="'+company.logo+'">':'<svg><use href="#flameIcon"/></svg>';renderWsSwitcher();}
+function renderWsSwitcher(){var s=document.getElementById('ws-select');if(!s)return;s.innerHTML=Object.keys(workspaces).map(function(id){return '<option value="'+id+'" '+(id===currentWs?'selected':'')+'>'+(workspaces[id].company.nombre||'Empresa')+'</option>';}).join('');}
+function switchWs(id){if(!workspaces[id])return;bindWs(id);applyCompany();renderAll();nav('dashboard');}
+function promptNewWs(){var n=prompt('Nombre / razón social de la nueva empresa:');if(n===null)return;var cuit=prompt('CUIT (opcional):')||'';newWorkspace(n||'Nueva empresa',cuit,false);applyCompany();renderAll();nav('dashboard');alert('✅ Empresa "'+(n||'Nueva empresa')+'" creada. Sus datos se guardan por separado. Cargá sus matafuegos con "+ Nuevo Matafuego".');}
 function openCompany(){['nombre','cuit','dir','tel','email','loc','hab'].forEach(function(k){var e=document.getElementById('emp-'+k);if(e)e.value=company[k]||'';});['nombre','mat','tel','email'].forEach(function(k){var e=document.getElementById('emp-syh-'+k);if(e)e.value=company['syh_'+k]||'';});var pv=document.getElementById('logo-prev'),ph=document.getElementById('logo-ph');if(company.logo){pv.src=company.logo;pv.style.display='';ph.style.display='none';}else{pv.style.display='none';ph.style.display='';}document.getElementById('ov-emp').classList.remove('hidden');}
 function pickLogo(){logoTarget='company';document.getElementById('logo-inp').click();}
-function onLogo(e){var f=e.target.files[0];if(!f)return;var r=new FileReader();r.onload=function(ev){company.logo=ev.target.result;sv('flama_company',company);var pv=document.getElementById('logo-prev'),ph=document.getElementById('logo-ph');if(pv){pv.src=ev.target.result;pv.style.display='';ph.style.display='none';}applyCompany();if(logoTarget==='planilla')renderSyH();};r.readAsDataURL(f);e.target.value='';}
-function saveCompany(){company.nombre=gv('emp-nombre')||'Mi Empresa';company.cuit=gv('emp-cuit');company.dir=gv('emp-dir');company.tel=gv('emp-tel');company.email=gv('emp-email');company.loc=gv('emp-loc');company.hab=gv('emp-hab');company.syh_nombre=gv('emp-syh-nombre');company.syh_mat=gv('emp-syh-mat');company.syh_tel=gv('emp-syh-tel');company.syh_email=gv('emp-syh-email');sv('flama_company',company);applyCompany();closeM('ov-emp');renderAll();renderSyH();renderContract();}
+function onLogo(e){var f=e.target.files[0];if(!f)return;var r=new FileReader();r.onload=function(ev){company.logo=ev.target.result;persist();var pv=document.getElementById('logo-prev'),ph=document.getElementById('logo-ph');if(pv){pv.src=ev.target.result;pv.style.display='';ph.style.display='none';}applyCompany();if(logoTarget==='planilla')renderSyH();};r.readAsDataURL(f);e.target.value='';}
+function saveCompany(){company.nombre=gv('emp-nombre')||'Mi Empresa';company.cuit=gv('emp-cuit');company.dir=gv('emp-dir');company.tel=gv('emp-tel');company.email=gv('emp-email');company.loc=gv('emp-loc');company.hab=gv('emp-hab');company.syh_nombre=gv('emp-syh-nombre');company.syh_mat=gv('emp-syh-mat');company.syh_tel=gv('emp-syh-tel');company.syh_email=gv('emp-syh-email');persist();applyCompany();closeM('ov-emp');renderAll();renderSyH();renderContract();}
 
 /* ===== COORD / EXPORT / RINGS ===== */
 function openCoord(){document.getElementById('ov-coord').classList.remove('hidden');}
@@ -1284,12 +1342,17 @@ function seed(){
       cPres:chk(i%4),cPrec:chk(i%3),cMang:chk(i%5),cBoq:chk(1),cSop:chk(i%6),cSen:chk(i%3),cEtq:chk(1),cAcc:chk(1),
       foto_unit:null,foto_qr:null,foto_oblea:null,foto_remito:null});
   }
-  data=out;sv('flama_mats',data);
+  data=out;if(workspaces[currentWs])workspaces[currentWs].mats=data;persist();
 }
 
 /* ===== INIT ===== */
-function renderAll(){renderTrends();renderKpis();renderTbl();renderSyhFilter();var c=buildAlerts().filter(function(a){return a.sev>=3;}).length,nb=document.getElementById('nb-al');if(c){nb.textContent=c;nb.classList.add('show');}else nb.classList.remove('show');}
-initSelects();seed();applyCompany();renderAll();
+function renderAll(){renderTrends();renderKpis();renderTbl();renderSyhFilter();renderWsSwitcher();var c=buildAlerts().filter(function(a){return a.sev>=3;}).length,nb=document.getElementById('nb-al');if(c){nb.textContent=c;nb.classList.add('show');}else nb.classList.remove('show');}
+/* boot */
+initSelects();
+var wsIds=Object.keys(workspaces);
+if(!wsIds.length){newWorkspace('FLAMA — Empresa Demo','30504835126',true);}
+else{bindWs((currentWs&&workspaces[currentWs])?currentWs:wsIds[0]);}
+applyCompany();renderAll();
 </script>
 </body>
 </html>
