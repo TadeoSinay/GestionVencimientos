@@ -1035,34 +1035,132 @@ function baseURL(){try{return location.origin+location.pathname;}catch(e){return
 function qrData(m){return [codeOf(m),(m.sector||'').slice(0,22),m.estadoActual||'',m.proximaRecarga||'',m.anilloYr||'',(m.opds||'')].join('|');}
 function qrPayload(m){return baseURL()+'#f='+encodeURIComponent(qrData(m));}
 
-/* ===== RENDER MATAFUEGO (estilo catálogo FLAMA) ===== */
+/* ===== RENDER MATAFUEGO FOTORREALISTA ===== */
+var _matSeq=0;
 function matImg(m,px){
-  px=px||120;var col=BODY_COLORS[m.color||'red']||BODY_COLORS.red;var wheels=m.ruedas;var id=(m.id||'x').replace(/[^a-z0-9]/gi,'');
+  px=px||120;
+  var col=BODY_COLORS[m.color||'red']||BODY_COLORS.red;
+  var wheels=m.ruedas;
+  var id='mi'+(++_matSeq);
   var isMetal=(m.color==='silver'||m.color==='steel');
-  var horn=m.horn?'<path d="M40 30 q-16 4 -18 22 q0 8 6 12" fill="none" stroke="#1a1a1a" stroke-width="5.5" stroke-linecap="round"/><ellipse cx="27" cy="66" rx="7" ry="9" fill="#1a1a1a"/>':'';
-  var hoseC=m.hoseGreen?'#22A859':'#111';
-  var hose=(!m.horn&&!wheels&&!m.noHose)?'<path d="M40 34 q-14 6 -14 30 v58" fill="none" stroke="'+hoseC+'" stroke-width="4" stroke-linecap="round"/><rect x="22" y="120" width="8" height="10" rx="2" fill="'+hoseC+'"/>':'';
-  var pict='<g transform="translate(38,98)">'+[0,1,2].map(function(i){return '<rect x="'+(i*10)+'" y="0" width="8" height="8" rx="1.5" fill="#e8e8e8" stroke="#bbb" stroke-width=".5"/><circle cx="'+(i*10+4)+'" cy="4" r="2" fill="'+['#c00','#06c','#093'][i]+'"/>';}).join('')+'</g>';
+  var hoseC=m.hoseGreen?'#22A859':'#2a2a2a';
+  var hoseHi=m.hoseGreen?'#66DD99':'#4e4e4e';
+
+  var defs='<defs>'
+    +'<linearGradient id="b'+id+'" x1="0" y1="0" x2="1" y2="0">'
+    +'<stop offset="0%" stop-color="'+col[2]+'"/>'
+    +'<stop offset="6%" stop-color="'+col[2]+'" stop-opacity=".8"/>'
+    +'<stop offset="17%" stop-color="'+col[1]+'"/>'
+    +'<stop offset="35%" stop-color="'+col[0]+'"/>'
+    +'<stop offset="44%" stop-color="#fff" stop-opacity="'+(isMetal?'.52':'.3')+'"/>'
+    +'<stop offset="54%" stop-color="'+col[0]+'"/>'
+    +'<stop offset="79%" stop-color="'+col[1]+'"/>'
+    +'<stop offset="100%" stop-color="'+col[2]+'"/>'
+    +'</linearGradient>'
+    +'<linearGradient id="c'+id+'" x1="0" y1="0" x2="1" y2="0">'
+    +'<stop offset="0%" stop-color="#777"/><stop offset="28%" stop-color="#bbb"/>'
+    +'<stop offset="48%" stop-color="#eee"/><stop offset="68%" stop-color="#aaa"/>'
+    +'<stop offset="100%" stop-color="#666"/>'
+    +'</linearGradient>'
+    +'<linearGradient id="hd'+id+'" x1="0" y1="0" x2="0" y2="1">'
+    +'<stop offset="0%" stop-color="#FF4040"/>'
+    +'<stop offset="45%" stop-color="#CC1010"/>'
+    +'<stop offset="100%" stop-color="#7A1512"/>'
+    +'</linearGradient>'
+    +'<radialGradient id="gf'+id+'" cx=".38" cy=".32" r=".6">'
+    +'<stop offset="0%" stop-color="#f0f0f0"/><stop offset="100%" stop-color="#b5b5b5"/>'
+    +'</radialGradient>'
+    +'<radialGradient id="gs'+id+'" cx=".5" cy=".5" r=".5">'
+    +'<stop offset="0%" stop-color="#000" stop-opacity=".3"/>'
+    +'<stop offset="100%" stop-color="#000" stop-opacity="0"/>'
+    +'</radialGradient>'
+    +'</defs>';
+
+  var shadow='<ellipse cx="50" cy="149" rx="26" ry="5" fill="url(#gs'+id+')"/>';
+
+  var hose='';
+  if(!m.horn&&!wheels&&!m.noHose){
+    hose='<path d="M44 22 C30 27 21 47 19 75 C17 103 18 118 20 130" fill="none" stroke="rgba(0,0,0,.22)" stroke-width="7" stroke-linecap="round"/>'
+      +'<path d="M44 22 C30 27 21 47 19 75 C17 103 18 118 20 130" fill="none" stroke="'+hoseC+'" stroke-width="5.5" stroke-linecap="round"/>'
+      +'<path d="M44 22 C30 27 21.5 47 19.5 75 C17.5 103 18.5 118 20.5 130" fill="none" stroke="'+hoseHi+'" stroke-width="1.8" stroke-dasharray="4 7" stroke-linecap="round" opacity=".65"/>'
+      +'<ellipse cx="44" cy="21" rx="4.5" ry="3.5" fill="url(#c'+id+')" transform="rotate(-15 44 21)"/>'
+      +'<rect x="14" y="125" width="11" height="16" rx="4.5" fill="'+hoseC+'"/>'
+      +'<rect x="11" y="133" width="17" height="5" rx="2.5" fill="'+hoseC+'"/>'
+      +'<ellipse cx="19.5" cy="125" rx="5.5" ry="2.5" fill="'+hoseHi+'" opacity=".45"/>';
+  }
+
+  var horn='';
+  if(m.horn){
+    horn='<path d="M44 22 C28 28 21 44 19 58" fill="none" stroke="rgba(0,0,0,.22)" stroke-width="7" stroke-linecap="round"/>'
+      +'<path d="M44 22 C28 28 21 44 19 58" fill="none" stroke="#1a1a1a" stroke-width="5.5" stroke-linecap="round"/>'
+      +'<path d="M44 22 C28 28 21.5 44 19.5 58" fill="none" stroke="#383838" stroke-width="2" stroke-linecap="round"/>'
+      +'<path d="M13 54 Q9 68 15 75 Q25 83 31 72 Q33 59 27 53 Z" fill="#111"/>'
+      +'<path d="M13 54 Q9 68 15 75 Q25 83 31 72" fill="none" stroke="#333" stroke-width=".7"/>'
+      +'<ellipse cx="44" cy="21" rx="4.5" ry="3.5" fill="url(#c'+id+')" transform="rotate(-15 44 21)"/>';
+  }
+
+  var base='<rect x="25" y="133" width="50" height="11" rx="4" fill="'+col[2]+'"/>'
+    +'<ellipse cx="50" cy="133" rx="25" ry="7" fill="url(#b'+id+')" opacity=".7"/>'
+    +'<ellipse cx="50" cy="144" rx="25" ry="6" fill="'+col[2]+'" opacity=".75"/>';
+
+  var body='<rect x="28" y="40" width="44" height="96" rx="6" fill="url(#b'+id+')" stroke="rgba(0,0,0,.18)" stroke-width=".5"/>'
+    +'<rect x="30" y="44" width="6" height="88" rx="3" fill="white" opacity="'+(isMetal?'.38':'.15')+'"/>';
+
+  var shoulder='<path d="M28 50 Q28 32 50 30 Q72 32 72 50" fill="url(#b'+id+')"/>'
+    +'<ellipse cx="50" cy="50" rx="22" ry="5.5" fill="url(#b'+id+')" stroke="rgba(0,0,0,.1)" stroke-width=".5"/>';
+
+  var neck='<rect x="38" y="18" width="24" height="15" rx="3.5" fill="url(#b'+id+')"/>'
+    +'<ellipse cx="50" cy="18" rx="12" ry="4" fill="url(#c'+id+')" opacity=".7"/>';
+
+  var valve='<rect x="36" y="10" width="28" height="11" rx="3.5" fill="url(#c'+id+')"/>'
+    +'<ellipse cx="50" cy="10" rx="14" ry="3.5" fill="url(#c'+id+')"/>'
+    +'<ellipse cx="50" cy="10" rx="14" ry="3.5" fill="white" opacity=".13"/>';
+
+  var gauge='<circle cx="41" cy="20" r="5.5" fill="#1a1a1a" stroke="#555" stroke-width=".4"/>'
+    +'<circle cx="41" cy="20" r="4.8" fill="url(#gf'+id+')"/>'
+    +'<circle cx="41" cy="20" r="4.8" fill="none" stroke="#999" stroke-width=".5"/>'
+    +'<circle cx="41" cy="20" r="3.2" fill="none" stroke="#d0d0d0" stroke-width=".4"/>'
+    +'<line x1="41" y1="20" x2="43.2" y2="16.2" stroke="#c00" stroke-width="1.2" stroke-linecap="round"/>'
+    +'<circle cx="41" cy="20" r=".9" fill="#555"/>'
+    +'<text x="41" y="24.5" text-anchor="middle" font-size="3" fill="#555" font-family="Arial,sans-serif">bar</text>';
+
+  var handle='<path d="M53 9 L76 3 Q81 1 82 5 L82 8 Q82 12 78 12 L57 14 Z" fill="url(#hd'+id+')"/>'
+    +'<path d="M53 9 L76 3" fill="none" stroke="#FF6666" stroke-width=".8" opacity=".4"/>'
+    +'<rect x="49" y="5" width="7" height="13" rx="3" fill="url(#c'+id+')"/>';
+
+  var pin='<circle cx="77" cy="3" r="4" fill="none" stroke="#ddd" stroke-width="1.8"/>'
+    +'<path d="M77 -1 Q82 -3 82 1" fill="none" stroke="#ddd" stroke-width="1.5" stroke-linecap="round"/>';
+
+  var flame='<path d="M50 57c-.6 3-2.8 4-3.2 7 .3 2.4 2 3.4 3.2 3 1.4-.6 2-2 1.6-3.2-.3-1.2-1-1.9-1.6-3.2 1 .8 1.6 2 1.5 3.2.7-1.2.5-2.8-.3-3.9-.5-.8-.9-1-1.2-2.9z" fill="'+col[0]+'"/>';
+  var typeText=m.tipoBase||'';
+  var sizeText=m.tamano||'';
+  var claseText=m.clase||'';
+  var label='<rect x="31" y="64" width="38" height="62" rx="3" fill="white"/>'
+    +'<rect x="31" y="64" width="38" height="15" rx="3" fill="'+col[1]+'"/>'
+    +'<rect x="31" y="72" width="38" height="7" fill="'+col[1]+'"/>'
+    +'<text x="50" y="76" text-anchor="middle" font-family="Archivo Black,Arial Black,sans-serif" font-size="6.5" font-weight="900" fill="white" letter-spacing=".8">FLAMA</text>'
+    +flame
+    +'<line x1="34" y1="82" x2="66" y2="82" stroke="#e0e0e0" stroke-width=".6"/>'
+    +'<text x="50" y="95" text-anchor="middle" font-family="Archivo Black,Arial Black,sans-serif" font-size="9" font-weight="900" fill="#111">'+typeText+'</text>'
+    +'<text x="50" y="106" text-anchor="middle" font-family="Archivo,Arial,sans-serif" font-size="7.5" font-weight="700" fill="#222">'+sizeText+'</text>'
+    +'<line x1="34" y1="111" x2="66" y2="111" stroke="#e8e8e8" stroke-width=".5"/>'
+    +'<text x="50" y="120" text-anchor="middle" font-family="Arial,sans-serif" font-size="4.2" fill="#666">Clase '+claseText+'</text>';
+
+  var grip='<rect x="28" y="128" width="44" height="5" rx="2" fill="rgba(0,0,0,.2)"/>'
+    +'<rect x="28" y="128.5" width="44" height="1.5" fill="rgba(255,255,255,.07)"/>';
+
+  var wheelSvg='';
+  if(wheels){
+    wheelSvg='<circle cx="34" cy="147" r="10" fill="#222" stroke="#555" stroke-width="1.5"/>'
+      +'<circle cx="66" cy="147" r="10" fill="#222" stroke="#555" stroke-width="1.5"/>'
+      +'<circle cx="34" cy="147" r="4" fill="#666"/>'
+      +'<circle cx="66" cy="147" r="4" fill="#666"/>'
+      +'<line x1="34" y1="139" x2="66" y2="139" stroke="#444" stroke-width="2.5"/>';
+  }
+
   return '<svg viewBox="0 0 100 155" width="'+px+'" height="'+(px*1.55)+'" xmlns="http://www.w3.org/2000/svg">'
-   +'<defs><linearGradient id="b'+id+'" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="'+col[2]+'"/><stop offset=".16" stop-color="'+col[1]+'"/><stop offset=".4" stop-color="'+col[0]+'"/><stop offset=".5" stop-color="'+(isMetal?'#ffffff':col[0])+'"/><stop offset=".62" stop-color="'+col[0]+'"/><stop offset="1" stop-color="'+col[2]+'"/></linearGradient>'
-   +'<radialGradient id="s'+id+'" cx=".5" cy=".5" r=".6"><stop offset="0" stop-color="#000" stop-opacity=".28"/><stop offset="1" stop-color="#000" stop-opacity="0"/></radialGradient></defs>'
-   +'<ellipse cx="50" cy="148" rx="28" ry="5" fill="url(#s'+id+')"/>'
-   +hose+horn
-   +'<path d="M44 12 q6 -5 12 0" fill="none" stroke="#c0000f" stroke-width="4" stroke-linecap="round"/>'
-   +'<rect x="43" y="14" width="14" height="9" rx="2" fill="#2b2b2b"/>'
-   +'<circle cx="60" cy="20" r="4.5" fill="#eee" stroke="#333" stroke-width="1"/><line x1="60" y1="20" x2="62" y2="18" stroke="#c00"/>'
-   +'<path d="M32 22 h36 v4 l-3 4 h-30 l-3 -4 z" fill="#3a3a3a"/>'
-   +'<rect x="26" y="30" width="48" height="112" rx="16" fill="url(#b'+id+')" stroke="rgba(0,0,0,.35)" stroke-width="1"/>'
-   +'<rect x="30" y="34" width="6" height="104" rx="3" fill="#fff" opacity="'+(isMetal?'.5':'.3')+'"/>'
-   +'<rect x="33" y="46" width="34" height="60" rx="3" fill="#fff" stroke="#ddd" stroke-width=".5"/>'
-   +'<path d="M50 52c-.6 3-3 4-3.4 7 .3 2.6 2 3.4 3.4 3 1.5-.6 2-2 1.7-3.4-.3-1.3-1.2-2-1.7-3.4 1 .7 1.7 2 1.6 3.4 .8-1.3.6-3-.3-4.3-.7-.9-1-.9-1.3-2.3z" fill="'+col[0]+'"/>'
-   +'<text x="50" y="72" font-size="7.5" font-weight="900" text-anchor="middle" fill="#111" font-family="Archivo,sans-serif" letter-spacing=".3">FLAMA</text>'
-   +'<line x1="37" y1="75" x2="63" y2="75" stroke="#ddd" stroke-width=".6"/>'
-   +'<text x="50" y="86" font-size="8.5" font-weight="800" text-anchor="middle" fill="#111">'+(m.tipoBase||'')+'</text>'
-   +'<text x="50" y="94" font-size="6.5" text-anchor="middle" fill="#333">'+(m.tamano||'')+'</text>'
-   +pict
-   +(wheels?'<rect x="20" y="118" width="60" height="5" rx="2.5" fill="#b00"/><path d="M24 122 v14 M76 122 v14" stroke="#b00" stroke-width="3"/><circle cx="24" cy="142" r="9" fill="#1a1a1a"/><circle cx="24" cy="142" r="3.5" fill="#666"/><circle cx="76" cy="142" r="9" fill="#1a1a1a"/><circle cx="76" cy="142" r="3.5" fill="#666"/>':'')
-   +'</svg>';
+    +defs+shadow+hose+horn+base+body+shoulder+neck+valve+gauge+handle+pin+label+grip+wheelSvg
+    +'</svg>';
 }
 /* ===== OBLEA DPS OFICIAL (estilo sello real) ===== */
 function obleaSvg(m,px){
