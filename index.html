@@ -519,6 +519,7 @@ img,svg{max-width:100%}
     <button class="nav-btn" data-p="galeria" onclick="nav('galeria')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>Galería QR / Obleas</button>
     <button class="nav-btn" data-p="syh" onclick="nav('syh')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 13h6M9 17h6"/></svg>Planilla SyH</button>
     <button class="nav-btn" data-p="cf" onclick="nav('cf')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2c0 0-1 3-1 5s2 3 2 5"/><path d="M8 12a5 6 0 1 0 8 0c-1 2-2 2-3 3 0-3-3-4-5-6z"/></svg>Carga de Fuego</button>
+    <button class="nav-btn" data-p="fijos" onclick="nav('fijos')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h4l2-5 3 10 2-5h5"/><rect x="2" y="4" width="20" height="16" rx="2"/></svg>Sistemas Fijos<span class="nav-badge" id="nb-fj"></span></button>
     <div class="sb-group">Comercial</div>
     <button class="nav-btn" data-p="contrato" onclick="nav('contrato')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 12h6M9 16h6M9 8h2"/><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>Contrato Digital</button>
     <button class="nav-btn" data-p="trayectoria" onclick="nav('trayectoria')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M18 9l-5 5-3-3-4 4"/></svg>Trayectoria</button>
@@ -673,6 +674,22 @@ img,svg{max-width:100%}
       <div class="cf-print" id="cf-print" style="display:none"></div>
     </div>
 
+    <!-- SISTEMAS FIJOS Y MANGUERAS -->
+    <div class="page" id="page-fijos">
+      <div class="sec-hdr">
+        <h3>Sistemas Fijos y Mangueras</h3><span class="ct">seguimiento de revisiones y vencimientos</span>
+        <div class="spacer"></div>
+        <button class="btn btn-dark btn-sm no-print" onclick="printFijos()">🖨 PDF</button>
+        <button class="btn btn-primary btn-sm no-print" onclick="openAddFijo()">+ Agregar</button>
+      </div>
+      <div class="alert-hero" id="fj-hero" style="margin-bottom:18px"></div>
+      <div class="tbl-wrap"><div class="tbl-scroll">
+        <table><thead><tr>
+          <th>Tipo</th><th>Identif.</th><th>Ubicación</th><th>Periodicidad</th><th>Última revisión</th><th>Próxima revisión</th><th>Estado</th><th>Acc.</th>
+        </tr></thead><tbody id="fj-body"></tbody></table>
+      </div></div>
+    </div>
+
     <!-- CONTRATO -->
     <div class="page" id="page-contrato">
       <div class="sec-hdr no-print">
@@ -688,6 +705,7 @@ img,svg{max-width:100%}
     <div class="page" id="page-trayectoria">
       <span class="sec-label">Trayectoria con FLAMA</span>
       <div class="tray-hero" id="tray-hero"></div>
+      <div class="panel" id="tray-savings" style="border-color:var(--ok);background:linear-gradient(135deg,rgba(34,197,94,.12),transparent);margin-bottom:22px;font-size:13px;color:var(--text2)"></div>
       <div class="sec-hdr"><h3>Gasto anual con nosotros</h3><div class="spacer"></div><select id="tray-filter" onchange="renderTray()" style="background:var(--surface);border:1px solid var(--border2);color:var(--text);border-radius:8px;padding:7px 11px;font-size:13px;font-family:inherit"><option value="total">Total (recargas + reposición)</option><option value="rec">Solo recargas</option><option value="rep">Solo reposición</option></select></div>
       <div class="panel" style="margin-bottom:22px"><div id="tray-curve"></div></div>
       <div class="sec-hdr"><h3>Detalle por tipo de matafuego</h3><span class="ct">valores de referencia sin IVA</span></div>
@@ -857,6 +875,26 @@ img,svg{max-width:100%}
   </div>
   <div class="modal-ftr"><button class="btn btn-outline" onclick="closeM('ov-contract')">Cancelar</button><button class="btn btn-primary" onclick="saveContract()">Aplicar</button></div>
 </div></div>
+
+<!-- MODAL SISTEMA FIJO / MANGUERA -->
+<div class="overlay hidden" id="ov-fijo"><div class="modal" onclick="event.stopPropagation()">
+  <div class="modal-hdr"><h2 id="fj-title">Nuevo sistema</h2><button class="btn-ghost" onclick="closeM('ov-fijo')">✕</button></div>
+  <div class="modal-body">
+    <div class="fg">
+      <div class="field"><label>Tipo <span class="req">*</span></label><select id="fj-tipo"><option>Sistema fijo (rociadores)</option><option>Red de hidrantes</option><option>Bocas de incendio / mangueras</option><option>Detección y alarma</option><option>Bomba de incendio</option><option>Tanque de reserva</option><option>Extinción por gas (FM-200/CO₂)</option><option>Otros</option></select></div>
+      <div class="field"><label>Identificación / N°</label><input id="fj-id" placeholder="Ej: HID-01 / BIE-03"></div>
+      <div class="field s2"><label>Ubicación <span class="req">*</span></label><input id="fj-ubic" placeholder="Ej: Subsuelo — Sala de bombas"></div>
+      <div class="field"><label>Marca / Fabricante</label><input id="fj-marca"></div>
+      <div class="field"><label>Periodicidad</label><select id="fj-per" onchange="fjAutoNext()"><option value="1">Mensual</option><option value="3">Trimestral</option><option value="6" selected>Semestral</option><option value="12">Anual</option><option value="60">Prueba hidráulica (5 años)</option></select></div>
+      <div class="field"><label>Última revisión</label><input type="date" id="fj-ult" onchange="fjAutoNext()"></div>
+      <div class="field"><label>Próxima revisión <span class="req">*</span></label><input type="date" id="fj-prox"></div>
+      <div class="field"><label>Estado</label><select id="fj-estado"><option>Operativo</option><option>Observado</option><option>Fuera de servicio</option><option>En mantenimiento</option></select></div>
+      <div class="field"><label>Responsable</label><input id="fj-resp"></div>
+      <div class="field s2"><label>Observaciones</label><textarea id="fj-obs"></textarea></div>
+    </div>
+  </div>
+  <div class="modal-ftr"><button class="btn btn-outline" onclick="closeM('ov-fijo')">Cancelar</button><button class="btn btn-primary" onclick="saveFijo()">💾 Guardar</button></div>
+</div></div>
 <script>
 /* ===== Real QR generator (Nayuki port, MIT) — byte mode, ECC M, v1-10 ===== */
 var QRGen=(function(){
@@ -955,10 +993,10 @@ function migrateOld(){
 }
 migrateOld();
 if(!workspaces){workspaces={};}
-var data,company,contract;
-function bindWs(id){currentWs=id;var w=workspaces[id];data=w.mats;company=w.company;contract=w.contract||defaultContract();w.contract=contract;sv('flama_current',currentWs);}
-function persist(){var w=workspaces[currentWs];if(w){w.mats=data;w.company=company;w.contract=contract;}sv('flama_ws',workspaces);sv('flama_current',currentWs);}
-function newWorkspace(nombre,cuit,doSeed){var id='ws'+Date.now()+Math.random().toString(36).slice(2,5);workspaces[id]={company:{nombre:nombre||'Nueva empresa',cuit:cuit||'',logo:null},mats:[],contract:defaultContract()};bindWs(id);if(doSeed)seed();persist();return id;}
+var data,company,contract,fijos,editFj=null;
+function bindWs(id){currentWs=id;var w=workspaces[id];data=w.mats;company=w.company;contract=w.contract||defaultContract();w.contract=contract;fijos=w.fijos||[];w.fijos=fijos;sv('flama_current',currentWs);}
+function persist(){var w=workspaces[currentWs];if(w){w.mats=data;w.company=company;w.contract=contract;w.fijos=fijos;}sv('flama_ws',workspaces);sv('flama_current',currentWs);}
+function newWorkspace(nombre,cuit,doSeed){var id='ws'+Date.now()+Math.random().toString(36).slice(2,5);workspaces[id]={company:{nombre:nombre||'Nueva empresa',cuit:cuit||'',logo:null},mats:[],contract:defaultContract(),fijos:[]};bindWs(id);if(doSeed){seed();seedFijos();}persist();return id;}
 var editId=null,curSlot=null,tmpPh={unit:null,qr:null,oblea:null,remito:null};
 var srtKey='proximaRecarga',srtAsc=true,alFilt='all',galFilt='all',boardMode='estado',logoTarget='company';
 
@@ -1338,11 +1376,13 @@ function renderTray(){
   var totRec=0,totUnits=0,totNuevo=0,rows='';
   CATALOG.forEach(function(c){var key=c.base+'|'+c.size,n=counts[key]||0;if(!n)return;var recAnual=n*c.pRec;totRec+=recAnual;totUnits+=n;totNuevo+=n*c.pFinal;
     rows+='<tr><td><strong>'+c.base+' '+c.size+'</strong></td><td>'+n+'</td><td>'+money(c.pFinal)+'</td><td>'+money(c.pRec)+'</td><td class="mono">'+money(recAnual)+'</td></tr>';});
+  var ahorroCPP=totUnits*2*CPP_COST; // 2 controles periódicos/año bonificados el 1er año
   document.getElementById('tray-hero').innerHTML=
    '<div class="tray-card"><div class="lbl">Unidades en parque</div><div class="big">'+totUnits+'</div></div>'
    +'<div class="tray-card"><div class="lbl">Gasto recargas / año</div><div class="big" style="color:var(--red)">'+money(totRec)+'</div></div>'
    +'<div class="tray-card"><div class="lbl">Valor de reposición</div><div class="big" style="color:var(--warn)">'+money(totNuevo)+'</div></div>'
-   +'<div class="tray-card"><div class="lbl">Tipos distintos</div><div class="big">'+Object.keys(counts).length+'</div></div>';
+   +'<div class="tray-card save"><div class="lbl">Ahorro año 1 — Control Periódico bonificado</div><div class="big">'+money(ahorroCPP)+'</div></div>';
+  var sb=document.getElementById('tray-savings');if(sb)sb.innerHTML='<strong>Beneficio 1er año:</strong> el Control Periódico Preventivo se realiza sin cargo. '+totUnits+' unidades × 2 controles × '+money(CPP_COST)+' = <strong style="color:var(--ok)">'+money(ahorroCPP)+' de ahorro</strong> respecto del valor de referencia del servicio.';
   // gasto anual histórico (5 años) por tipo de gasto (filtrable)
   var filt=(document.getElementById('tray-filter')||{}).value||'total';
   var yBase=(filt==='rec')?totRec:(filt==='rep')?totNuevo:(totRec+Math.round(totNuevo*0.15));
@@ -1462,6 +1502,48 @@ function exportCSV(){
 }
 function renderRings(){document.getElementById('rings').innerHTML=RINGS.map(function(r){var cnt=data.filter(function(m){return parseInt(m.anilloYr)===r.yr;}).length;return '<div class="ring-card"><div class="ring-circle" style="background:'+r.hex+';color:'+r.txt+';border-color:'+(r.brd||'rgba(255,255,255,.15)')+'">'+r.yr.toString().slice(2)+'</div><div class="ring-info"><h4>'+r.name+'</h4><p>Vence en '+r.yr+'</p><small>'+cnt+' matafuego'+(cnt!==1?'s':'')+'</small></div></div>';}).join('');}
 
+/* ===== SISTEMAS FIJOS Y MANGUERAS ===== */
+function fjAutoNext(){var ult=document.getElementById('fj-ult').value,per=+document.getElementById('fj-per').value;if(ult&&per){var d=new Date(ult);d.setMonth(d.getMonth()+per);document.getElementById('fj-prox').value=d.toISOString().split('T')[0];}}
+function openAddFijo(){closeSidebar();editFj=null;document.getElementById('fj-title').textContent='Nuevo sistema';['fj-id','fj-ubic','fj-marca','fj-ult','fj-prox','fj-resp','fj-obs'].forEach(function(x){var e=document.getElementById(x);if(e)e.value='';});document.getElementById('fj-tipo').selectedIndex=0;document.getElementById('fj-per').value='6';document.getElementById('fj-estado').value='Operativo';document.getElementById('ov-fijo').classList.remove('hidden');}
+function openEditFijo(id){var f=null;for(var i=0;i<fijos.length;i++)if(fijos[i].id===id)f=fijos[i];if(!f)return;editFj=id;document.getElementById('fj-title').textContent='Editar sistema';document.getElementById('fj-tipo').value=f.tipo;document.getElementById('fj-id').value=f.ident||'';document.getElementById('fj-ubic').value=f.ubic||'';document.getElementById('fj-marca').value=f.marca||'';document.getElementById('fj-per').value=f.per||'6';document.getElementById('fj-ult').value=f.ult||'';document.getElementById('fj-prox').value=f.prox||'';document.getElementById('fj-estado').value=f.estado||'Operativo';document.getElementById('fj-resp').value=f.resp||'';document.getElementById('fj-obs').value=f.obs||'';document.getElementById('ov-fijo').classList.remove('hidden');}
+function saveFijo(){var tipo=document.getElementById('fj-tipo').value,ubic=gv('fj-ubic'),prox=gv('fj-prox');if(!ubic){alert('La ubicación es obligatoria.');return;}if(!prox){alert('La próxima revisión es obligatoria.');return;}
+  var f={id:editFj||uid(),tipo:tipo,ident:gv('fj-id'),ubic:ubic,marca:gv('fj-marca'),per:document.getElementById('fj-per').value,ult:gv('fj-ult'),prox:prox,estado:document.getElementById('fj-estado').value,resp:gv('fj-resp'),obs:gv('fj-obs')};
+  if(editFj){fijos=fijos.map(function(x){return x.id===editFj?f:x;});}else fijos.push(f);persist();closeM('ov-fijo');renderFijos();renderAll();}
+function delFijo(id){if(!confirm('¿Eliminar este sistema?'))return;fijos=fijos.filter(function(x){return x.id!==id;});persist();renderFijos();renderAll();}
+var PER_LBL={1:'Mensual',3:'Trimestral',6:'Semestral',12:'Anual',60:'Prueba hidr. (5 años)'};
+function renderFijos(){
+  var all=fijos.slice().sort(function(a,b){return (daysTo(a.prox)==null?9999:daysTo(a.prox))-(daysTo(b.prox)==null?9999:daysTo(b.prox));});
+  var venc=all.filter(function(f){var n=daysTo(f.prox);return n!=null&&n<0;}).length;
+  var prox=all.filter(function(f){var n=daysTo(f.prox);return n!=null&&n>=0&&n<=30;}).length;
+  var oper=all.filter(function(f){return f.estado==='Operativo';}).length;
+  document.getElementById('fj-hero').innerHTML='<div class="ah-card crit"><div class="n">'+venc+'</div><div class="l">🔴 Revisiones vencidas</div></div><div class="ah-card warn"><div class="n">'+prox+'</div><div class="l">🟠 Vencen en ≤30d</div></div><div class="ah-card ok"><div class="n">'+oper+'</div><div class="l">🟢 Operativos</div></div><div class="ah-card info"><div class="n">'+all.length+'</div><div class="l">📋 Total sistemas</div></div>';
+  var tb=document.getElementById('fj-body');
+  if(!all.length){tb.innerHTML='<tr><td colspan="8" class="table-empty">Sin sistemas cargados. Agregá rociadores, hidrantes, mangueras/BIE, detección, bombas…</td></tr>';return;}
+  var est={Operativo:'ok',Observado:'warn','Fuera de servicio':'crit','En mantenimiento':'warn'};
+  tb.innerHTML=all.map(function(f){return '<tr><td><strong>'+f.tipo+'</strong></td><td class="mono" style="font-size:11px">'+(f.ident||'—')+'</td><td style="max-width:160px;overflow:hidden;text-overflow:ellipsis">'+f.ubic+'</td><td style="font-size:12px">'+(PER_LBL[f.per]||'—')+'</td><td class="mono" style="font-size:12px">'+fmt(f.ult)+'</td><td><div class="date-cell"><div class="date-val">'+fmt(f.prox)+'</div>'+dayChip(f.prox)+'</div></td><td><span class="chip '+(est[f.estado]||'grey')+'">'+f.estado+'</span></td><td><div style="display:flex;gap:2px"><button class="btn-ghost" onclick="openEditFijo(\''+f.id+'\')" title="Editar">✏️</button><button class="btn-ghost" onclick="delFijo(\''+f.id+'\')" title="Borrar">🗑</button></div></td></tr>';}).join('');
+}
+function printFijos(){
+  var logo=docLogo(),c=company;
+  var rows=fijos.slice().sort(function(a,b){return (daysTo(a.prox)==null?9999:daysTo(a.prox))-(daysTo(b.prox)==null?9999:daysTo(b.prox));}).map(function(f){var n=daysTo(f.prox);var st=n!=null&&n<0?'VENCIDO':n!=null&&n<=30?'PRÓXIMO':'OK';var stc=n!=null&&n<0?'#ED1C24':n!=null&&n<=30?'#B4700A':'#12813C';return '<tr><td>'+f.tipo+'</td><td>'+(f.ident||'—')+'</td><td>'+f.ubic+'</td><td>'+(PER_LBL[f.per]||'—')+'</td><td>'+fmt(f.ult)+'</td><td>'+fmt(f.prox)+'</td><td style="color:'+stc+';font-weight:700">'+st+'</td><td>'+f.estado+'</td><td>'+(f.resp||'—')+'</td></tr>';}).join('')||'<tr><td colspan="9" style="text-align:center;padding:16px;color:#888">Sin registros</td></tr>';
+  var html='<div class="doc"><div class="doc-head"><div class="doc-emp">'+logo+'<div class="doc-emp-txt">'+(c.nombre||'Empresa')+'<small>'+(c.dir||'')+'</small><small>CUIT: '+(c.cuit||'—')+'</small></div></div><div class="doc-title"><h2>Sistemas Fijos y Mangueras</h2><p>Seguimiento de revisiones y vencimientos</p></div><div class="doc-norm"><strong>Ley 19.587 · Dec. 351/79</strong>Normas IRAM<br>'+fmt(today())+'</div></div>'
+   +'<table class="doc-table"><thead><tr><th>Tipo</th><th>Identif.</th><th>Ubicación</th><th>Periodicidad</th><th>Última rev.</th><th>Próxima rev.</th><th>Estado rev.</th><th>Cond.</th><th>Responsable</th></tr></thead><tbody>'+rows+'</tbody></table>'
+   +'<div class="doc-sign"><div>Firma Responsable SyH<br><small>'+(c.syh_nombre||'________________')+'</small></div><div>Matrícula<br><small>'+(c.syh_mat||'________________')+'</small></div><div>Fecha<br><small>'+fmt(today())+'</small></div></div>'
+   +'<div class="doc-foot">Registro de control de sistemas fijos de protección contra incendios (rociadores, hidrantes, bocas de incendio equipadas, detección/alarma, bombas) y mangueras. La periodicidad de prueba hidráulica de mangueras es cada 5 años conforme normas IRAM.</div></div>';
+  printDoc(html,true);
+}
+function seedFijos(){
+  if(fijos.length>0)return;var now=new Date();
+  function d(mo){return new Date(now.getFullYear(),now.getMonth()+mo,15).toISOString().split('T')[0];}
+  fijos=[
+   {id:uid(),tipo:'Red de hidrantes',ident:'HID-01',ubic:'Playa de carga',marca:'Rafitrol',per:'6',ult:d(-5),prox:d(1),estado:'Operativo',resp:'Ing. García Lucía',obs:''},
+   {id:uid(),tipo:'Bocas de incendio / mangueras',ident:'BIE-03',ubic:'Pasillo Central 1° piso',marca:'',per:'12',ult:d(-14),prox:d(-2),estado:'Observado',resp:'Ing. García Lucía',obs:'Manguera con desgaste, reemplazar.'},
+   {id:uid(),tipo:'Sistema fijo (rociadores)',ident:'SPK-A',ubic:'Depósito general',marca:'Tyco',per:'6',ult:d(-2),prox:d(4),estado:'Operativo',resp:'',obs:''},
+   {id:uid(),tipo:'Detección y alarma',ident:'DET-01',ubic:'Sala de servidores',marca:'Notifier',per:'3',ult:d(-1),prox:d(2),estado:'Operativo',resp:'',obs:''},
+   {id:uid(),tipo:'Bomba de incendio',ident:'BBA-01',ubic:'Sala de bombas',marca:'',per:'12',ult:d(-11),prox:d(1),estado:'En mantenimiento',resp:'',obs:'Revisión anual de presurización.'},
+   {id:uid(),tipo:'Bocas de incendio / mangueras',ident:'BIE-07',ubic:'Subsuelo',marca:'',per:'60',ult:'2021-03-15',prox:'2026-03-15',estado:'Operativo',resp:'',obs:'Prueba hidráulica quinquenal.'}
+  ];persist();
+}
+
 /* ===== FICHA (destino del QR) ===== */
 function fichaFrom(obj,m){
   // obj = {code,sector,estado,recarga,anillo,opds}; m = matafuego local (si existe) con fotos
@@ -1496,9 +1578,9 @@ function routeHash(){
 window.addEventListener('hashchange',routeHash);
 
 /* ===== NAV ===== */
-var T={dashboard:'Dashboard <span>General</span>',matafuegos:'Matafuegos <span>Registrados</span>',vencimientos:'Vencimientos <span>Visual</span>',alertas:'Alertas <span>de Vencimiento</span>',galeria:'Galería <span>QR / Obleas</span>',syh:'Planilla <span>SyH</span>',cf:'Carga de <span>Fuego</span>',contrato:'Contrato <span>Digital</span>',trayectoria:'Trayectoria <span>& Ahorro</span>',anillos:'Anillos <span>por Año</span>'};
+var T={dashboard:'Dashboard <span>General</span>',matafuegos:'Matafuegos <span>Registrados</span>',vencimientos:'Vencimientos <span>Visual</span>',alertas:'Alertas <span>de Vencimiento</span>',galeria:'Galería <span>QR / Obleas</span>',syh:'Planilla <span>SyH</span>',cf:'Carga de <span>Fuego</span>',contrato:'Contrato <span>Digital</span>',trayectoria:'Trayectoria <span>& Ahorro</span>',fijos:'Sistemas <span>Fijos y Mangueras</span>',anillos:'Anillos <span>por Año</span>'};
 function nav(p){var pgs=document.querySelectorAll('.page');for(var i=0;i<pgs.length;i++)pgs[i].classList.remove('active');document.getElementById('page-'+p).classList.add('active');var nb=document.querySelectorAll('.nav-btn');for(var i=0;i<nb.length;i++)nb[i].classList.toggle('active',nb[i].getAttribute('data-p')===p);document.getElementById('pg-title').innerHTML=T[p]||p;
-  if(p==='vencimientos')renderBoard();if(p==='alertas')renderAlerts();if(p==='galeria')renderGal();if(p==='syh')renderSyH();if(p==='cf'){renderCFRows();calcCF();}if(p==='contrato')renderContract();if(p==='trayectoria')renderTray();if(p==='anillos')renderRings();closeSidebar();window.scrollTo(0,0);}
+  if(p==='vencimientos')renderBoard();if(p==='alertas')renderAlerts();if(p==='galeria')renderGal();if(p==='syh')renderSyH();if(p==='cf'){renderCFRows();calcCF();}if(p==='contrato')renderContract();if(p==='trayectoria')renderTray();if(p==='fijos')renderFijos();if(p==='anillos')renderRings();closeSidebar();window.scrollTo(0,0);}
 function toggleSidebar(){var sb=document.getElementById('sidebar'),bd=document.getElementById('sb-backdrop');var open=sb.classList.toggle('open');bd.classList.toggle('show',open);}
 function closeSidebar(){document.getElementById('sidebar').classList.remove('open');document.getElementById('sb-backdrop').classList.remove('show');}
 function toggleTheme(){var r=document.documentElement;r.dataset.theme=r.dataset.theme==='light'?'dark':'light';}
@@ -1540,12 +1622,15 @@ function seed(){
 }
 
 /* ===== INIT ===== */
-function renderAll(){renderTrends();renderKpis();renderTbl();renderSyhFilter();renderWsSwitcher();var c=buildAlerts().filter(function(a){return a.sev>=3;}).length,nb=document.getElementById('nb-al');if(c){nb.textContent=c;nb.classList.add('show');}else nb.classList.remove('show');}
+function renderAll(){renderTrends();renderKpis();renderTbl();renderSyhFilter();renderWsSwitcher();
+  var c=buildAlerts().filter(function(a){return a.sev>=3;}).length,nb=document.getElementById('nb-al');if(c){nb.textContent=c;nb.classList.add('show');}else nb.classList.remove('show');
+  var fc=(fijos||[]).filter(function(f){var n=daysTo(f.prox);return n!=null&&n<=30;}).length,fb=document.getElementById('nb-fj');if(fb){if(fc){fb.textContent=fc;fb.classList.add('show');}else fb.classList.remove('show');}}
 /* boot */
 initSelects();
 var wsIds=Object.keys(workspaces);
 if(!wsIds.length){newWorkspace('FLAMA — Empresa Demo','30504835126',true);}
 else{bindWs((currentWs&&workspaces[currentWs])?currentWs:wsIds[0]);}
+if((!fijos||!fijos.length)&&data.length>=50)seedFijos();
 applyCompany();renderAll();routeHash();
 </script>
 </body>
