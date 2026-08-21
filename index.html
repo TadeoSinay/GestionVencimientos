@@ -322,7 +322,8 @@ select.mini{padding:5px 8px;font-size:11px;width:auto}
 .contract-body .cl{font-weight:700}
 
 /* CARGA DE FUEGO */
-.cf-layout{display:grid;grid-template-columns:1.15fr 1fr;gap:18px;align-items:start}
+.cf-layout{display:grid;grid-template-columns:1fr;gap:18px;align-items:start;max-width:900px}
+.cf-result{max-width:100%}
 .panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:18px;box-shadow:var(--sh)}
 .panel h4{font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:700;text-transform:uppercase;margin-bottom:12px}
 .mat-table{width:100%;border-collapse:collapse;font-size:12px;margin-top:8px}
@@ -1610,7 +1611,7 @@ function seed(force){
       entregaEstado:ent,nroPedido:ent==='Pendiente'?'':'REM-0004-'+String(460000+i*13),fentrega:ent==='Pendiente'?'':alta,
       fabricacion:fabYr+'-'+String(1+(i%12)).padStart(2,'0'),instalacion:fabYr+'-06-01',anilloYr:String(anilloYr),
       ultimaRecarga:new Date(prox.getFullYear()-1,prox.getMonth(),prox.getDate()).toISOString().split('T')[0],proximaRecarga:prox.toISOString().split('T')[0],
-      ultimoCPP:new Date(now.getFullYear(),now.getMonth()-(2+(i%3)),1+(i%20)).toISOString().split('T')[0],proximoCPP:new Date(now.getFullYear(),now.getMonth(),now.getDate()+[20,60,100,140,-6,175,45,90,130,10][i%10]).toISOString().split('T')[0],
+      ultimoCPP:new Date(now.getFullYear(),now.getMonth()-(2+(i%3)),1+(i%20)).toISOString().split('T')[0],proximoCPP:new Date(now.getFullYear(),now.getMonth(),now.getDate()+(offset>150?offset-160:(offset<0?offset-2:[15,40,70,100,25,55,85,110][i%8]))).toISOString().split('T')[0],
       ultimaPH:new Date(now.getFullYear()-(4-(i%5)),now.getMonth(),15).toISOString().split('T')[0],proximaPH:new Date(now.getFullYear()+(1+(i%5)),now.getMonth(),15).toISOString().split('T')[0],caducidad:(fabYr+20)+'-'+String(1+(i%12)).padStart(2,'0'),
       estadoActual:estado,tieneProvisorio:offset<0?'si':'no',provDesc:offset<0?('MAT-PROV-'+(i+1)+' '+c.base+' '+c.size):'',nuevoFecha:nuevo,
       fechaAlta:alta,fechaInsp:new Date(now.getFullYear(),now.getMonth()-2,10).toISOString().split('T')[0],responsable:resp,matricula:mat,proximaInsp:new Date(now.getFullYear(),now.getMonth()+4,10).toISOString().split('T')[0],
@@ -1627,7 +1628,7 @@ function renderAll(){renderTrends();renderKpis();renderTbl();renderSyhFilter();r
   var fc=(fijos||[]).filter(function(f){var n=daysTo(f.prox);return n!=null&&n<=30;}).length,fb=document.getElementById('nb-fj');if(fb){if(fc){fb.textContent=fc;fb.classList.add('show');}else fb.classList.remove('show');}}
 /* boot */
 initSelects();
-var SEEDVER='2';
+var SEEDVER='3';
 var wsIds=Object.keys(workspaces);
 if(!wsIds.length){newWorkspace('FLAMA — Empresa Demo','30504835126',true);}
 else{bindWs((currentWs&&workspaces[currentWs])?currentWs:wsIds[0]);}
