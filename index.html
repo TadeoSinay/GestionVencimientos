@@ -595,7 +595,7 @@ img,svg{max-width:100%}
       <div class="alert-hero" id="alert-hero"></div>
       <div class="tabs">
         <button class="tab active" onclick="filtAl('all',this)">Todas</button>
-        <button class="tab" onclick="filtAl('crit',this)">🔴 Vencidas / Críticas</button>
+        <button class="tab" onclick="filtAl('crit',this)">🔴 Por vencer ≤30d</button>
         <button class="tab" onclick="filtAl('warn',this)">🟠 Próximas 30–90d</button>
         <button class="tab" onclick="filtAl('info',this)">🟢 A futuro</button>
       </div>
@@ -1129,7 +1129,7 @@ function renderTrends(){
   var mlbls=months.map(function(m){return m.lbl;});
   var peak=months[venc.indexOf(Math.max.apply(null,venc))];
   // breakdown by estado + anillo (item 6, per-client, no rubro)
-  var estados=['Operativo','En mantenimiento','Vencido','De baja'];
+  var estados=['Operativo','En mantenimiento'];
   var byEst={};estados.forEach(function(e){byEst[e]=data.filter(function(m){return m.estadoActual===e&&(daysTo(m.proximaRecarga)==null?false:daysTo(m.proximaRecarga)<=90);}).length;});
   var estRows=estados.map(function(e){var v=byEst[e],mx=Math.max.apply(null,estados.map(function(x){return byEst[x];}).concat([1]));return '<div class="brk-row"><span class="nm">'+e+'</span><div class="brk-bar"><div style="width:'+(v/mx*100)+'%"></div></div><span class="vl">'+v+'</span></div>';}).join('');
   var years=[];data.forEach(function(m){if(m.anilloYr&&years.indexOf(m.anilloYr)<0)years.push(m.anilloYr);});years.sort();
@@ -1147,15 +1147,15 @@ function toggleDetail(id){document.getElementById(id).classList.toggle('show');}
 /* ===== KPIs + urgent ===== */
 function renderKpis(){
   var tot=data.length,op=data.filter(function(m){return m.estadoActual==='Operativo';}).length;
-  var ven=data.filter(function(m){return (daysTo(m.proximaRecarga)!=null&&daysTo(m.proximaRecarga)<0)||(daysTo(m.caducidad)!=null&&daysTo(m.caducidad)<0)||m.estadoActual==='Vencido';}).length;
-  var prox=buildAlerts().filter(function(a){return a.days>=0&&a.days<=90;}).length;
+  var urg=buildAlerts().filter(function(a){return a.days>=0&&a.days<=30;}).length;
+  var prox=buildAlerts().filter(function(a){return a.days>30&&a.days<=90;}).length;
   var prov=data.filter(function(m){return m.tieneProvisorio==='si';}).length;
   document.getElementById('kpis').innerHTML=
    '<div class="kpi"><div class="kpi-lbl">Parque total</div><div class="kpi-val">'+tot+'</div></div>'
    +'<div class="kpi ok"><div class="kpi-lbl">Operativos</div><div class="kpi-val">'+op+'</div></div>'
-   +'<div class="kpi warn"><div class="kpi-lbl">Alertas 90d</div><div class="kpi-val">'+prox+'</div></div>'
-   +'<div class="kpi crit"><div class="kpi-lbl">Vencidos</div><div class="kpi-val">'+ven+'</div></div>'
-   +'<div class="kpi info"><div class="kpi-lbl">Con provisorio</div><div class="kpi-val">'+prov+'</div></div>';
+   +'<div class="kpi crit"><div class="kpi-lbl">Por vencer ≤30d</div><div class="kpi-val">'+urg+'</div></div>'
+   +'<div class="kpi warn"><div class="kpi-lbl">Próximos 30–90d</div><div class="kpi-val">'+prox+'</div></div>'
+   +'<div class="kpi info"><div class="kpi-lbl">En recambio</div><div class="kpi-val">'+prov+'</div></div>';
   var u=buildAlerts().slice(0,6).map(function(a){return alertCard(a,true);}).join('');
   document.getElementById('dash-urgent').innerHTML=u||'<p style="color:var(--text3);text-align:center;padding:24px">✅ Sin vencimientos urgentes</p>';
 }
@@ -1173,7 +1173,7 @@ function alertCard(a,live){
 }
 function renderAlertHero(){
   var all=buildAlerts(),c=all.filter(function(a){return a.sev>=3;}).length,w=all.filter(function(a){return a.sev===2;}).length,i=all.filter(function(a){return a.sev<=1&&a.days>=0;}).length;
-  document.getElementById('alert-hero').innerHTML='<div class="ah-card crit"><div class="n">'+c+'</div><div class="l">🔴 Vencidas / críticas &lt;30d</div></div><div class="ah-card warn"><div class="n">'+w+'</div><div class="l">🟠 Próximas 30–90d</div></div><div class="ah-card info"><div class="n">'+i+'</div><div class="l">🟢 A futuro &gt;90d</div></div><div class="ah-card ok"><div class="n">'+data.length+'</div><div class="l">🧯 Total monitoreados</div></div>';
+  document.getElementById('alert-hero').innerHTML='<div class="ah-card crit"><div class="n">'+c+'</div><div class="l">🔴 Por vencer ≤30d</div></div><div class="ah-card warn"><div class="n">'+w+'</div><div class="l">🟠 Próximas 30–90d</div></div><div class="ah-card info"><div class="n">'+i+'</div><div class="l">🟢 A futuro &gt;90d</div></div><div class="ah-card ok"><div class="n">'+data.length+'</div><div class="l">🧯 Total monitoreados</div></div>';
 }
 function renderAlerts(){renderAlertHero();var all=buildAlerts();var f=alFilt==='all'?all:alFilt==='crit'?all.filter(function(a){return a.sev>=3;}):alFilt==='warn'?all.filter(function(a){return a.sev===2;}):all.filter(function(a){return a.sev<=1&&a.days>=0;});document.getElementById('al-list').innerHTML=f.length?f.map(function(a){return alertCard(a,true);}).join(''):'<p style="color:var(--text3);text-align:center;padding:40px">Sin alertas en este rango ✅</p>';}
 function filtAl(t,btn){alFilt=t;var ts=document.querySelectorAll('#page-alertas .tab');for(var i=0;i<ts.length;i++)ts[i].classList.remove('active');btn.classList.add('active');renderAlerts();}
@@ -1224,7 +1224,7 @@ function nextVenc(m){var arr=[['Recarga',m.proximaRecarga],['Ctrl.Periódico',m.
 function boardCard(m){var nv=nextVenc(m),s=sevOf(nv.n),pct=nv.n===null?0:Math.max(4,Math.min(100,100-(nv.n/365*100)));return '<div class="venc-card" style="--sc:'+SEVC[s]+'" onmouseenter="showTip(event,\''+m.id+'\')" onmousemove="moveTip(event)" onmouseleave="hideTip()" onclick="openDet(\''+m.id+'\')"><div class="vc-code">'+codeOf(m)+'</div><div class="vc-sector">'+m.sector+'</div><div class="vc-next"><span class="lbl">'+nv.l+': '+fmt(nv.d)+'</span><span class="vc-days">'+(nv.n===null?'—':nv.n<0?'✕':nv.n+'d')+'</span></div><div class="vc-meter"><div style="width:'+pct+'%"></div></div></div>';}
 function renderBoard(){
   var el=document.getElementById('board');
-  if(boardMode==='estado'){var cols=[['Vencido','#ED1C24'],['En mantenimiento','#F5A623'],['Operativo','#22C55E'],['De baja','#6B6B78']];
+  if(boardMode==='estado'){var cols=[['En mantenimiento','#F5A623'],['Operativo','#22C55E'],['De baja','#6B6B78']];
    el.innerHTML=cols.map(function(c){var items=data.filter(function(m){return m.estadoActual===c[0];}).sort(function(a,b){return (nextVenc(a).n==null?999:nextVenc(a).n)-(nextVenc(b).n==null?999:nextVenc(b).n);});return '<div class="board-col"><div class="board-col-hd" style="--col-c:'+c[1]+';color:'+c[1]+'">'+c[0]+'<span class="cnt">'+items.length+'</span></div><div class="board-col-body">'+(items.map(boardCard).join('')||'<div class="board-empty">Sin matafuegos</div>')+'</div></div>';}).join('');
   }else{var years=[];data.forEach(function(m){if(m.anilloYr&&years.indexOf(m.anilloYr)<0)years.push(m.anilloYr);});years.sort();
    el.innerHTML=years.map(function(yr){var r=ring(yr),c=r?r.hex:'#6B6B78';var items=data.filter(function(m){return String(m.anilloYr)===String(yr);}).sort(function(a,b){return (nextVenc(a).n==null?999:nextVenc(a).n)-(nextVenc(b).n==null?999:nextVenc(b).n);});return '<div class="board-col"><div class="board-col-hd" style="--col-c:'+c+';color:'+c+'">'+(r?r.name:yr)+' '+yr+'<span class="cnt">'+items.length+'</span></div><div class="board-col-body">'+(items.map(boardCard).join('')||'<div class="board-empty">—</div>')+'</div></div>';}).join('')||'<p style="color:var(--text3)">Sin anillos cargados</p>';}
@@ -1627,12 +1627,14 @@ function seed(force){
   var now=new Date(),out=[];
   for(var i=0;i<100;i++){
     var c=CATALOG[i%CATALOG.length];
-    var offset=[12,25,40,55,70,85,100,120,140,165,20,35,50,65,-8,-15,10,45,-12,80,95,110,-5,30,60][i%25]+((i%3)-1)*2;
+    // Todos con vencimiento A FUTURO (ninguno vencido): la alerta es por cercanía
+    var offset=[6,10,15,20,28,35,45,55,68,80,95,110,130,150,175,200,230,260,290,320,8,25,50,90,140][i%25]+(i%3);
     var prox=new Date(now.getFullYear(),now.getMonth(),now.getDate()+offset);
     var fabYr=2019+(i%7),anilloYr=2025+((i+1)%6);
-    var estado=offset<0?((i%2===0)?'En mantenimiento':'Vencido'):(i%40===0?'De baja':'Operativo');
+    var enMant=(i%18===7);
+    var estado=enMant?'En mantenimiento':'Operativo';
     var alta=new Date(now.getFullYear(),now.getMonth()-(i%6),3+(i%20)).toISOString().split('T')[0];
-    var nuevo=(i%6===0)?new Date(now.getFullYear(),now.getMonth()-(i%5),12).toISOString().split('T')[0]:'';
+    var nuevo=enMant?new Date(now.getFullYear(),now.getMonth(),now.getDate()+7+(i%20)).toISOString().split('T')[0]:'';
     function chk(g){return g?'✅ Conforme':(i%5===0?'⚠️ Regular':(i%11===0?'❌ No conforme':'✅ Conforme'));}
     var ent=entregas[i%entregas.length];
     out.push({id:uid(),lote:'MAT-'+String(i+1).padStart(3,'0'),tipoBase:c.base,tamano:c.size,clase:c.clase,origen:c.origen,color:c.color,ruedas:!!c.ruedas,horn:!!c.horn,
@@ -1641,11 +1643,11 @@ function seed(force){
       entregaEstado:ent,nroPedido:ent==='Pendiente'?'':'REM-0004-'+String(460000+i*13),fentrega:ent==='Pendiente'?'':alta,
       fabricacion:fabYr+'-'+String(1+(i%12)).padStart(2,'0'),instalacion:fabYr+'-06-01',anilloYr:String(anilloYr),
       ultimaRecarga:new Date(prox.getFullYear()-1,prox.getMonth(),prox.getDate()).toISOString().split('T')[0],proximaRecarga:prox.toISOString().split('T')[0],
-      ultimoCPP:new Date(now.getFullYear(),now.getMonth()-(2+(i%3)),1+(i%20)).toISOString().split('T')[0],proximoCPP:new Date(now.getFullYear(),now.getMonth(),now.getDate()+(offset>150?offset-160:(offset<0?offset-2:[15,40,70,100,25,55,85,110][i%8]))).toISOString().split('T')[0],
+      ultimoCPP:new Date(now.getFullYear(),now.getMonth()-(2+(i%3)),1+(i%20)).toISOString().split('T')[0],proximoCPP:new Date(now.getFullYear(),now.getMonth(),now.getDate()+Math.max(4,Math.min(offset-2,[12,30,55,80,20,45,70,100,18,60][i%10]))).toISOString().split('T')[0],
       ultimaPH:new Date(now.getFullYear()-(4-(i%5)),now.getMonth(),15).toISOString().split('T')[0],proximaPH:new Date(now.getFullYear()+(1+(i%5)),now.getMonth(),15).toISOString().split('T')[0],caducidad:(fabYr+20)+'-'+String(1+(i%12)).padStart(2,'0'),
-      estadoActual:estado,tieneProvisorio:offset<0?'si':'no',provDesc:offset<0?('MAT-PROV-'+(i+1)+' '+c.base+' '+c.size):'',nuevoFecha:nuevo,
+      estadoActual:estado,tieneProvisorio:enMant?'si':'no',provDesc:enMant?('MAT-PROV-'+(i+1)+' '+c.base+' '+c.size):'',nuevoFecha:nuevo,
       fechaAlta:alta,fechaInsp:new Date(now.getFullYear(),now.getMonth()-2,10).toISOString().split('T')[0],responsable:resp,matricula:mat,proximaInsp:new Date(now.getFullYear(),now.getMonth()+4,10).toISOString().split('T')[0],
-      obs:offset<0?'Requiere recarga / recambio.':'',
+      obs:offset<=15?'Próximo a vencer — coordinar recarga.':'',
       cPres:chk(i%4),cPrec:chk(i%3),cMang:chk(i%5),cBoq:chk(1),cSop:chk(i%6),cSen:chk(i%3),cEtq:chk(1),cAcc:chk(1),
       foto_unit:null,foto_qr:null,foto_oblea:null,foto_remito:null});
   }
@@ -1658,7 +1660,7 @@ function renderAll(){renderTrends();renderKpis();renderTbl();renderSyhFilter();r
   var fc=(fijos||[]).filter(function(f){var n=daysTo(f.prox);return n!=null&&n<=30;}).length,fb=document.getElementById('nb-fj');if(fb){if(fc){fb.textContent=fc;fb.classList.add('show');}else fb.classList.remove('show');}}
 /* boot */
 initSelects();
-var SEEDVER='5';
+var SEEDVER='6';
 function isDemoWs(w){return !!(w._demo||(w.company&&w.company.nombre==='FLAMA — Empresa Demo')||(w.company&&(w.company.cuit||'').replace(/\D/g,'')==='30504835126'&&(w.mats||[]).length>=50));}
 var wsIds=Object.keys(workspaces);
 if(!wsIds.length){var demoId=newWorkspace('FLAMA — Empresa Demo','30504835126',true);workspaces[demoId]._demo=true;persist();}
