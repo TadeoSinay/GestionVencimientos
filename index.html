@@ -322,8 +322,8 @@ select.mini{padding:5px 8px;font-size:11px;width:auto}
 .contract-body .cl{font-weight:700}
 
 /* CARGA DE FUEGO */
-.cf-layout{display:grid;grid-template-columns:1fr;gap:18px;align-items:start;max-width:900px}
-.cf-result{max-width:100%}
+.cf-layout{display:grid;grid-template-columns:1fr;gap:18px;align-items:start}
+.cf-badges{grid-template-columns:repeat(4,1fr)}
 .panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:18px;box-shadow:var(--sh)}
 .panel h4{font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:700;text-transform:uppercase;margin-bottom:12px}
 .mat-table{width:100%;border-collapse:collapse;font-size:12px;margin-top:8px}
@@ -443,6 +443,7 @@ body.print-landscape{}
   .fg,.fg.c3,.fg.c4{grid-template-columns:1fr}.cf-layout{grid-template-columns:1fr}
   .field.s2,.field.s3{grid-column:auto}
   .photo-panel{grid-template-columns:1fr 1fr}.detail-grid{grid-template-columns:1fr}.cf-tables{grid-template-columns:1fr}
+  .cf-badges{grid-template-columns:1fr 1fr}
   .trend-grid{grid-template-columns:1fr;gap:12px}
   .kpi-row{grid-template-columns:repeat(2,1fr);gap:10px}
   .alert-hero,.tray-hero{grid-template-columns:repeat(2,1fr);gap:10px}
@@ -863,18 +864,18 @@ img,svg{max-width:100%}
 </div></div>
 
 <!-- MODAL CONTRATO EDIT -->
-<div class="overlay hidden" id="ov-contract"><div class="modal" onclick="event.stopPropagation()">
-  <div class="modal-hdr"><h2>✏️ Condiciones del contrato</h2><button class="btn-ghost" onclick="closeM('ov-contract')">✕</button></div>
+<div class="overlay hidden" id="ov-contract"><div class="modal wide" onclick="event.stopPropagation()">
+  <div class="modal-hdr"><h2>✏️ Editar contrato</h2><button class="btn-ghost" onclick="closeM('ov-contract')">✕</button></div>
   <div class="modal-body">
-    <p style="font-size:12px;color:var(--text2);margin-bottom:14px">Acuerdo marco de suministro. No se fijan precios ni cantidades: el volumen y los valores se pactan por orden de compra según lista vigente.</p>
+    <p style="font-size:12px;color:var(--text2);margin-bottom:14px">Todos los términos son editables. Editá el título del acuerdo, las partes firmantes y el texto de cada cláusula. Los datos del cliente salen de la configuración de empresa.</p>
     <div class="fg">
-      <div class="field"><label>Plazo de vigencia (meses)</label><input type="number" id="ct-plazo" value="24"></div>
-      <div class="field"><label>Jurisdicción</label><input id="ct-juris" value="Tribunales Ordinarios de la Ciudad Autónoma de Buenos Aires"></div>
-      <div class="field"><label>Firmante por FLAMA (nombre y cargo)</label><input id="ct-repFlama" placeholder="Ej: Juan Pérez — Gerente Comercial"></div>
-      <div class="field"><label>Firmante por el Cliente</label><input id="ct-repCli" placeholder="Ej: María López — Apoderada"></div>
+      <div class="field s2"><label>Título del documento</label><input id="ct-titulo"></div>
+      <div class="field"><label>Firmante por FLAMA (nombre y cargo)</label><input id="ct-repFlama" placeholder="Juan Pérez — Gerente Comercial"></div>
+      <div class="field"><label>Firmante por el Cliente</label><input id="ct-repCli" placeholder="María López — Apoderada"></div>
     </div>
+    <div id="ct-clausulas" style="margin-top:14px"></div>
   </div>
-  <div class="modal-ftr"><button class="btn btn-outline" onclick="closeM('ov-contract')">Cancelar</button><button class="btn btn-primary" onclick="saveContract()">Aplicar</button></div>
+  <div class="modal-ftr"><button class="btn btn-outline" onclick="restoreContract()">↺ Restaurar texto</button><button class="btn btn-outline" onclick="closeM('ov-contract')">Cancelar</button><button class="btn btn-primary" onclick="saveContract()">💾 Guardar</button></div>
 </div></div>
 
 <!-- MODAL SISTEMA FIJO / MANGUERA -->
@@ -986,7 +987,20 @@ function sv(k,v){localStorage.setItem(k,JSON.stringify(v));}
 /* Cada empresa es un workspace independiente y persistente */
 var workspaces=ld('flama_ws',null);
 var currentWs=ld('flama_current',null);
-function defaultContract(){return {plazo:24,juris:'Tribunales Ordinarios de la Ciudad Autónoma de Buenos Aires',repFlama:'',repCli:''};}
+function defaultContract(){return {titulo:'Acuerdo Marco de Suministro',sub:'Provisión y mantenimiento de matafuegos',repFlama:'',repCli:'',cl:[]};}
+var CLAUSES=[
+ {t:'Primera — Objeto',def:'El presente tiene por objeto establecer las condiciones generales bajo las cuales EL PROVEEDOR suministrará a EL CLIENTE matafuegos y los servicios de recarga, control periódico preventivo, prueba hidráulica y mantenimiento, conforme la Norma IRAM 3517-2, la Ley N° 19.587 de Higiene y Seguridad en el Trabajo y su Decreto Reglamentario N° 351/79.'},
+ {t:'Segunda — Modalidad de contratación',def:'El presente constituye un acuerdo marco. No fija por sí cantidades ni precios. Cada provisión o servicio se instrumentará mediante órdenes de compra particulares emitidas por EL CLIENTE y aceptadas por EL PROVEEDOR, las que se regirán por este Acuerdo y por la lista de precios vigente al momento de cada operación.'},
+ {t:'Tercera — Plazo y vigencia',def:'El presente tendrá una vigencia de veinticuatro (24) meses contados desde su suscripción, renovable automáticamente por períodos iguales, salvo notificación fehaciente en contrario de cualquiera de LAS PARTES cursada con treinta (30) días corridos de anticipación a su vencimiento.'},
+ {t:'Cuarta — Precios y facturación',def:'Los precios serán los del listado vigente de EL PROVEEDOR a la fecha de cada orden de compra. Las condiciones comerciales, bonificaciones por volumen y plazos de pago se pactarán por escrito en cada operación o en anexos al presente. La facturación se emitirá conforme la normativa fiscal aplicable.'},
+ {t:'Quinta — Obligaciones de las partes',def:'EL PROVEEDOR garantiza el sello IRAM, la habilitación OPDS/ODS de sus equipos y el cumplimiento de los plazos y procedimientos normativos. EL CLIENTE se obliga a facilitar el acceso a los establecimientos para las inspecciones y servicios, a conservar los matafuegos en condiciones de uso y a comunicar bajas, traslados o siniestros.'},
+ {t:'Sexta — Trazabilidad y registro',def:'Cada matafuego será identificado con código QR y oblea ODS/OPDS. El historial de vencimientos, controles y servicios quedará disponible para EL CLIENTE en la plataforma digital de gestión, sin que ello sustituya los registros que la normativa exija llevar en el establecimiento.'},
+ {t:'Séptima — Confidencialidad',def:'LAS PARTES mantendrán reserva sobre la información comercial y técnica a la que accedan con motivo del presente, obligación que subsistirá luego de su finalización.'},
+ {t:'Octava — Rescisión',def:'Cualquiera de LAS PARTES podrá rescindir el presente ante incumplimiento de la otra, previa intimación fehaciente por quince (15) días corridos para subsanarlo. La rescisión no afectará las órdenes de compra en curso de ejecución.'},
+ {t:'Novena — Firma digital',def:'LAS PARTES acuerdan que el presente y sus anexos podrán suscribirse mediante firma digital o electrónica en los términos de la Ley N° 25.506 y sus modificatorias, reconociéndoles plena validez y eficacia probatoria, equivalente a la firma manuscrita.'},
+ {t:'Décima — Jurisdicción y domicilios',def:'Para todos los efectos legales derivados del presente, LAS PARTES se someten a la jurisdicción de los Tribunales Ordinarios de la Ciudad Autónoma de Buenos Aires, renunciando a cualquier otro fuero, y constituyen domicilios en los indicados en el encabezamiento, donde serán válidas todas las notificaciones.'}
+];
+function clauseText(i){return (contract.cl&&contract.cl[i])?contract.cl[i]:CLAUSES[i].def;}
 function migrateOld(){
   // migración desde versión anterior (single-company) si existía
   var oldMats=ld('flama_mats',null);
@@ -1345,28 +1359,32 @@ function printCF(){
   printDoc(htmlCF,false);
 }
 /* ===== CONTRATO (acuerdo marco, sin valores) ===== */
-function editContract(){document.getElementById('ct-plazo').value=contract.plazo||24;document.getElementById('ct-juris').value=contract.juris||'';document.getElementById('ct-repFlama').value=contract.repFlama||'';document.getElementById('ct-repCli').value=contract.repCli||'';document.getElementById('ov-contract').classList.remove('hidden');}
-function saveContract(){contract.plazo=+document.getElementById('ct-plazo').value||24;contract.juris=document.getElementById('ct-juris').value;contract.repFlama=document.getElementById('ct-repFlama').value;contract.repCli=document.getElementById('ct-repCli').value;persist();closeM('ov-contract');renderContract();}
+function esc(s){return (s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');}
+function editContract(){
+  document.getElementById('ct-titulo').value=contract.titulo||'Acuerdo Marco de Suministro';
+  document.getElementById('ct-repFlama').value=contract.repFlama||'';document.getElementById('ct-repCli').value=contract.repCli||'';
+  document.getElementById('ct-clausulas').innerHTML=CLAUSES.map(function(cl,i){return '<div class="field" style="margin-bottom:12px"><label>'+cl.t+'</label><textarea id="ct-cl-'+i+'" style="min-height:90px">'+esc(clauseText(i))+'</textarea></div>';}).join('');
+  document.getElementById('ov-contract').classList.remove('hidden');
+}
+function saveContract(){
+  contract.titulo=document.getElementById('ct-titulo').value||'Acuerdo Marco de Suministro';
+  contract.repFlama=document.getElementById('ct-repFlama').value;contract.repCli=document.getElementById('ct-repCli').value;
+  contract.cl=CLAUSES.map(function(cl,i){var e=document.getElementById('ct-cl-'+i);return e?e.value:cl.def;});
+  persist();closeM('ov-contract');renderContract();
+}
+function restoreContract(){if(!confirm('¿Restaurar el texto original de todas las cláusulas?'))return;contract.cl=[];contract.titulo='Acuerdo Marco de Suministro';editContract();}
 function contractHTML(){
   var c=company,k=contract;var logo=docLogo();
   var fechaTxt=new Date().toLocaleDateString('es-AR',{day:'numeric',month:'long',year:'numeric'});
-  return '<div class="doc"><div class="doc-head"><div class="doc-emp">'+logo+'<div class="doc-emp-txt">FLAMA S.A.<small>Producción, comercialización y recarga de matafuegos</small><small>Sello IRAM · Hab. OPDS/ODS</small></div></div><div class="doc-title"><h2>Acuerdo Marco de Suministro</h2><p>Provisión y mantenimiento de matafuegos</p></div><div class="doc-norm"><strong>CCyC arts. 1176-1186</strong>Firma digital Ley 25.506<br>'+fmt(today())+'</div></div>'
+  var clausulas=CLAUSES.map(function(cl,i){return '<h3>'+cl.t+'</h3><p>'+esc(clauseText(i))+'</p>';}).join('');
+  return '<div class="doc"><div class="doc-head"><div class="doc-emp">'+logo+'<div class="doc-emp-txt">FLAMA S.A.<small>Producción, comercialización y recarga de matafuegos</small><small>Sello IRAM · Hab. OPDS/ODS</small></div></div><div class="doc-title"><h2>'+esc(k.titulo||'Acuerdo Marco de Suministro')+'</h2><p>'+esc(k.sub||'Provisión y mantenimiento de matafuegos')+'</p></div><div class="doc-norm"><strong>CCyC arts. 1176-1186</strong>Firma digital Ley 25.506<br>'+fmt(today())+'</div></div>'
    +'<div class="contract-body">'
-   +'<p>En la Ciudad Autónoma de Buenos Aires, a los '+fechaTxt+', comparecen: por una parte <span class="cl">FLAMA S.A.</span>, con domicilio en la Ciudad Autónoma de Buenos Aires, representada en este acto por '+(k.repFlama||'su representante legal')+', en adelante <span class="cl">«EL PROVEEDOR»</span>; y por la otra, <span class="cl">'+(c.nombre||'____________________')+'</span>, CUIT '+(c.cuit||'____________')+', con domicilio en '+(c.dir||'____________________')+', representada por '+(k.repCli||'su representante legal')+', en adelante <span class="cl">«EL CLIENTE»</span>; en conjunto <span class="cl">«LAS PARTES»</span>, quienes acuerdan celebrar el presente Acuerdo Marco de Suministro, sujeto a las siguientes cláusulas:</p>'
-   +'<h3>Primera — Objeto</h3><p>El presente tiene por objeto establecer las condiciones generales bajo las cuales EL PROVEEDOR suministrará a EL CLIENTE matafuegos y los servicios de recarga, control periódico preventivo, prueba hidráulica y mantenimiento, conforme la Norma IRAM 3517-2, la Ley N° 19.587 de Higiene y Seguridad en el Trabajo y su Decreto Reglamentario N° 351/79.</p>'
-   +'<h3>Segunda — Modalidad de contratación</h3><p>El presente constituye un acuerdo marco. <span class="cl">No fija por sí cantidades ni precios.</span> Cada provisión o servicio se instrumentará mediante órdenes de compra particulares emitidas por EL CLIENTE y aceptadas por EL PROVEEDOR, las que se regirán por este Acuerdo y por la lista de precios vigente al momento de cada operación.</p>'
-   +'<h3>Tercera — Plazo y vigencia</h3><p>El presente tendrá una vigencia de <span class="cl">'+(k.plazo||24)+' (meses)</span> contados desde su suscripción, renovable automáticamente por períodos iguales, salvo notificación fehaciente en contrario de cualquiera de LAS PARTES cursada con treinta (30) días corridos de anticipación a su vencimiento.</p>'
-   +'<h3>Cuarta — Precios y facturación</h3><p>Los precios serán los del listado vigente de EL PROVEEDOR a la fecha de cada orden de compra. Las condiciones comerciales, bonificaciones por volumen y plazos de pago se pactarán por escrito en cada operación o en anexos al presente. La facturación se emitirá conforme la normativa fiscal aplicable.</p>'
-   +'<h3>Quinta — Obligaciones de las partes</h3><p>EL PROVEEDOR garantiza el sello IRAM, la habilitación OPDS/ODS de sus equipos y el cumplimiento de los plazos y procedimientos normativos. EL CLIENTE se obliga a facilitar el acceso a los establecimientos para las inspecciones y servicios, a conservar los matafuegos en condiciones de uso y a comunicar bajas, traslados o siniestros.</p>'
-   +'<h3>Sexta — Trazabilidad y registro</h3><p>Cada matafuego será identificado con código QR y oblea ODS/OPDS. El historial de vencimientos, controles y servicios quedará disponible para EL CLIENTE en la plataforma digital de gestión, sin que ello sustituya los registros que la normativa exija llevar en el establecimiento.</p>'
-   +'<h3>Séptima — Confidencialidad</h3><p>LAS PARTES mantendrán reserva sobre la información comercial y técnica a la que accedan con motivo del presente, obligación que subsistirá luego de su finalización.</p>'
-   +'<h3>Octava — Rescisión</h3><p>Cualquiera de LAS PARTES podrá rescindir el presente ante incumplimiento de la otra, previa intimación fehaciente por quince (15) días corridos para subsanarlo. La rescisión no afectará las órdenes de compra en curso de ejecución.</p>'
-   +'<h3>Novena — Firma digital</h3><p>LAS PARTES acuerdan que el presente y sus anexos podrán suscribirse mediante <span class="cl">firma digital o electrónica</span> en los términos de la Ley N° 25.506 y sus modificatorias, reconociéndoles plena validez y eficacia probatoria, equivalente a la firma manuscrita.</p>'
-   +'<h3>Décima — Jurisdicción y domicilios</h3><p>Para todos los efectos legales derivados del presente, LAS PARTES se someten a la jurisdicción de los <span class="cl">'+(k.juris||'Tribunales Ordinarios competentes')+'</span>, renunciando a cualquier otro fuero, y constituyen domicilios en los indicados en el encabezamiento, donde serán válidas todas las notificaciones.</p>'
+   +'<p>En la Ciudad Autónoma de Buenos Aires, a los '+fechaTxt+', comparecen: por una parte <span class="cl">FLAMA S.A.</span>, con domicilio en la Ciudad Autónoma de Buenos Aires, representada en este acto por '+esc(k.repFlama||'su representante legal')+', en adelante <span class="cl">«EL PROVEEDOR»</span>; y por la otra, <span class="cl">'+esc(c.nombre||'____________________')+'</span>, CUIT '+esc(c.cuit||'____________')+', con domicilio en '+esc(c.dir||'____________________')+', representada por '+esc(k.repCli||'su representante legal')+', en adelante <span class="cl">«EL CLIENTE»</span>; en conjunto <span class="cl">«LAS PARTES»</span>, quienes acuerdan celebrar el presente acuerdo, sujeto a las siguientes cláusulas:</p>'
+   +clausulas
    +'<p style="margin-top:14px">En prueba de conformidad, previa lectura y ratificación, LAS PARTES firman dos (2) ejemplares de un mismo tenor y a un solo efecto, en el lugar y fecha indicados <i>ut supra</i>.</p>'
    +'</div>'
-   +'<div class="doc-sign"><div>_______________________<br><small><strong>'+(k.repFlama||'Por FLAMA S.A.')+'</strong><br>EL PROVEEDOR</small></div><div>_______________________<br><small><strong>'+(k.repCli||(c.nombre||'Por EL CLIENTE'))+'</strong><br>EL CLIENTE</small></div></div>'
-   +'<div class="doc-foot">Documento suscripto digitalmente. La firma digital posee idéntico valor legal que la manuscrita conforme la Ley N° 25.506. Este acuerdo marco no obliga a volúmenes ni montos determinados; los mismos se pactan por orden de compra.</div></div>';
+   +'<div class="doc-sign"><div>_______________________<br><small><strong>'+esc(k.repFlama||'Por FLAMA S.A.')+'</strong><br>EL PROVEEDOR</small></div><div>_______________________<br><small><strong>'+esc(k.repCli||(c.nombre||'Por EL CLIENTE'))+'</strong><br>EL CLIENTE</small></div></div>'
+   +'<div class="doc-foot">Documento suscripto digitalmente. La firma digital posee idéntico valor legal que la manuscrita conforme la Ley N° 25.506.</div></div>';
 }
 function renderContract(){document.getElementById('contract-doc').innerHTML=contractHTML();}
 function printContract(){printDoc(contractHTML(),false);}
@@ -1597,7 +1615,7 @@ function seed(force){
   var now=new Date(),out=[];
   for(var i=0;i<100;i++){
     var c=CATALOG[i%CATALOG.length];
-    var offset=[30,75,120,160,200,240,290,330,20,55,95,135,180,220,-8,-18,15,50,-12,110,150,190,-5,25,70][i%25]+((i%3)-1)*3;
+    var offset=[12,25,40,55,70,85,100,120,140,165,20,35,50,65,-8,-15,10,45,-12,80,95,110,-5,30,60][i%25]+((i%3)-1)*2;
     var prox=new Date(now.getFullYear(),now.getMonth(),now.getDate()+offset);
     var fabYr=2019+(i%7),anilloYr=2025+((i+1)%6);
     var estado=offset<0?((i%2===0)?'En mantenimiento':'Vencido'):(i%40===0?'De baja':'Operativo');
@@ -1628,7 +1646,7 @@ function renderAll(){renderTrends();renderKpis();renderTbl();renderSyhFilter();r
   var fc=(fijos||[]).filter(function(f){var n=daysTo(f.prox);return n!=null&&n<=30;}).length,fb=document.getElementById('nb-fj');if(fb){if(fc){fb.textContent=fc;fb.classList.add('show');}else fb.classList.remove('show');}}
 /* boot */
 initSelects();
-var SEEDVER='3';
+var SEEDVER='4';
 var wsIds=Object.keys(workspaces);
 if(!wsIds.length){newWorkspace('FLAMA — Empresa Demo','30504835126',true);}
 else{bindWs((currentWs&&workspaces[currentWs])?currentWs:wsIds[0]);}
