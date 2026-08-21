@@ -709,7 +709,7 @@ img,svg{max-width:100%}
       <span class="sec-label">Trayectoria con FLAMA</span>
       <div class="tray-hero" id="tray-hero"></div>
       <div class="panel" id="tray-savings" style="border-color:var(--ok);background:linear-gradient(135deg,rgba(34,197,94,.12),transparent);margin-bottom:22px;font-size:13px;color:var(--text2)"></div>
-      <div class="sec-hdr"><h3>Gasto anual con nosotros</h3><div class="spacer"></div><select id="tray-filter" onchange="renderTray()" style="background:var(--surface);border:1px solid var(--border2);color:var(--text);border-radius:8px;padding:7px 11px;font-size:13px;font-family:inherit"><option value="total">Total (recargas + reposición)</option><option value="rec">Solo recargas</option><option value="rep">Solo reposición</option></select></div>
+      <div class="sec-hdr"><h3>Gasto anual con nosotros</h3><div class="spacer"></div><select id="tray-filter" onchange="renderTray()" style="background:var(--surface);border:1px solid var(--border2);color:var(--text);border-radius:8px;padding:7px 11px;font-size:13px;font-family:inherit"><option value="total">Total (equipos + recargas + PH)</option><option value="nuevo">Equipos nuevos</option><option value="rec">Recargas anuales</option><option value="ph">Prueba hidráulica</option><option value="ahorro">Ahorro CPP año 1</option></select></div>
       <div class="panel" style="margin-bottom:22px"><div id="tray-curve"></div></div>
       <div class="sec-hdr"><h3>Detalle por tipo de matafuego</h3><span class="ct">valores de referencia sin IVA</span></div>
       <div class="tbl-wrap"><div class="tbl-scroll"><table><thead><tr><th>Tipo</th><th>Unidades en parque</th><th>Precio unidad</th><th>Recarga</th><th>Gasto anual est.</th></tr></thead><tbody id="tray-table"></tbody></table></div></div>
@@ -942,7 +942,7 @@ var QRGen=(function(){
 })();
 /* ===== CATÁLOGO FLAMA (14 tipos, con precios de referencia) ===== */
 var CATALOG=[
- {base:'ABC',size:'1 kg',clase:'A, B, C',origen:'propia',color:'red',pFinal:26000,pRec:16000},
+ {base:'ABC',size:'1 kg',clase:'A, B, C',origen:'propia',color:'red',noHose:true,pFinal:26000,pRec:16000},
  {base:'ABC',size:'2,5 kg',clase:'A, B, C',origen:'propia',color:'red',pFinal:112000,pRec:23500},
  {base:'ABC',size:'5 kg',clase:'A, B, C',origen:'propia',color:'red',pFinal:160000,pRec:26500},
  {base:'ABC',size:'10 kg',clase:'A, B, C',origen:'propia',color:'red',pFinal:276000,pRec:34000},
@@ -1041,7 +1041,7 @@ function matImg(m,px){
   var isMetal=(m.color==='silver'||m.color==='steel');
   var horn=m.horn?'<path d="M40 30 q-16 4 -18 22 q0 8 6 12" fill="none" stroke="#1a1a1a" stroke-width="5.5" stroke-linecap="round"/><ellipse cx="27" cy="66" rx="7" ry="9" fill="#1a1a1a"/>':'';
   var hoseC=m.hoseGreen?'#22A859':'#111';
-  var hose=(!m.horn&&!wheels)?'<path d="M40 34 q-14 6 -14 30 v58" fill="none" stroke="'+hoseC+'" stroke-width="4" stroke-linecap="round"/><rect x="22" y="120" width="8" height="10" rx="2" fill="'+hoseC+'"/>':'';
+  var hose=(!m.horn&&!wheels&&!m.noHose)?'<path d="M40 34 q-14 6 -14 30 v58" fill="none" stroke="'+hoseC+'" stroke-width="4" stroke-linecap="round"/><rect x="22" y="120" width="8" height="10" rx="2" fill="'+hoseC+'"/>':'';
   var pict='<g transform="translate(38,98)">'+[0,1,2].map(function(i){return '<rect x="'+(i*10)+'" y="0" width="8" height="8" rx="1.5" fill="#e8e8e8" stroke="#bbb" stroke-width=".5"/><circle cx="'+(i*10+4)+'" cy="4" r="2" fill="'+['#c00','#06c','#093'][i]+'"/>';}).join('')+'</g>';
   return '<svg viewBox="0 0 100 155" width="'+px+'" height="'+(px*1.55)+'" xmlns="http://www.w3.org/2000/svg">'
    +'<defs><linearGradient id="b'+id+'" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="'+col[2]+'"/><stop offset=".16" stop-color="'+col[1]+'"/><stop offset=".4" stop-color="'+col[0]+'"/><stop offset=".5" stop-color="'+(isMetal?'#ffffff':col[0])+'"/><stop offset=".62" stop-color="'+col[0]+'"/><stop offset="1" stop-color="'+col[2]+'"/></linearGradient>'
@@ -1408,20 +1408,28 @@ function renderTray(){
   var totRec=0,totUnits=0,totNuevo=0,rows='';
   CATALOG.forEach(function(c){var key=c.base+'|'+c.size,n=counts[key]||0;if(!n)return;var recAnual=n*c.pRec;totRec+=recAnual;totUnits+=n;totNuevo+=n*c.pFinal;
     rows+='<tr><td><strong>'+c.base+' '+c.size+'</strong></td><td>'+n+'</td><td>'+money(c.pFinal)+'</td><td>'+money(c.pRec)+'</td><td class="mono">'+money(recAnual)+'</td></tr>';});
-  var ahorroCPP=totUnits*2*CPP_COST; // 2 controles periódicos/año bonificados el 1er año
+  // PH cada 5 años, costo ~2× recarga anual por unidad → amortizado por año = 0.4× totRec
+  var totPH=Math.round(totRec*0.4);
+  var ahorroCPP=totUnits*2*CPP_COST;
+  var totBruto=totNuevo+totRec+totPH;
+  var totNeto=totBruto-ahorroCPP;
   document.getElementById('tray-hero').innerHTML=
    '<div class="tray-card"><div class="lbl">Unidades en parque</div><div class="big">'+totUnits+'</div></div>'
-   +'<div class="tray-card"><div class="lbl">Gasto recargas / año</div><div class="big" style="color:var(--red)">'+money(totRec)+'</div></div>'
-   +'<div class="tray-card"><div class="lbl">Valor de reposición</div><div class="big" style="color:var(--warn)">'+money(totNuevo)+'</div></div>'
-   +'<div class="tray-card save"><div class="lbl">Ahorro año 1 — Control Periódico bonificado</div><div class="big">'+money(ahorroCPP)+'</div></div>';
-  var sb=document.getElementById('tray-savings');if(sb)sb.innerHTML='<strong>Beneficio 1er año:</strong> el Control Periódico Preventivo se realiza sin cargo. '+totUnits+' unidades × 2 controles × '+money(CPP_COST)+' = <strong style="color:var(--ok)">'+money(ahorroCPP)+' de ahorro</strong> respecto del valor de referencia del servicio.';
-  // gasto anual histórico (5 años) por tipo de gasto (filtrable)
+   +'<div class="tray-card"><div class="lbl">Equipos nuevos</div><div class="big" style="color:var(--warn)">'+money(totNuevo)+'</div></div>'
+   +'<div class="tray-card"><div class="lbl">Recargas anuales</div><div class="big" style="color:var(--red)">'+money(totRec)+'</div></div>'
+   +'<div class="tray-card"><div class="lbl">Prueba hidráulica (anual est.)</div><div class="big" style="color:var(--text2)">'+money(totPH)+'</div></div>'
+   +'<div class="tray-card save"><div class="lbl">Ahorro año 1 — CPP bonificado</div><div class="big">'+money(ahorroCPP)+'</div></div>'
+   +'<div class="tray-card" style="border-color:var(--red)"><div class="lbl">Total año 1 (s/IVA)</div><div class="big" style="color:var(--red)">'+money(totBruto)+'</div><div style="font-size:11px;color:var(--ok);margin-top:3px">Con ahorro CPP: '+money(totNeto)+'</div></div>';
+  var sb=document.getElementById('tray-savings');if(sb)sb.innerHTML='<strong>Beneficio 1er año:</strong> el CPP se realiza sin cargo. '+totUnits+' unidades × 2 controles × '+money(CPP_COST)+' = <strong style="color:var(--ok)">'+money(ahorroCPP)+' de ahorro</strong> · Gasto total año 1 con ahorro: <strong style="color:var(--ok)">'+money(totNeto)+'</strong>';
   var filt=(document.getElementById('tray-filter')||{}).value||'total';
-  var yBase=(filt==='rec')?totRec:(filt==='rep')?totNuevo:(totRec+Math.round(totNuevo*0.15));
-  var col=(filt==='rep')?'#F5A623':'#ED1C24';
+  var yBase,col,lbl;
+  if(filt==='nuevo'){yBase=totNuevo;col='#F5A623';lbl='Evolución valor parque — equipos nuevos';}
+  else if(filt==='rec'){yBase=totRec;col='#ED1C24';lbl='Evolución gasto recargas anuales';}
+  else if(filt==='ph'){yBase=totPH;col='#7B61FF';lbl='Evolución gasto prueba hidráulica (amortizado)';}
+  else if(filt==='ahorro'){yBase=ahorroCPP;col='#22A859';lbl='Ahorro anual — CPP bonificado';}
+  else{yBase=totBruto;col='#ED1C24';lbl='Evolución del gasto total año 1 (equipos + recargas + PH)';}
   var years=[hoyYear()-4,hoyYear()-3,hoyYear()-2,hoyYear()-1,hoyYear()];
   var vals=years.map(function(y,i){return Math.round(yBase*(0.55+i*0.11));});
-  var lbl=filt==='rec'?'Evolución del gasto en recargas':filt==='rep'?'Evolución del valor de reposición':'Evolución del gasto anual total';
   document.getElementById('tray-curve').innerHTML='<div style="font-size:12px;color:var(--text3);margin-bottom:6px">'+lbl+' — pasá el mouse por cada año</div>'+lineCurveMoney(vals,years,col);
   document.getElementById('tray-table').innerHTML=rows||'<tr><td colspan="5" class="table-empty">Sin datos</td></tr>';
 }
@@ -1488,7 +1496,7 @@ function saveMat(){
   if(!prec){alert('La próxima recarga es obligatoria.');return;}
   if(!cuit){alert('El CUIT es obligatorio (forma parte del código).');return;}
   var c=CATALOG[i];var prev=null;if(editId)for(var j=0;j<data.length;j++)if(data[j].id===editId)prev=data[j];
-  var m={id:editId||uid(),lote:lote,tipoBase:c.base,tamano:c.size,clase:c.clase,origen:c.origen,color:c.color,ruedas:!!c.ruedas,horn:!!c.horn,
+  var m={id:editId||uid(),lote:lote,tipoBase:c.base,tamano:c.size,clase:c.clase,origen:c.origen,color:c.color,ruedas:!!c.ruedas,horn:!!c.horn,noHose:!!c.noHose,hoseGreen:!!c.hoseGreen,
    agente:c.base.indexOf('CO')>=0?'CO₂':(c.base==='ABC'||c.base==='BC')?'Polvo químico':c.base==='AFFF'?'Espuma AFFF':c.base,
    sector:gv('f-sector'),mercado:gv('f-mercado'),marca:gv('f-marca'),serie:gv('f-serie'),cuit:cuit,opds:gv('f-opds'),
    entregaEstado:gv('f-entrega'),nroPedido:gv('f-pedido'),fentrega:gv('f-fentrega'),
