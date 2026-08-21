@@ -654,6 +654,10 @@ img,svg{max-width:100%}
               <div class="cf-badge"><div class="k">Resistencia al fuego</div><div class="v" id="cf-rf">—</div></div>
             </div>
           </div>
+          <div class="panel" style="margin-bottom:16px"><h4>🧯 Matafuegos recomendados</h4>
+            <div style="font-size:11px;color:var(--text3);margin-bottom:8px">Se actualiza con la carga de fuego, el riesgo y la superficie. Precios de referencia FLAMA.</div>
+            <div id="cf-reco"></div>
+          </div>
           <div class="panel"><h4>⚖️ Tablas de referencia (Anexo VII)</h4>
             <div class="cf-tables"><table class="ref-table" id="tab-a"><caption>Tabla 1 · Potencial clase A</caption></table><table class="ref-table" id="tab-b"><caption>Tabla 2 · Potencial clase B</caption></table></div>
             <div class="risk-scale">
@@ -1236,6 +1240,41 @@ var TAB_A=[{max:15,v:{3:'1 A',4:'1 A',5:'1 A'}},{max:30,v:{3:'2 A',4:'1 A',5:'1 
 var TAB_B=[{max:15,v:{1:'—',2:'6 B',3:'4 B'}},{max:30,v:{1:'—',2:'8 B',3:'6 B'}},{max:60,v:{1:'—',2:'10 B',3:'8 B'}},{max:100,v:{1:'—',2:'20 B',3:'10 B'}},{max:Infinity,v:{1:'a det.',2:'a det.',3:'a det.'}}];
 function resistencia(qf,r){var bands=[[15,'F 30'],[30,'F 60'],[60,'F 90'],[100,'F 120'],[Infinity,'F 180']];var f='F 180';for(var i=0;i<bands.length;i++)if(qf<=bands[i][0]){f=bands[i][1];break;}if(r<=2)f='F 180';return f;}
 function buildRefTables(){var rs=[3,4,5];document.getElementById('tab-a').innerHTML+='<tr><th>Carga (kg/m²)</th>'+rs.map(function(r){return '<th>R'+r+'</th>';}).join('')+'</tr>'+TAB_A.map(function(row){return '<tr>'+'<td>'+(row.max===Infinity?'> 100':'≤ '+row.max)+'</td>'+rs.map(function(r){return '<td data-r="'+r+'">'+(row.v[r]||'—')+'</td>';}).join('')+'</tr>';}).join('');var rb=[1,2,3];document.getElementById('tab-b').innerHTML+='<tr><th>Carga (kg/m²)</th>'+rb.map(function(r){return '<th>R'+r+'</th>';}).join('')+'</tr>'+TAB_B.map(function(row){return '<tr>'+'<td>'+(row.max===Infinity?'> 100':'≤ '+row.max)+'</td>'+rb.map(function(r){return '<td data-r="'+r+'">'+(row.v[r]||'—')+'</td>';}).join('')+'</tr>';}).join('');}
+/* ===== Recomendación de matafuegos (dinámica) ===== */
+var IVA=0.21;
+var RAT_A={'ABC 1 kg':1,'ABC 2,5 kg':2,'ABC 5 kg':4,'ABC 10 kg':6,'ABC 50 kg':10};
+var RAT_B={'CO₂ 2 kg':5,'CO₂ 5 kg':10,'BC 5 kg':20};
+var FLAMMABLE=['Nafta / gasolina','Gasoil / diesel','Alcohol etílico','Aceite / lubricante','Pintura / solvente'];
+function catBS(base,size){for(var i=0;i<CATALOG.length;i++)if(CATALOG[i].base===base&&CATALOG[i].size===size)return CATALOG[i];return null;}
+function recommendExt(qf,riesgo,area){
+  var nBy=Math.max(1,Math.ceil(area/200));var items=[];
+  function add(base,size,qty,motivo){var c=catBS(base,size);if(!c)return;var unit=c.pFinal;items.push({label:base+' '+size,qty:qty,unit:unit,subNo:unit*qty,subIva:unit*qty*(1+IVA),motivo:motivo});}
+  var hasLiquid=cfRows.some(function(r){return FLAMMABLE.indexOf(r.mat)>=0&&(r.kg||0)>0;});
+  if(riesgo>=3){
+    var rowA=TAB_A.filter(function(r){return qf<=r.max;})[0];var potA=rowA.v[riesgo]||rowA.v[3]||'1 A';var reqA=parseInt(potA);if(isNaN(reqA))reqA=10;
+    var order=['1 kg','2,5 kg','5 kg','10 kg','50 kg'],chosen='10 kg';
+    for(var i=0;i<order.length;i++){if((RAT_A['ABC '+order[i]]||0)>=reqA){chosen=order[i];break;}}
+    add('ABC',chosen,nBy,'Fuegos clase A (sólidos) · potencial ≥ '+potA);
+    if(hasLiquid)add('CO₂','5 kg',Math.max(1,Math.ceil(area/300)),'Líquidos inflamables (clase B) y tableros eléctricos');
+  }else{
+    var rowB=TAB_B.filter(function(r){return qf<=r.max;})[0];var potB=rowB.v[riesgo]||rowB.v[2]||'6 B';var reqB=parseInt(potB);if(isNaN(reqB))reqB=20;
+    var orderB=[['CO₂','2 kg'],['CO₂','5 kg'],['BC','5 kg']],pickB=['BC','5 kg'];
+    for(var i=0;i<orderB.length;i++){if((RAT_B[orderB[i][0]+' '+orderB[i][1]]||0)>=reqB){pickB=orderB[i];break;}}
+    add(pickB[0],pickB[1],nBy,'Líquidos/gases inflamables (clase B) · potencial ≥ '+potB);
+    add('ABC','5 kg',Math.max(1,Math.ceil(area/300)),'Complemento para clase A');
+  }
+  var totNo=items.reduce(function(a,b){return a+b.subNo;},0);
+  return {items:items,totNo:totNo,totIva:totNo*(1+IVA),nBy:nBy};
+}
+function recoHTML(rc,forPrint){
+  var bord=forPrint?'#ccc':'var(--border)';var mut=forPrint?'#666':'var(--text3)';var red=forPrint?'#ED1C24':'var(--red)';
+  var rows=rc.items.map(function(it){return '<tr><td style="text-align:left"><b>'+it.label+'</b><div style="font-size:10px;color:'+mut+'">'+it.motivo+'</div></td><td>'+it.qty+'</td><td>'+money(it.unit)+'</td><td>'+money(it.subNo)+'</td><td>'+money(it.subIva)+'</td></tr>';}).join('');
+  return '<table style="width:100%;border-collapse:collapse;font-size:12px">'
+   +'<thead><tr style="color:'+mut+';font-size:10px;text-transform:uppercase"><th style="text-align:left;padding:5px;border-bottom:1px solid '+bord+'">Modelo FLAMA</th><th style="padding:5px;border-bottom:1px solid '+bord+'">Cant.</th><th style="padding:5px;border-bottom:1px solid '+bord+'">$ s/IVA c/u</th><th style="padding:5px;border-bottom:1px solid '+bord+'">Subt. s/IVA</th><th style="padding:5px;border-bottom:1px solid '+bord+'">Subt. c/IVA</th></tr></thead>'
+   +'<tbody style="text-align:center">'+rows+'</tbody>'
+   +'<tfoot><tr style="font-weight:800"><td style="text-align:right;padding:7px 5px;border-top:2px solid '+bord+'" colspan="3">TOTAL</td><td style="padding:7px 5px;border-top:2px solid '+bord+';color:'+red+'">'+money(rc.totNo)+'</td><td style="padding:7px 5px;border-top:2px solid '+bord+';color:'+red+'">'+money(rc.totIva)+'</td></tr></tfoot></table>'
+   +'<div style="font-size:10px;color:'+mut+';margin-top:6px">Distribución mínima: '+rc.nBy+' equipo(s) por línea (≈ 1 cada 200 m², Dec. 351/79). IVA 21%. Precios de referencia sin cargo de instalación.</div>';
+}
 function calcCF(){
   var area=+document.getElementById('cf-area').value||1,riesgo=+document.getElementById('cf-riesgo').value,totCal=0;
   cfRows.forEach(function(r){totCal+=(r.kg||0)*(MATERIALS[r.mat]||PC_MADERA);});
@@ -1250,6 +1289,7 @@ function calcCF(){
   var tds=document.querySelectorAll('#tab-a td,#tab-b td');for(var i=0;i<tds.length;i++)tds[i].classList.remove('hl');
   var idxA=TAB_A.findIndex(function(r){return qf<=r.max;});var tra=document.getElementById('tab-a').querySelectorAll('tr')[idxA+1];if(tra){var td=tra.querySelector('td[data-r="'+riesgo+'"]');if(td)td.classList.add('hl');}
   var idxB=TAB_B.findIndex(function(r){return qf<=r.max;});var trb=document.getElementById('tab-b').querySelectorAll('tr')[idxB+1];if(trb){var td2=trb.querySelector('td[data-r="'+riesgo+'"]');if(td2)td2.classList.add('hl');}
+  var rc=recommendExt(qf,riesgo,area);document.getElementById('cf-reco').innerHTML=recoHTML(rc,false);
 }
 function printCF(){
   var area=+document.getElementById('cf-area').value||1,riesgo=+document.getElementById('cf-riesgo').value,sector=document.getElementById('cf-sector').value,totCal=0;
@@ -1260,6 +1300,7 @@ function printCF(){
    +'<table class="doc-table"><thead><tr><th>Material combustible</th><th>Cantidad (kg)</th><th>Poder calorífico (kcal/kg)</th><th>Calor generado (Mcal)</th></tr></thead><tbody>'+cfRows.map(function(r){return '<tr><td>'+r.mat+'</td><td>'+r.kg+'</td><td>'+(MATERIALS[r.mat]||PC_MADERA)+'</td><td>'+((r.kg||0)*(MATERIALS[r.mat]||PC_MADERA)/1000).toFixed(0)+'</td></tr>';}).join('')+'<tr style="font-weight:800;background:#f0f0f0"><td colspan="3">CALOR TOTAL</td><td>'+(totCal/1000).toFixed(0)+' Mcal</td></tr></tbody></table>'
    +'<div style="display:flex;gap:16px;margin-top:16px"><div style="flex:1;text-align:center;border:2px solid #ED1C24;border-radius:8px;padding:14px"><div style="font-size:11px;color:#666;text-transform:uppercase">Carga de fuego (Qf)</div><div style="font-family:Barlow Condensed;font-size:32px;font-weight:800;color:#ED1C24">'+qf.toFixed(1)+' kg/m²</div></div><div style="flex:1;text-align:center;border:1px solid #ccc;border-radius:8px;padding:14px"><div style="font-size:11px;color:#666;text-transform:uppercase">Superficie</div><div style="font-family:Barlow Condensed;font-size:32px;font-weight:800">'+area+' m²</div></div><div style="flex:1;text-align:center;border:1px solid #ccc;border-radius:8px;padding:14px"><div style="font-size:11px;color:#666;text-transform:uppercase">Clasificación</div><div style="font-family:Barlow Condensed;font-size:26px;font-weight:800">'+clas+'</div></div><div style="flex:1;text-align:center;border:1px solid #ccc;border-radius:8px;padding:14px"><div style="font-size:11px;color:#666;text-transform:uppercase">Potencial extintor</div><div style="font-family:Barlow Condensed;font-size:32px;font-weight:800;color:#ED1C24">'+potA+'</div></div></div>'
    +'<div style="margin-top:14px;font-size:12px;color:#333"><strong>Riesgo:</strong> R'+riesgo+' · <strong>Resistencia al fuego requerida:</strong> '+resistencia(qf,riesgo)+' · <strong>Poder calorífico de referencia (madera):</strong> 4.400 kcal/kg (18,41 MJ/kg)</div>'
+   +'<h3 style="font-family:Barlow Condensed;font-size:16px;color:#ED1C24;margin:18px 0 8px;text-transform:uppercase">Matafuegos recomendados a instalar</h3>'+recoHTML(recommendExt(qf,riesgo,area),true)
    +'<div class="doc-sign"><div>Firma Responsable SyH<br><small>'+(c.syh_nombre||'________________')+'</small></div><div>Matrícula<br><small>'+(c.syh_mat||'________________')+'</small></div><div>Fecha<br><small>'+fmt(today())+'</small></div></div>'
    +'<div class="doc-foot"><strong>Fórmula:</strong> Qf = Σ(Pᵢ × Cᵢ) / (Pc × S) — Pᵢ = peso material (kg), Cᵢ = poder calorífico (kcal/kg), Pc = 4.400 kcal/kg (madera), S = superficie (m²). Conforme Decreto 351/79 Anexo VII, reglamentario de la Ley 19.587.</div></div>';
   printDoc(htmlCF,false);
