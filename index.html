@@ -1,1265 +1,1354 @@
 <!DOCTYPE html>
-<html lang="es" data-theme="light">
+<html lang="es" data-theme="dark">
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Control Matafuegos</title>
-<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
+<title>Flama Control</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&family=Barlow+Condensed:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap">
 <style>
-:root{
-  --bg:#EEF1F5;--surface:#fff;--surface2:#F5F7FA;--border:#D4DAE3;
-  --text:#1A2332;--text2:#4A5568;--text3:#8A96A8;
-  --accent:#CC3A15;--accent-h:#A82E0E;--navy:#1E3A5F;--navy2:#162d4a;
-  --ok:#16803C;--ok-bg:#D1FAE5;--warn:#B45309;--warn-bg:#FEF3C7;
-  --crit:#B91C1C;--crit-bg:#FEE2E2;--info:#1D4ED8;--info-bg:#DBEAFE;
-  --sh:0 1px 3px rgba(0,0,0,.08);--shmd:0 4px 20px rgba(0,0,0,.12);
-  --r:8px;--sw:240px;
+/* ═══════════════════════ FLAMA THEME ═══════════════════════ */
+:root, :root[data-theme="dark"]{
+  --bg:#0A0A0C; --bg2:#111114; --surface:#161619; --surface2:#1E1E23;
+  --border:#2A2A31; --border2:#38383F;
+  --text:#F5F5F7; --text2:#A8A8B3; --text3:#6B6B78;
+  --red:#ED1C24; --red-h:#C4141B; --red-dim:#7A1015; --red-glow:rgba(237,28,36,.35);
+  --orange:#FF6A2C; --amber:#F5A623;
+  --ok:#22C55E; --ok-bg:rgba(34,197,94,.12);
+  --warn:#F5A623; --warn-bg:rgba(245,166,35,.12);
+  --crit:#ED1C24; --crit-bg:rgba(237,28,36,.14);
+  --info:#3B82F6; --info-bg:rgba(59,130,246,.12);
+  --sh:0 2px 8px rgba(0,0,0,.5); --shmd:0 8px 32px rgba(0,0,0,.6);
+  --grad-red:linear-gradient(135deg,#FF6A2C 0%,#ED1C24 45%,#8A0F14 100%);
+  --grad-panel:linear-gradient(145deg,#18181C 0%,#111114 100%);
+  --r:10px; --sw:236px;
 }
-@media(prefers-color-scheme:dark){:root:not([data-theme=light]){
-  --bg:#090F18;--surface:#101C2B;--surface2:#162438;--border:#1E3045;
-  --text:#E2E8F0;--text2:#94A3B8;--text3:#4A5E72;
-  --accent:#E84B1A;--accent-h:#CC3A15;--navy:#1a3050;--navy2:#12243d;
-  --ok:#22C55E;--ok-bg:#052E16;--warn:#F59E0B;--warn-bg:#1C1205;
-  --crit:#F87171;--crit-bg:#1C0505;--info:#60A5FA;--info-bg:#0A1F3A;
-  --sh:0 1px 3px rgba(0,0,0,.4);--shmd:0 4px 20px rgba(0,0,0,.5);
-}}
-:root[data-theme=dark]{
-  --bg:#090F18;--surface:#101C2B;--surface2:#162438;--border:#1E3045;
-  --text:#E2E8F0;--text2:#94A3B8;--text3:#4A5E72;
-  --accent:#E84B1A;--accent-h:#CC3A15;--navy:#1a3050;--navy2:#12243d;
-  --ok:#22C55E;--ok-bg:#052E16;--warn:#F59E0B;--warn-bg:#1C1205;
-  --crit:#F87171;--crit-bg:#1C0505;--info:#60A5FA;--info-bg:#0A1F3A;
-  --sh:0 1px 3px rgba(0,0,0,.4);--shmd:0 4px 20px rgba(0,0,0,.5);
+:root[data-theme="light"]{
+  --bg:#F0F1F4; --bg2:#FFFFFF; --surface:#FFFFFF; --surface2:#F5F6F9;
+  --border:#DDE1E8; --border2:#C8CDD6;
+  --text:#14141A; --text2:#4A4A57; --text3:#8A8A99;
+  --red:#ED1C24; --red-h:#C4141B; --red-dim:#F5C6C8; --red-glow:rgba(237,28,36,.2);
+  --orange:#FF6A2C; --amber:#E08800;
+  --ok:#12813C; --ok-bg:#D8F5E3; --warn:#B4700A; --warn-bg:#FDEFCD;
+  --crit:#C4141B; --crit-bg:#FCE0E1; --info:#1D4ED8; --info-bg:#DEE9FE;
+  --sh:0 1px 3px rgba(0,0,0,.1); --shmd:0 8px 32px rgba(0,0,0,.15);
+  --grad-red:linear-gradient(135deg,#FF6A2C 0%,#ED1C24 45%,#B0000A 100%);
+  --grad-panel:#FFFFFF;
 }
 *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;font-size:14px;line-height:1.5}
+body{font-family:'Archivo',system-ui,sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;font-size:14px;line-height:1.5;-webkit-font-smoothing:antialiased}
+body::before{content:'';position:fixed;inset:0;z-index:-1;background:
+  radial-gradient(circle at 0% 0%,rgba(237,28,36,.06),transparent 40%),
+  radial-gradient(circle at 100% 100%,rgba(237,28,36,.05),transparent 42%);pointer-events:none}
 
-/* SIDEBAR */
-.sb{width:var(--sw);background:var(--navy);min-height:100vh;position:fixed;top:0;left:0;z-index:100;display:flex;flex-direction:column;box-shadow:var(--shmd)}
-.sb-logo{padding:18px 16px;border-bottom:1px solid rgba(255,255,255,.08);display:flex;align-items:center;gap:12px;cursor:pointer}
-.sb-logo-img{width:42px;height:42px;border-radius:8px;object-fit:cover;background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;overflow:hidden}
-.sb-logo-img img{width:100%;height:100%;object-fit:cover}
-.sb-logo-text h1{font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:700;color:#fff;line-height:1.1}
-.sb-logo-text p{font-size:10px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.08em;margin-top:1px}
-.sb-nav{padding:12px 8px;flex:1;overflow-y:auto}
-.sb-group{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.3);padding:12px 12px 6px;margin-top:4px}
-.nav-btn{display:flex;align-items:center;gap:10px;width:100%;padding:9px 12px;border-radius:6px;background:none;border:none;color:rgba(255,255,255,.6);font-size:13px;font-weight:500;cursor:pointer;transition:all .15s;text-align:left;position:relative}
-.nav-btn:hover{background:rgba(255,255,255,.08);color:#fff}
-.nav-btn.active{background:var(--accent);color:#fff}
+/* ═══ LOGO ═══ */
+.flama-logo{display:inline-flex;align-items:center;gap:9px}
+.flama-flame{width:34px;height:34px;flex-shrink:0}
+.flama-word{font-family:'Archivo',sans-serif;font-weight:900;font-size:22px;letter-spacing:.04em;color:var(--text);line-height:1;position:relative}
+.flama-word .tri{color:var(--red)}
+
+/* ═══ SIDEBAR ═══ */
+.sb{width:var(--sw);background:var(--bg2);min-height:100vh;position:fixed;top:0;left:0;z-index:100;display:flex;flex-direction:column;border-right:1px solid var(--border)}
+.sb-top{padding:18px 16px 14px;border-bottom:1px solid var(--border);cursor:pointer}
+.sb-top .flama-word{font-size:20px}
+.sb-top .sub{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.14em;margin-top:5px;font-weight:600}
+.sb-nav{padding:10px 8px;flex:1;overflow-y:auto}
+.sb-group{font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.13em;color:var(--text3);padding:12px 12px 5px}
+.nav-btn{display:flex;align-items:center;gap:10px;width:100%;padding:9px 12px;border-radius:7px;background:none;border:none;color:var(--text2);font-size:13px;font-weight:500;cursor:pointer;transition:all .13s;text-align:left;font-family:inherit;margin-bottom:1px}
+.nav-btn:hover{background:var(--surface2);color:var(--text)}
+.nav-btn.active{background:var(--grad-red);color:#fff;box-shadow:0 4px 14px var(--red-glow)}
 .nav-btn svg{width:16px;height:16px;flex-shrink:0}
-.nav-badge{margin-left:auto;background:var(--crit);color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:10px;display:none}
-.nav-badge.show{display:block}
-.sb-footer{padding:10px 8px;border-top:1px solid rgba(255,255,255,.08)}
-.sb-footer-btn{display:flex;align-items:center;gap:8px;width:100%;padding:8px 12px;border-radius:6px;background:rgba(255,255,255,.06);border:none;color:rgba(255,255,255,.5);font-size:12px;cursor:pointer;transition:all .15s;margin-bottom:4px}
-.sb-footer-btn:hover{background:rgba(255,255,255,.12);color:#fff}
+.nav-badge{margin-left:auto;background:var(--red);color:#fff;font-size:10px;font-weight:800;min-width:19px;height:19px;padding:0 5px;border-radius:10px;display:none;align-items:center;justify-content:center}
+.nav-badge.show{display:flex}
+.nav-btn.active .nav-badge{background:rgba(0,0,0,.3)}
+.sb-foot{padding:9px 8px;border-top:1px solid var(--border)}
+.sb-foot-btn{display:flex;align-items:center;gap:8px;width:100%;padding:7px 12px;border-radius:6px;background:var(--surface);border:1px solid var(--border);color:var(--text2);font-size:12px;cursor:pointer;transition:all .13s;margin-bottom:4px;font-family:inherit}
+.sb-foot-btn:hover{border-color:var(--red);color:var(--text)}
 
-/* MAIN */
+/* ═══ MAIN ═══ */
 .main{margin-left:var(--sw);flex:1;display:flex;flex-direction:column;min-height:100vh}
+.topbar{background:var(--bg2);border-bottom:1px solid var(--border);padding:12px 26px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:50}
+.topbar h2{font-family:'Barlow Condensed',sans-serif;font-size:24px;font-weight:700;flex:1;text-transform:uppercase;letter-spacing:.01em}
+.topbar h2 span{color:var(--red)}
+.content{padding:20px 26px 48px;flex:1}
+.page{display:none}.page.active{display:block;animation:fade .25s}
+@keyframes fade{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
 
-/* TOPBAR */
-.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:11px 24px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:50;box-shadow:var(--sh)}
-.topbar h2{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;flex:1}
-.topbar h2 span{color:var(--accent)}
-
-/* BUTTONS */
-.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:6px;font-size:13px;font-weight:500;cursor:pointer;border:none;font-family:inherit;transition:all .15s;white-space:nowrap}
-.btn-primary{background:var(--accent);color:#fff}
-.btn-primary:hover{background:var(--accent-h)}
-.btn-secondary{background:var(--navy);color:#fff}
-.btn-secondary:hover{background:var(--navy2)}
-.btn-outline{background:transparent;color:var(--text2);border:1px solid var(--border)}
+/* ═══ BUTTONS ═══ */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:8px 15px;border-radius:7px;font-size:13px;font-weight:600;cursor:pointer;border:none;font-family:inherit;transition:all .13s;white-space:nowrap}
+.btn-primary{background:var(--grad-red);color:#fff;box-shadow:0 3px 12px var(--red-glow)}
+.btn-primary:hover{filter:brightness(1.08);transform:translateY(-1px)}
+.btn-dark{background:var(--surface2);color:var(--text);border:1px solid var(--border2)}
+.btn-dark:hover{border-color:var(--red)}
+.btn-outline{background:transparent;color:var(--text2);border:1px solid var(--border2)}
 .btn-outline:hover{background:var(--surface2);color:var(--text)}
-.btn-ghost{background:transparent;color:var(--text3);border:none;padding:6px 8px}
+.btn-ghost{background:transparent;color:var(--text3);border:none;padding:6px 8px;cursor:pointer;border-radius:6px}
 .btn-ghost:hover{color:var(--text);background:var(--surface2)}
-.btn-sm{padding:5px 10px;font-size:12px}
-.btn-danger{background:#DC2626;color:#fff}
-.btn-danger:hover{background:#B91C1C}
+.btn-sm{padding:5px 11px;font-size:12px}
 
-/* ALERT BANNER */
-.alert-band{padding:0 24px}
-.alert-strip{margin:14px 0 0;border-radius:var(--r);padding:10px 14px;display:flex;align-items:flex-start;gap:10px;font-size:13px}
-.alert-strip.crit{background:var(--crit-bg);border:1px solid var(--crit);color:var(--crit)}
-.alert-strip.warn{background:var(--warn-bg);border:1px solid var(--warn);color:var(--warn)}
-
-/* CONTENT */
-.content{padding:18px 24px 40px;flex:1}
-.page{display:none}.page.active{display:block}
-
-/* STATS */
-.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:20px}
-.stat{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;box-shadow:var(--sh)}
-.stat-lbl{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--text3);margin-bottom:4px}
-.stat-val{font-family:'Barlow Condensed',sans-serif;font-size:34px;font-weight:800;line-height:1}
-.stat-sub{font-size:11px;color:var(--text3);margin-top:3px}
-.stat.ok .stat-val{color:var(--ok)}
-.stat.warn .stat-val{color:var(--warn)}
-.stat.crit .stat-val{color:var(--crit)}
-.stat.info .stat-val{color:var(--info)}
-
-/* SECTION HEADER */
-.sec-hdr{display:flex;align-items:center;gap:10px;margin-bottom:14px}
-.sec-hdr h3{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700}
-.sec-hdr .ct{font-size:13px;color:var(--text3)}
+/* ═══ SECTION LABEL (Flama style) ═══ */
+.sec-label{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.16em;color:var(--red);margin-bottom:6px;display:inline-block}
+.sec-label::after{content:'';display:block;width:38px;height:3px;background:var(--red);margin-top:5px;border-radius:2px}
+.sec-hdr{display:flex;align-items:center;gap:10px;margin:0 0 14px}
+.sec-hdr h3{font-family:'Barlow Condensed',sans-serif;font-size:21px;font-weight:700;text-transform:uppercase}
+.sec-hdr .ct{font-size:12px;color:var(--text3)}
 .sec-hdr .spacer{flex:1}
 
-/* CHIPS */
-.chip{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600;white-space:nowrap}
+/* ═══ TREND CARDS ═══ */
+.trend-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(300px,1fr));gap:16px;margin-bottom:22px}
+.trend-card{background:var(--grad-panel);border:1px solid var(--border);border-radius:var(--r);padding:18px;box-shadow:var(--sh);position:relative;overflow:hidden}
+.trend-card::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--grad-red)}
+.tc-head{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:14px}
+.tc-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--text2)}
+.tc-big{font-family:'Barlow Condensed',sans-serif;font-size:38px;font-weight:800;line-height:.9;margin-top:4px}
+.tc-big.red{color:var(--red)}.tc-big.ok{color:var(--ok)}.tc-big.warn{color:var(--warn)}
+.tc-sub{font-size:11px;color:var(--text3);margin-top:2px}
+.tc-expand{background:var(--surface2);border:1px solid var(--border);color:var(--text3);border-radius:6px;padding:4px 8px;font-size:11px;cursor:pointer;font-family:inherit;transition:all .13s}
+.tc-expand:hover{border-color:var(--red);color:var(--text)}
+.spark{display:flex;align-items:flex-end;gap:3px;height:56px;margin-top:6px}
+.spark-bar{flex:1;background:var(--surface2);border-radius:3px 3px 0 0;position:relative;min-height:3px;transition:all .2s;cursor:pointer}
+.spark-bar .sb-fill{position:absolute;bottom:0;left:0;right:0;border-radius:3px 3px 0 0;background:var(--grad-red)}
+.spark-bar.dim .sb-fill{background:var(--border2)}
+.spark-bar:hover .sb-fill{filter:brightness(1.2)}
+.spark-bar .sb-tip{position:absolute;bottom:100%;left:50%;transform:translateX(-50%);background:var(--surface);border:1px solid var(--border2);color:var(--text);font-size:10px;padding:3px 7px;border-radius:5px;white-space:nowrap;opacity:0;pointer-events:none;transition:opacity .13s;margin-bottom:4px;z-index:5;font-weight:600}
+.spark-bar:hover .sb-tip{opacity:1}
+.spark-labels{display:flex;gap:3px;margin-top:4px}
+.spark-labels span{flex:1;text-align:center;font-size:9px;color:var(--text3);text-transform:uppercase}
+.tc-detail{margin-top:14px;padding-top:14px;border-top:1px solid var(--border);display:none}
+.tc-detail.show{display:block;animation:fade .2s}
+.mkt-row{display:flex;align-items:center;gap:8px;padding:5px 0;font-size:12px}
+.mkt-row .mkt-name{width:110px;color:var(--text2)}
+.mkt-bar{flex:1;height:7px;background:var(--surface2);border-radius:4px;overflow:hidden}
+.mkt-bar>div{height:100%;background:var(--grad-red);border-radius:4px}
+.mkt-row .mkt-val{width:52px;text-align:right;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text)}
+.mkt-row.sensible{background:var(--warn-bg);margin:2px -6px;padding:5px 6px;border-radius:6px}
+.coord-btn{margin-top:10px;width:100%;background:var(--warn-bg);border:1px solid var(--warn);color:var(--warn);border-radius:7px;padding:8px;font-size:12px;font-weight:700;cursor:pointer;font-family:inherit;transition:all .13s}
+.coord-btn:hover{background:var(--warn);color:#0A0A0C}
+
+/* ═══ KPI MINI ═══ */
+.kpi-row{display:grid;grid-template-columns:repeat(auto-fit,minmax(130px,1fr));gap:12px;margin-bottom:22px}
+.kpi{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:13px 15px}
+.kpi-lbl{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.07em;color:var(--text3);margin-bottom:3px}
+.kpi-val{font-family:'Barlow Condensed',sans-serif;font-size:30px;font-weight:800;line-height:1}
+.kpi.ok .kpi-val{color:var(--ok)}.kpi.warn .kpi-val{color:var(--warn)}.kpi.crit .kpi-val{color:var(--red)}.kpi.info .kpi-val{color:var(--info)}
+
+/* ═══ CHIPS ═══ */
+.chip{display:inline-flex;align-items:center;gap:4px;padding:2px 9px;border-radius:20px;font-size:11px;font-weight:700;white-space:nowrap}
 .chip.ok{background:var(--ok-bg);color:var(--ok)}
 .chip.warn{background:var(--warn-bg);color:var(--warn)}
 .chip.crit{background:var(--crit-bg);color:var(--crit)}
 .chip.info{background:var(--info-bg);color:var(--info)}
 .chip.grey{background:var(--surface2);color:var(--text3);border:1px solid var(--border)}
 
-/* TABLE */
+/* ═══ SEVERITY (gradient closeness) ═══ */
+.sev-0{--sc:#22C55E}.sev-1{--sc:#A3E635}.sev-2{--sc:#F5A623}.sev-3{--sc:#FF6A2C}.sev-4{--sc:#ED1C24}
+
+/* ═══ TABLE ═══ */
 .tbl-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;box-shadow:var(--sh)}
 .tbl-scroll{overflow-x:auto}
 table{width:100%;border-collapse:collapse;font-size:13px}
-thead{background:var(--surface2)}
-th{padding:9px 12px;text-align:left;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--text2);border-bottom:1px solid var(--border);white-space:nowrap;cursor:pointer;user-select:none}
-th:hover{color:var(--text)}
-td{padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:middle;white-space:nowrap}
-tr:last-child td{border-bottom:none}
-tr:hover td{background:var(--surface2)}
-.date-cell{display:flex;flex-direction:column;gap:2px}
-.date-val{font-family:'JetBrains Mono',monospace;font-size:12px}
-.table-empty{text-align:center;padding:48px;color:var(--text3)}
+thead{background:var(--bg2)}
+th{padding:10px 12px;text-align:left;font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;color:var(--text3);border-bottom:1px solid var(--border);white-space:nowrap;cursor:pointer;user-select:none}
+th:hover{color:var(--red)}
+td{padding:11px 12px;border-bottom:1px solid var(--border);vertical-align:middle;white-space:nowrap}
+tbody tr{transition:background .1s}
+tbody tr:last-child td{border-bottom:none}
+tbody tr:hover td{background:var(--surface2)}
+.mono{font-family:'JetBrains Mono',monospace}
+.date-cell{display:flex;flex-direction:column;gap:3px}
+.date-val{font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text2)}
+.table-empty{text-align:center;padding:52px;color:var(--text3)}
+.code-cell{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:var(--text)}
+.code-cell small{color:var(--text3);font-weight:400}
 
-/* TOOLBAR */
-.toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
-.toolbar input,.toolbar select{background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:7px 10px;font-size:13px;font-family:inherit;outline:none;transition:border-color .15s}
-.toolbar input:focus,.toolbar select:focus{border-color:var(--accent)}
-.toolbar input{min-width:200px;flex:1}
+/* ═══ TOOLBAR ═══ */
+.toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:14px}
+.toolbar input,.toolbar select{background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:7px;padding:8px 11px;font-size:13px;font-family:inherit;outline:none;transition:border-color .13s}
+.toolbar input:focus,.toolbar select:focus{border-color:var(--red)}
+.toolbar input{min-width:220px;flex:1}
 
-/* RING */
-.ring-badge{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:700}
-.ring-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+/* ═══ RING BADGE ═══ */
+.ring-badge{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:20px;font-size:11px;font-weight:700}
+.ring-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0}
 
-/* ALERTS LIST */
-.alerts-list{display:flex;flex-direction:column;gap:10px}
-.alert-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;display:flex;align-items:center;gap:14px;box-shadow:var(--sh)}
-.alert-card.crit{border-left:4px solid var(--crit)}
-.alert-card.warn{border-left:4px solid var(--warn)}
-.alert-card.info{border-left:4px solid var(--info)}
-.al-icon{font-size:22px;flex-shrink:0}
-.al-body{flex:1;min-width:0}
-.al-title{font-size:13px;font-weight:600}
-.al-sub{font-size:12px;color:var(--text2);margin-top:2px}
-.al-days{font-family:'Barlow Condensed',sans-serif;font-size:24px;font-weight:800;flex-shrink:0;text-align:right}
-.alert-card.crit .al-days{color:var(--crit)}
-.alert-card.warn .al-days{color:var(--warn)}
-.alert-card.info .al-days{color:var(--info)}
+/* ═══ HOVER TOOLTIP (auto popup) ═══ */
+#tooltip{position:fixed;z-index:500;width:340px;background:var(--surface);border:1px solid var(--border2);border-radius:12px;box-shadow:var(--shmd);padding:0;opacity:0;pointer-events:none;transition:opacity .12s;overflow:hidden}
+#tooltip.show{opacity:1}
+.tt-head{background:var(--grad-red);padding:12px 14px;color:#fff}
+.tt-code{font-family:'JetBrains Mono',monospace;font-size:13px;font-weight:700}
+.tt-sub{font-size:11px;opacity:.85;margin-top:2px}
+.tt-body{padding:12px 14px}
+.tt-row{display:flex;justify-content:space-between;align-items:center;padding:4px 0;font-size:12px;gap:8px}
+.tt-k{color:var(--text3)}
+.tt-v{color:var(--text);font-weight:600;text-align:right}
+.tt-timeline{margin-top:8px;padding-top:8px;border-top:1px solid var(--border)}
+.tt-tl{display:flex;align-items:center;gap:8px;padding:3px 0;font-size:11px}
+.tt-tl .bar{flex:1;height:6px;background:var(--surface2);border-radius:3px;overflow:hidden;position:relative}
+.tt-tl .bar>div{height:100%;border-radius:3px}
+.tt-tl .lbl{width:96px;color:var(--text2)}
+.tt-tl .d{width:64px;text-align:right;font-family:'JetBrains Mono',monospace;font-size:10px}
 
-/* TABS */
-.tabs{display:flex;border-bottom:2px solid var(--border);margin-bottom:18px;gap:0}
-.tab{padding:9px 16px;font-size:13px;font-weight:500;color:var(--text2);cursor:pointer;border:none;background:none;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .15s;font-family:inherit}
+/* ═══ VENCIMIENTOS BOARD ═══ */
+.view-toggle{display:inline-flex;background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:3px;gap:2px}
+.view-toggle button{padding:6px 14px;border:none;background:none;color:var(--text2);font-size:12px;font-weight:600;border-radius:6px;cursor:pointer;font-family:inherit}
+.view-toggle button.active{background:var(--grad-red);color:#fff}
+.board{display:grid;gap:14px;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));align-items:start}
+.board-col{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);overflow:hidden}
+.board-col-hd{padding:11px 14px;font-weight:800;font-size:12px;text-transform:uppercase;letter-spacing:.05em;display:flex;align-items:center;justify-content:space-between;border-bottom:2px solid var(--col-c,var(--red))}
+.board-col-hd .cnt{background:var(--surface2);color:var(--text2);font-size:11px;padding:1px 8px;border-radius:10px}
+.board-col-body{padding:10px;display:flex;flex-direction:column;gap:8px;min-height:40px;max-height:640px;overflow-y:auto}
+.venc-card{background:var(--surface);border:1px solid var(--border);border-left:3px solid var(--sc,var(--border));border-radius:8px;padding:10px 11px;cursor:pointer;transition:all .13s}
+.venc-card:hover{border-color:var(--border2);transform:translateX(2px);box-shadow:var(--sh)}
+.vc-code{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;color:var(--text)}
+.vc-sector{font-size:11px;color:var(--text3);margin:2px 0 7px}
+.vc-next{display:flex;align-items:center;justify-content:space-between;gap:6px}
+.vc-next .lbl{font-size:10px;color:var(--text2)}
+.vc-days{font-family:'Barlow Condensed',sans-serif;font-size:19px;font-weight:800;color:var(--sc)}
+.vc-meter{height:5px;background:var(--surface2);border-radius:3px;overflow:hidden;margin-top:6px}
+.vc-meter>div{height:100%;border-radius:3px;background:var(--sc)}
+.board-empty{color:var(--text3);font-size:11px;text-align:center;padding:14px}
+
+/* ═══ ALERTS ═══ */
+.tabs{display:flex;border-bottom:2px solid var(--border);margin-bottom:18px;gap:0;flex-wrap:wrap}
+.tab{padding:9px 16px;font-size:13px;font-weight:600;color:var(--text2);cursor:pointer;border:none;background:none;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .13s;font-family:inherit}
 .tab:hover{color:var(--text)}
-.tab.active{color:var(--accent);border-bottom-color:var(--accent);font-weight:600}
+.tab.active{color:var(--red);border-bottom-color:var(--red)}
+.alert-hero{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:20px}
+.ah-card{border-radius:var(--r);padding:16px;border:1px solid var(--border);position:relative;overflow:hidden}
+.ah-card .n{font-family:'Barlow Condensed',sans-serif;font-size:44px;font-weight:800;line-height:.9}
+.ah-card .l{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.06em;margin-top:4px}
+.ah-card.crit{background:var(--crit-bg);border-color:var(--crit)}.ah-card.crit .n,.ah-card.crit .l{color:var(--crit)}
+.ah-card.warn{background:var(--warn-bg);border-color:var(--warn)}.ah-card.warn .n,.ah-card.warn .l{color:var(--warn)}
+.ah-card.info{background:var(--info-bg);border-color:var(--info)}.ah-card.info .n,.ah-card.info .l{color:var(--info)}
+.ah-card.ok{background:var(--ok-bg);border-color:var(--ok)}.ah-card.ok .n,.ah-card.ok .l{color:var(--ok)}
+.alerts-list{display:flex;flex-direction:column;gap:9px}
+.alert-card{background:var(--surface);border:1px solid var(--border);border-left:4px solid var(--sc);border-radius:var(--r);padding:13px 16px;display:flex;align-items:center;gap:14px;cursor:pointer;transition:all .13s}
+.alert-card:hover{border-color:var(--border2);box-shadow:var(--sh)}
+.al-pulse{width:12px;height:12px;border-radius:50%;background:var(--sc);flex-shrink:0;box-shadow:0 0 0 0 var(--sc)}
+.alert-card.live .al-pulse{animation:pulse 1.8s infinite}
+@keyframes pulse{0%{box-shadow:0 0 0 0 var(--sc)}70%{box-shadow:0 0 0 8px transparent}100%{box-shadow:0 0 0 0 transparent}}
+.al-body{flex:1;min-width:0}
+.al-title{font-size:13px;font-weight:700}
+.al-title .tag{font-size:10px;font-weight:700;padding:1px 7px;border-radius:10px;background:var(--sc);color:#fff;margin-left:6px}
+.al-sub{font-size:12px;color:var(--text3);margin-top:2px}
+.al-days{font-family:'Barlow Condensed',sans-serif;font-size:26px;font-weight:800;color:var(--sc);flex-shrink:0;text-align:right;min-width:90px}
 
-/* MODAL */
-.overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:200;display:flex;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto;backdrop-filter:blur(3px)}
+/* ═══ GALLERY ═══ */
+.gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px}
+.gal-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;transition:all .13s;cursor:pointer}
+.gal-card:hover{border-color:var(--red);transform:translateY(-3px);box-shadow:var(--shmd)}
+.gal-img{aspect-ratio:1/1;background:var(--bg2);display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative;padding:12px}
+.gal-img img,.gal-img svg{max-width:100%;max-height:100%;object-fit:contain}
+.gal-type{position:absolute;top:8px;left:8px;background:rgba(0,0,0,.7);color:#fff;font-size:9px;font-weight:700;padding:3px 7px;border-radius:5px;text-transform:uppercase;letter-spacing:.04em;backdrop-filter:blur(4px)}
+.gal-foot{padding:10px 11px;border-top:1px solid var(--border)}
+.gal-code{font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700}
+.gal-sec{font-size:11px;color:var(--text3);margin-top:1px}
+
+/* ═══ MODAL ═══ */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.7);z-index:200;display:flex;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto;backdrop-filter:blur(4px)}
 .overlay.hidden{display:none}
-.modal{background:var(--surface);border-radius:12px;width:100%;max-width:760px;box-shadow:var(--shmd);margin:auto}
-.modal.wide{max-width:960px}
-.modal-hdr{display:flex;align-items:center;justify-content:space-between;padding:16px 22px;border-bottom:1px solid var(--border)}
-.modal-hdr h2{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700}
-.modal-body{padding:22px;max-height:80vh;overflow-y:auto}
-.modal-ftr{padding:14px 22px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end}
+.modal{background:var(--surface);border:1px solid var(--border2);border-radius:14px;width:100%;max-width:780px;box-shadow:var(--shmd);margin:auto}
+.modal.wide{max-width:1000px}
+.modal-hdr{display:flex;align-items:center;justify-content:space-between;padding:16px 22px;border-bottom:1px solid var(--border);position:sticky;top:0;background:var(--surface);z-index:2;border-radius:14px 14px 0 0}
+.modal-hdr h2{font-family:'Barlow Condensed',sans-serif;font-size:21px;font-weight:700;text-transform:uppercase}
+.modal-body{padding:22px;max-height:78vh;overflow-y:auto}
+.modal-ftr{padding:14px 22px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end;position:sticky;bottom:0;background:var(--surface);border-radius:0 0 14px 14px}
 
-/* FORM */
-.fs{margin-bottom:18px}
-.fs-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--accent);margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--border)}
+/* ═══ FORM ═══ */
+.fs{margin-bottom:20px}
+.fs-title{font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.09em;color:var(--red);margin-bottom:11px;padding-bottom:6px;border-bottom:1px solid var(--border)}
 .fg{display:grid;grid-template-columns:1fr 1fr;gap:12px}
-.fg.c3{grid-template-columns:1fr 1fr 1fr}
-.fg.c1{grid-template-columns:1fr}
-.field{display:flex;flex-direction:column;gap:4px}
-.field.s2{grid-column:span 2}
-.field.s3{grid-column:span 3}
+.fg.c3{grid-template-columns:1fr 1fr 1fr}.fg.c1{grid-template-columns:1fr}.fg.c4{grid-template-columns:1fr 1fr 1fr 1fr}
+.field{display:flex;flex-direction:column;gap:5px}
+.field.s2{grid-column:span 2}.field.s3{grid-column:span 3}
 label{font-size:12px;font-weight:600;color:var(--text2)}
-label .req{color:var(--crit)}
-.f-hint{font-size:11px;color:var(--text3)}
-input,select,textarea{background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:8px 10px;font-size:13px;font-family:inherit;outline:none;transition:border-color .15s;width:100%}
-input:focus,select:focus,textarea:focus{border-color:var(--accent);background:var(--surface)}
-input[readonly]{opacity:.7;cursor:default}
-textarea{resize:vertical;min-height:68px}
+label .req{color:var(--red)}
+.f-hint{font-size:11px;color:var(--text3);font-weight:400}
+input,select,textarea{background:var(--bg2);border:1px solid var(--border);color:var(--text);border-radius:7px;padding:9px 11px;font-size:13px;font-family:inherit;outline:none;transition:border-color .13s;width:100%}
+input:focus,select:focus,textarea:focus{border-color:var(--red)}
+input[readonly]{opacity:.6}
+textarea{resize:vertical;min-height:64px}
 
-/* SYH CHECKS */
+/* ═══ SYH CHECKS ═══ */
 .syh-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
-.syh-row{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:8px 12px;display:flex;align-items:center;justify-content:space-between;gap:8px}
-.syh-row label{font-size:12px;font-weight:500;color:var(--text)}
-select.mini{padding:4px 8px;font-size:11px;width:auto}
+.syh-row{background:var(--bg2);border:1px solid var(--border);border-radius:7px;padding:8px 12px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.syh-row label{font-size:12px;color:var(--text)}
+select.mini{padding:5px 8px;font-size:11px;width:auto}
 
-/* PHOTO PANEL */
+/* ═══ PHOTO ═══ */
 .photo-panel{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
-.photo-slot{border:2px dashed var(--border);border-radius:var(--r);aspect-ratio:4/3;position:relative;overflow:hidden;cursor:pointer;background:var(--surface2);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;transition:all .15s}
-.photo-slot:hover{border-color:var(--accent);background:var(--surface)}
+.photo-slot{border:2px dashed var(--border2);border-radius:var(--r);aspect-ratio:1/1;position:relative;overflow:hidden;cursor:pointer;background:var(--bg2);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;transition:all .13s}
+.photo-slot:hover{border-color:var(--red)}
 .photo-slot.filled{border-style:solid;border-color:var(--ok)}
-.photo-slot img.preview{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
-.photo-slot .ph-label{position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.65);color:#fff;font-size:10px;font-weight:700;text-align:center;padding:4px;text-transform:uppercase;letter-spacing:.06em}
-.photo-slot .ph-hover{position:absolute;inset:0;background:rgba(0,0,0,0);display:flex;align-items:center;justify-content:center;opacity:0;transition:all .15s}
-.photo-slot:hover .ph-hover{background:rgba(0,0,0,.45);opacity:1}
-.ph-hover span{color:#fff;font-size:12px;font-weight:600}
-.ph-empty-icon{color:var(--text3);font-size:28px}
-.ph-empty-text{font-size:11px;color:var(--text3);text-align:center;padding:0 6px}
-.ph-remove{position:absolute;top:4px;right:4px;background:rgba(0,0,0,.6);border:none;color:#fff;width:20px;height:20px;border-radius:50%;font-size:11px;cursor:pointer;display:none;align-items:center;justify-content:center;z-index:2}
+.photo-slot img.preview,.photo-slot svg.preview{position:absolute;inset:0;width:100%;height:100%;object-fit:contain;padding:8px}
+.photo-slot .ph-label{position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.7);color:#fff;font-size:10px;font-weight:700;text-align:center;padding:4px;text-transform:uppercase;letter-spacing:.04em}
+.ph-empty-icon{font-size:28px;opacity:.5}
+.ph-empty-text{font-size:11px;color:var(--text3);text-align:center;padding:0 8px}
+.ph-remove{position:absolute;top:5px;right:5px;background:rgba(0,0,0,.7);border:none;color:#fff;width:22px;height:22px;border-radius:50%;font-size:12px;cursor:pointer;display:none;align-items:center;justify-content:center;z-index:3}
 .photo-slot.filled .ph-remove{display:flex}
 
-/* DETAIL */
+/* ═══ DETAIL ═══ */
 .detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-.det-card{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:14px}
-.det-card h4{font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;margin-bottom:10px;color:var(--text)}
+.det-card{background:var(--bg2);border:1px solid var(--border);border-radius:var(--r);padding:15px}
+.det-card h4{font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;margin-bottom:11px;text-transform:uppercase}
 .det-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--border);gap:8px}
 .det-row:last-child{border-bottom:none}
-.det-k{font-size:11px;color:var(--text3);font-weight:500;flex-shrink:0}
+.det-k{font-size:11px;color:var(--text3)}
 .det-v{font-size:12px;color:var(--text);font-weight:600;text-align:right}
-.det-v.mono{font-family:'JetBrains Mono',monospace}
-
-/* TIMELINE */
-.tl{display:flex;flex-direction:column;gap:0}
+.tl{display:flex;flex-direction:column}
 .tl-item{display:flex;gap:10px}
-.tl-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;margin-top:4px;border:2px solid}
-.tl-dot.ok{background:var(--ok);border-color:var(--ok)}
-.tl-dot.warn{background:var(--warn);border-color:var(--warn)}
-.tl-dot.crit{background:var(--crit);border-color:var(--crit)}
-.tl-dot.dim{background:transparent;border-color:var(--border)}
-.tl-info{flex:1;padding-bottom:12px}
+.tl-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;margin-top:5px;border:2px solid}
+.tl-dot.ok{background:var(--ok);border-color:var(--ok)}.tl-dot.warn{background:var(--warn);border-color:var(--warn)}
+.tl-dot.crit{background:var(--red);border-color:var(--red)}.tl-dot.dim{background:transparent;border-color:var(--border2)}
+.tl-info{flex:1;padding-bottom:11px}
 .tl-type{font-size:12px;font-weight:600}
 .tl-date{font-size:11px;color:var(--text3);font-family:'JetBrains Mono',monospace}
 
-/* GALLERY */
-.gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px}
-.gal-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;box-shadow:var(--sh)}
-.gal-img{aspect-ratio:4/3;background:var(--surface2);display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}
-.gal-img img{width:100%;height:100%;object-fit:cover}
-.gal-img .gal-type{position:absolute;top:6px;left:6px;background:rgba(0,0,0,.6);color:#fff;font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px;text-transform:uppercase}
-.gal-foot{padding:8px 10px}
-.gal-lote{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600}
-.gal-sec{font-size:11px;color:var(--text3)}
+/* ═══ PLANILLA (print) ═══ */
+.planilla{background:#fff;color:#111;border-radius:var(--r);padding:26px;box-shadow:var(--sh);font-family:'Archivo',sans-serif}
+.pl-head{display:flex;justify-content:space-between;align-items:center;border-bottom:3px solid #ED1C24;padding-bottom:14px;margin-bottom:18px}
+.pl-emp{display:flex;align-items:center;gap:14px}
+.pl-logo{width:64px;height:64px;object-fit:contain;flex-shrink:0}
+.pl-emp-txt{font-size:14px;font-weight:700;color:#111}
+.pl-emp-txt small{display:block;font-size:11px;font-weight:400;color:#555;margin-top:1px}
+.pl-title{text-align:center;flex:1;padding:0 16px}
+.pl-title h2{font-family:'Barlow Condensed',sans-serif;font-size:24px;font-weight:800;color:#111;text-transform:uppercase;line-height:1}
+.pl-title p{font-size:11px;color:#666;margin-top:3px}
+.pl-norm{font-size:10px;text-align:right;color:#666;line-height:1.4}
+.pl-norm strong{color:#ED1C24;font-size:11px}
+.pl-table{width:100%;border-collapse:collapse;font-size:10px;margin-bottom:16px}
+.pl-table th{background:#ED1C24;color:#fff;padding:6px 5px;text-align:left;font-size:9px;text-transform:uppercase;border:1px solid #C4141B;white-space:nowrap;cursor:default;letter-spacing:0}
+.pl-table td{padding:5px;border:1px solid #ccc;color:#222;white-space:nowrap}
+.pl-table tr:nth-child(even) td{background:#f7f7f7}
+.pl-sign{display:flex;justify-content:space-between;gap:36px;margin-top:32px}
+.pl-sign>div{flex:1;border-top:1px solid #111;padding-top:6px;text-align:center;font-size:11px;color:#333}
+.pl-foot{margin-top:16px;font-size:9px;color:#888;border-top:1px solid #ddd;padding-top:8px;line-height:1.5}
+.pl-legend{display:flex;gap:14px;flex-wrap:wrap;font-size:10px;color:#555;margin-bottom:12px}
+.pl-legend span{display:inline-flex;align-items:center;gap:4px}
 
-/* PRINT PLANILLA */
-.planilla-preview{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:24px;box-shadow:var(--sh)}
-.planilla-header{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid var(--text);padding-bottom:12px;margin-bottom:16px}
-.planilla-empresa{font-size:13px;font-weight:600}
-.planilla-empresa small{display:block;font-size:11px;font-weight:400;color:var(--text2)}
-.planilla-title{text-align:center;flex:1;padding:0 16px}
-.planilla-title h2{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:800}
-.planilla-title p{font-size:11px;color:var(--text2)}
-.planilla-norm{font-size:10px;text-align:right;color:var(--text3)}
-.planilla-norm strong{display:block;font-size:11px;color:var(--text)}
+/* ═══ CARGA DE FUEGO ═══ */
+.cf-layout{display:grid;grid-template-columns:1.15fr 1fr;gap:18px;align-items:start}
+.panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:18px;box-shadow:var(--sh)}
+.panel h4{font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:700;text-transform:uppercase;margin-bottom:12px;display:flex;align-items:center;gap:8px}
+.mat-table{width:100%;border-collapse:collapse;font-size:12px;margin-top:8px}
+.mat-table th{padding:7px 6px;font-size:10px;text-align:left;color:var(--text3);border-bottom:1px solid var(--border);cursor:default;text-transform:uppercase}
+.mat-table td{padding:5px 6px;border-bottom:1px solid var(--border)}
+.mat-table input,.mat-table select{padding:5px 7px;font-size:12px}
+.mat-del{background:none;border:none;color:var(--text3);cursor:pointer;font-size:14px}
+.mat-del:hover{color:var(--red)}
+.cf-result{background:var(--grad-panel);border:1px solid var(--border2);border-radius:var(--r);padding:20px;text-align:center;margin-bottom:16px;position:relative;overflow:hidden}
+.cf-result::before{content:'';position:absolute;top:0;left:0;right:0;height:3px;background:var(--grad-red)}
+.cf-qf{font-family:'Barlow Condensed',sans-serif;font-size:52px;font-weight:800;color:var(--red);line-height:.9}
+.cf-qf small{font-size:18px;color:var(--text2);font-weight:600}
+.cf-qf-lbl{font-size:11px;text-transform:uppercase;letter-spacing:.1em;color:var(--text3);margin-top:6px}
+.cf-badges{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:16px}
+.cf-badge{background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:11px}
+.cf-badge .k{font-size:10px;text-transform:uppercase;color:var(--text3);letter-spacing:.05em}
+.cf-badge .v{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800;margin-top:2px}
+.cf-tables{display:grid;grid-template-columns:1fr 1fr;gap:14px;margin-top:16px}
+.ref-table{width:100%;border-collapse:collapse;font-size:11px}
+.ref-table caption{font-size:11px;font-weight:700;text-transform:uppercase;color:var(--red);text-align:left;margin-bottom:6px;letter-spacing:.05em}
+.ref-table th,.ref-table td{padding:5px 7px;border:1px solid var(--border);text-align:center}
+.ref-table th{background:var(--bg2);color:var(--text3);font-size:10px;font-weight:700}
+.ref-table td.hl{background:var(--crit-bg);color:var(--red);font-weight:800}
+.risk-scale{display:flex;flex-direction:column;gap:5px;margin-top:8px}
+.risk-item{display:flex;align-items:center;gap:8px;font-size:12px;padding:6px 10px;border-radius:7px;background:var(--bg2);border:1px solid var(--border)}
+.risk-item .rn{width:26px;height:26px;border-radius:6px;display:flex;align-items:center;justify-content:center;font-weight:800;color:#fff;flex-shrink:0;font-size:12px}
+
+/* ═══ RINGS PAGE ═══ */
+.rings-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px}
+.ring-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:18px;box-shadow:var(--sh);display:flex;align-items:center;gap:14px}
+.ring-circle{width:56px;height:56px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:800;border:3px solid rgba(255,255,255,.15)}
+.ring-info h4{font-family:'Barlow Condensed',sans-serif;font-size:19px;font-weight:800}
+.ring-info p{font-size:12px;color:var(--text2)}.ring-info small{font-size:11px;color:var(--text3)}
+
+/* ═══ LOGO UPLOAD ═══ */
+.logo-upload{width:88px;height:88px;border:2px dashed var(--border2);border-radius:12px;cursor:pointer;overflow:hidden;display:flex;align-items:center;justify-content:center;background:var(--bg2);transition:all .13s;flex-shrink:0}
+.logo-upload:hover{border-color:var(--red)}
+.logo-upload img{width:100%;height:100%;object-fit:contain;padding:6px}
+
+.origin-tag{font-size:9px;padding:1px 6px;border-radius:4px;font-weight:700;text-transform:uppercase}
+.origin-tag.propia{background:var(--crit-bg);color:var(--red)}
+.origin-tag.comerc{background:var(--info-bg);color:var(--info)}
+
+/* ═══ PRINT ═══ */
 @media print{
-  .sb,.topbar,.no-print{display:none!important}
+  body{background:#fff}
+  body::before,.sb,.topbar,.no-print,#tooltip{display:none!important}
   .main{margin-left:0!important}
   .content{padding:0!important}
-  .page{display:block!important}
-  .planilla-preview{box-shadow:none;border:none}
-  body{font-size:12px}
+  .page{display:none!important}
+  body.printing-syh #page-syh,body.printing-cf #page-cf{display:block!important}
+  body.printing-syh #page-syh>*:not(.planilla-wrap),body.printing-cf #page-cf>*:not(.cf-print){display:none!important}
+  .planilla,.cf-print{box-shadow:none;border:none;color:#111!important;background:#fff!important}
+  @page{size:A4 landscape;margin:12mm}
 }
 
-/* RINGS PAGE */
-.rings-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px}
-.ring-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:18px;box-shadow:var(--sh);display:flex;align-items:center;gap:14px}
-.ring-circle{width:54px;height:54px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:800;border:3px solid rgba(0,0,0,.1)}
-.ring-info h4{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:800}
-.ring-info p{font-size:12px;color:var(--text2)}
-.ring-info small{font-size:11px;color:var(--text3)}
-
-/* COMPANY MODAL */
-.logo-upload{width:80px;height:80px;border:2px dashed var(--border);border-radius:10px;cursor:pointer;overflow:hidden;display:flex;align-items:center;justify-content:center;background:var(--surface2);transition:all .15s;flex-shrink:0}
-.logo-upload:hover{border-color:var(--accent)}
-.logo-upload img{width:100%;height:100%;object-fit:cover}
-
-/* PROV */
-.prov-tag{font-size:10px;background:var(--info-bg);color:var(--info);padding:2px 6px;border-radius:4px;font-weight:700}
-
-/* RESPONSIVE */
-@media(max-width:768px){
+/* ═══ RESPONSIVE ═══ */
+@media(max-width:820px){
   :root{--sw:0px}
-  .sb{transform:translateX(-240px);transition:transform .2s}.sb.open{transform:translateX(0);width:240px}
-  .main{margin-left:0}.fg{grid-template-columns:1fr}.fg.c3{grid-template-columns:1fr 1fr}
-  .photo-panel{grid-template-columns:1fr 1fr}.detail-grid{grid-template-columns:1fr}
+  .sb{transform:translateX(-240px);transition:transform .2s;width:240px}.sb.open{transform:translateX(0)}
+  .main{margin-left:0}.fg,.fg.c3,.fg.c4{grid-template-columns:1fr}.cf-layout{grid-template-columns:1fr}
+  .photo-panel{grid-template-columns:1fr 1fr}.detail-grid{grid-template-columns:1fr}.cf-tables{grid-template-columns:1fr}
 }
 @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
 <body>
 
+<!-- ═══ FLAME LOGO (reusable svg symbol) ═══ -->
+<svg width="0" height="0" style="position:absolute"><defs>
+  <linearGradient id="flameGrad" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0%" stop-color="#FF7A2E"/><stop offset="45%" stop-color="#ED1C24"/><stop offset="100%" stop-color="#8A0F14"/>
+  </linearGradient>
+  <symbol id="flameIcon" viewBox="0 0 64 64">
+    <path fill="url(#flameGrad)" d="M32 4c2 8-4 12-8 18-3 5-4 11-1 16 1-4 3-7 6-9-2 6 0 12 5 15 6-3 9-10 8-17 3 3 5 7 4 12 5-4 7-11 4-17-2-5-7-8-9-14-1 4 0 7 2 10-4-3-7-8-8-14-2 1-4 3-5 6-1-2-2-5-3-8-1 1-1 2-1 3z"/>
+    <path fill="#B0000A" opacity=".55" d="M32 22c-1 5-4 8-5 13-1 4 0 8 3 10-1-4 0-7 3-9-1 5 1 9 5 11 3-3 4-8 3-13 2 4 1 8-1 11 4-3 5-9 2-14-2-4-6-6-8-10-2 2-3 5-5 0z"/>
+  </symbol>
+</defs></svg>
+
 <!-- ═══ SIDEBAR ═══ -->
 <nav class="sb" id="sidebar">
-  <div class="sb-logo" onclick="openCompany()">
-    <div class="sb-logo-img" id="sb-logo-img"><span>🏭</span></div>
-    <div class="sb-logo-text">
-      <h1 id="sb-empresa">Mi Empresa</h1>
-      <p>Control Matafuegos</p>
+  <div class="sb-top" onclick="openCompany()">
+    <div class="flama-logo">
+      <svg class="flama-flame" id="sb-logo"><use href="#flameIcon"/></svg>
+      <div>
+        <div class="flama-word">FL<span class="tri">A</span>MA</div>
+        <div class="sub" id="sb-emp">Control de Matafuegos</div>
+      </div>
     </div>
   </div>
   <div class="sb-nav">
-    <div class="sb-group">Principal</div>
+    <div class="sb-group">Panel</div>
     <button class="nav-btn active" onclick="nav('dashboard')" data-p="dashboard">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
-      Dashboard
-    </button>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg>Dashboard</button>
     <button class="nav-btn" onclick="nav('matafuegos')" data-p="matafuegos">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2c0 0-1 2-1 4s2 3 2 5c0 1.5-1 2.5-2 3"/><path d="M8 22h8M12 22v-4"/><ellipse cx="12" cy="14" rx="5" ry="4"/></svg>
-      Matafuegos
-    </button>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2c0 0-1 2-1 4s2 3 2 5"/><ellipse cx="12" cy="15" rx="5" ry="4"/><path d="M8 22h8"/></svg>Matafuegos</button>
+    <button class="nav-btn" onclick="nav('vencimientos')" data-p="vencimientos">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg>Vencimientos</button>
     <button class="nav-btn" onclick="nav('alertas')" data-p="alertas">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-      Alertas
-      <span class="nav-badge" id="nb-alertas"></span>
-    </button>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 0 1-3.4 0"/></svg>Alertas<span class="nav-badge" id="nb-al"></span></button>
     <div class="sb-group">Documentación</div>
-    <button class="nav-btn" onclick="nav('fotos')" data-p="fotos">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
-      Galería / Obleas
-    </button>
+    <button class="nav-btn" onclick="nav('galeria')" data-p="galeria">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>Galería QR / Obleas</button>
     <button class="nav-btn" onclick="nav('syh')" data-p="syh">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-      Planilla SyH
-    </button>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M9 13h6M9 17h6"/></svg>Planilla SyH</button>
+    <button class="nav-btn" onclick="nav('cf')" data-p="cf">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2c0 0-1 3-1 5s2 3 2 5"/><path d="M8 12a5 6 0 1 0 8 0c-1 2-2 2-3 3 0-3-3-4-5-6z"/></svg>Carga de Fuego</button>
     <div class="sb-group">Referencia</div>
     <button class="nav-btn" onclick="nav('anillos')" data-p="anillos">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/></svg>
-      Anillos por Año
-    </button>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="3.5"/></svg>Anillos por Año</button>
   </div>
-  <div class="sb-footer">
-    <button class="sb-footer-btn" onclick="openCompany()">⚙️ Configurar empresa</button>
-    <button class="sb-footer-btn" onclick="toggleTheme()">🌓 Cambiar tema</button>
-    <button class="sb-footer-btn" onclick="exportCSV()">↓ Exportar CSV</button>
+  <div class="sb-foot">
+    <button class="sb-foot-btn" onclick="openCompany()">⚙️ Configurar empresa</button>
+    <button class="sb-foot-btn" onclick="toggleTheme()">🌗 Tema claro / oscuro</button>
+    <button class="sb-foot-btn" onclick="exportCSV()">↓ Exportar CSV</button>
   </div>
 </nav>
 
-<!-- ═══ MAIN ═══ -->
 <main class="main">
   <div class="topbar">
     <h2 id="pg-title">Dashboard <span>General</span></h2>
     <button class="btn btn-outline btn-sm no-print" onclick="exportCSV()">↓ CSV</button>
     <button class="btn btn-primary no-print" onclick="openAdd()">+ Nuevo Matafuego</button>
   </div>
-  <div class="alert-band" id="alert-band"></div>
-
   <div class="content">
 
-    <!-- DASHBOARD -->
+    <!-- ═══ DASHBOARD ═══ -->
     <div class="page active" id="page-dashboard">
-      <div class="stats-grid" id="stats"></div>
-      <div class="sec-hdr" style="margin-top:8px">
-        <h3>Vencimientos próximos</h3><span class="ct">— 90 días</span>
-      </div>
-      <div class="alerts-list" id="dash-alerts"></div>
+      <span class="sec-label">Tendencias Históricas</span>
+      <div class="trend-grid" id="trend-cards"></div>
+      <span class="sec-label">Estado de la Flota</span>
+      <div class="kpi-row" id="kpis"></div>
+      <div class="sec-hdr"><h3>Vencimientos más urgentes</h3><span class="ct">— el más cercano, más rojo</span></div>
+      <div class="alerts-list" id="dash-urgent"></div>
     </div>
 
-    <!-- MATAFUEGOS -->
+    <!-- ═══ MATAFUEGOS ═══ -->
     <div class="page" id="page-matafuegos">
       <div class="toolbar">
-        <input type="text" id="srch" placeholder="Buscar lote, sector, tipo…" oninput="renderTbl()">
-        <select id="ftipo" onchange="renderTbl()">
-          <option value="">Todos los tipos</option>
-          <option>ABC — Polvo triclase</option>
-          <option>BC — CO₂</option>
-          <option>BC — Polvo seco</option>
-          <option>Agua</option><option>Espuma AFFF</option>
-          <option>Clase D</option><option>Gas limpio HFC-227ea</option>
-        </select>
-        <select id="festado" onchange="renderTbl()">
-          <option value="">Todos los estados</option>
-          <option>Operativo</option><option>En mantenimiento</option>
-          <option>Vencido</option><option>De baja</option>
-        </select>
+        <input id="srch" placeholder="Buscar código, sector, tipo, CUIT…" oninput="renderTbl()">
+        <select id="ftipo" onchange="renderTbl()"><option value="">Todos los tipos</option></select>
+        <select id="festado" onchange="renderTbl()"><option value="">Todos los estados</option><option>Operativo</option><option>En mantenimiento</option><option>Vencido</option><option>De baja</option></select>
+        <select id="fmercado" onchange="renderTbl()"><option value="">Todos los mercados</option></select>
         <select id="fanillo" onchange="renderTbl()"><option value="">Todos los anillos</option></select>
       </div>
       <div class="tbl-wrap"><div class="tbl-scroll">
         <table><thead><tr>
-          <th onclick="sort('lote')">Lote</th>
-          <th onclick="sort('sector')">Sector</th>
-          <th onclick="sort('tipo')">Tipo</th>
-          <th>Cap.</th>
+          <th onclick="sortT('code')">Código (Tipo-Tamaño-CUIT)</th>
+          <th onclick="sortT('sector')">Sector</th>
+          <th onclick="sortT('mercado')">Mercado</th>
           <th>Anillo</th>
-          <th onclick="sort('proximaRecarga')">Recarga Anual</th>
-          <th onclick="sort('proximoCPP')">CPP</th>
-          <th onclick="sort('proximaPH')">Prueba Hidr.</th>
-          <th onclick="sort('caducidad')">Caducidad</th>
-          <th onclick="sort('estadoActual')">Estado</th>
-          <th>Prov.</th>
-          <th>Acciones</th>
-        </tr></thead>
-        <tbody id="tbl-body"></tbody></table>
+          <th onclick="sortT('proximaRecarga')">Recarga Anual</th>
+          <th onclick="sortT('proximoCPP')">CPP</th>
+          <th onclick="sortT('proximaPH')">Prueba Hidr.</th>
+          <th onclick="sortT('caducidad')">Caducidad</th>
+          <th onclick="sortT('estadoActual')">Estado</th>
+          <th>Acc.</th>
+        </tr></thead><tbody id="tbl-body"></tbody></table>
       </div></div>
     </div>
 
-    <!-- ALERTAS -->
+    <!-- ═══ VENCIMIENTOS BOARD ═══ -->
+    <div class="page" id="page-vencimientos">
+      <div class="sec-hdr">
+        <div class="view-toggle">
+          <button class="active" id="vt-estado" onclick="setBoard('estado')">Por Estado</button>
+          <button id="vt-anillo" onclick="setBoard('anillo')">Por Anillo (año)</button>
+        </div>
+        <div class="spacer"></div>
+        <span class="ct">Color por urgencia: <span style="color:#22C55E">▉</span> lejano → <span style="color:#ED1C24">▉</span> vencido</span>
+      </div>
+      <div class="board" id="board"></div>
+    </div>
+
+    <!-- ═══ ALERTAS ═══ -->
     <div class="page" id="page-alertas">
+      <div class="alert-hero" id="alert-hero"></div>
       <div class="tabs">
         <button class="tab active" onclick="filtAl('all',this)">Todas</button>
-        <button class="tab" onclick="filtAl('crit',this)">Críticas &lt;30d</button>
-        <button class="tab" onclick="filtAl('warn',this)">Próximas 30–90d</button>
-        <button class="tab" onclick="filtAl('info',this)">Informativas</button>
+        <button class="tab" onclick="filtAl('crit',this)">🔴 Vencidas / Críticas</button>
+        <button class="tab" onclick="filtAl('warn',this)">🟠 Próximas 30–90d</button>
+        <button class="tab" onclick="filtAl('info',this)">🟢 A futuro</button>
       </div>
       <div class="alerts-list" id="al-list"></div>
     </div>
 
-    <!-- FOTOS -->
-    <div class="page" id="page-fotos">
+    <!-- ═══ GALERÍA ═══ -->
+    <div class="page" id="page-galeria">
       <div class="tabs">
         <button class="tab active" onclick="filtGal('all',this)">Todas</button>
-        <button class="tab" onclick="filtGal('qr',this)">QR</button>
-        <button class="tab" onclick="filtGal('oblea',this)">Obleas IRAM</button>
-        <button class="tab" onclick="filtGal('opds',this)">Etiquetas OPDS</button>
+        <button class="tab" onclick="filtGal('unit',this)">Unidad</button>
+        <button class="tab" onclick="filtGal('qr',this)">Códigos QR</button>
+        <button class="tab" onclick="filtGal('oblea',this)">Obleas ODS/OPDS</button>
       </div>
       <div class="gallery" id="gallery"></div>
     </div>
 
-    <!-- PLANILLA SYH -->
+    <!-- ═══ PLANILLA SYH ═══ -->
     <div class="page" id="page-syh">
       <div class="sec-hdr no-print">
-        <h3>Planilla de Control SyH</h3>
-        <span class="ct">IRAM 3517-2 (ed. 2020) — Res. 349/07 OPDS</span>
+        <h3>Planilla de Seguridad e Higiene</h3><span class="ct">IRAM 3517-2 · Ley 19.587 · Dec. 351/79</span>
         <div class="spacer"></div>
-        <button class="btn btn-secondary btn-sm" onclick="window.print()">🖨 Imprimir</button>
-        <select id="syh-filter" class="btn btn-outline btn-sm" onchange="renderSyH()" style="border:1px solid var(--border)">
-          <option value="">Todos los matafuegos</option>
-        </select>
+        <button class="btn btn-dark btn-sm" onclick="uploadPlanillaLogo()">🖼 Cargar logo</button>
+        <select id="syh-filter" class="btn btn-outline btn-sm" onchange="renderSyH()" style="border:1px solid var(--border2)"><option value="">Todos los matafuegos</option></select>
+        <button class="btn btn-primary btn-sm" onclick="printSyH()">🖨 Imprimir / PDF</button>
       </div>
-      <div class="planilla-preview" id="planilla-preview"></div>
+      <div class="planilla-wrap"><div class="planilla" id="planilla"></div></div>
     </div>
 
-    <!-- ANILLOS -->
+    <!-- ═══ CARGA DE FUEGO ═══ -->
+    <div class="page" id="page-cf">
+      <div class="sec-hdr no-print">
+        <h3>Cálculo de Carga de Fuego</h3><span class="ct">Dec. 351/79 Anexo VII · Ley 19.587</span>
+        <div class="spacer"></div>
+        <button class="btn btn-primary btn-sm" onclick="printCF()">🖨 Imprimir estudio / PDF</button>
+      </div>
+      <div class="cf-layout no-print">
+        <div class="panel">
+          <h4>📋 Materiales combustibles del sector</h4>
+          <div class="fg c3" style="margin-bottom:14px">
+            <div class="field"><label>Establecimiento / Sector</label><input id="cf-sector" value="Depósito general" oninput="calcCF()"></div>
+            <div class="field"><label>Superficie del sector (m²) <span class="req">*</span></label><input type="number" id="cf-area" value="200" oninput="calcCF()"></div>
+            <div class="field"><label>Actividad / Riesgo</label>
+              <select id="cf-riesgo" onchange="calcCF()">
+                <option value="1">Riesgo 1 — Explosivo</option>
+                <option value="2">Riesgo 2 — Inflamable</option>
+                <option value="3" selected>Riesgo 3 — Muy combustible</option>
+                <option value="4">Riesgo 4 — Combustible</option>
+                <option value="5">Riesgo 5 — Poco combustible</option>
+              </select></div>
+          </div>
+          <table class="mat-table"><thead><tr>
+            <th style="width:34%">Material</th><th>Cantidad (kg)</th><th>Poder cal. (kcal/kg)</th><th>Calor (Mcal)</th><th></th>
+          </tr></thead><tbody id="cf-rows"></tbody></table>
+          <button class="btn btn-dark btn-sm" style="margin-top:10px" onclick="addCFRow()">+ Agregar material</button>
+        </div>
+        <div>
+          <div class="cf-result">
+            <div class="cf-qf" id="cf-qf">—</div>
+            <div class="cf-qf-lbl">Carga de fuego (kg madera equiv. / m²)</div>
+            <div class="cf-badges">
+              <div class="cf-badge"><div class="k">Calor total</div><div class="v" id="cf-cal">—</div></div>
+              <div class="cf-badge"><div class="k">Clasificación</div><div class="v" id="cf-clas" style="font-size:16px">—</div></div>
+              <div class="cf-badge"><div class="k">Potencial extintor (A)</div><div class="v" style="color:var(--red)" id="cf-pa">—</div></div>
+              <div class="cf-badge"><div class="k">Resistencia al fuego</div><div class="v" id="cf-rf">—</div></div>
+            </div>
+          </div>
+          <div class="panel">
+            <h4>⚖️ Tablas de referencia (Anexo VII)</h4>
+            <div class="cf-tables">
+              <table class="ref-table" id="tab-a"><caption>Tabla 1 · Potencial clase A</caption></table>
+              <table class="ref-table" id="tab-b"><caption>Tabla 2 · Potencial clase B</caption></table>
+            </div>
+            <div class="risk-scale" style="margin-top:12px">
+              <div class="risk-item"><span class="rn" style="background:#8A0F14">R1</span> Explosivo — sustancias que producen deflagración</div>
+              <div class="risk-item"><span class="rn" style="background:#ED1C24">R2</span> Inflamable — líquidos/gases (punto inflamación &lt;40°C)</div>
+              <div class="risk-item"><span class="rn" style="background:#FF6A2C">R3</span> Muy combustible — se enciende con facilidad</div>
+              <div class="risk-item"><span class="rn" style="background:#F5A623">R4</span> Combustible — arde con aporte de calor</div>
+              <div class="risk-item"><span class="rn" style="background:#22C55E">R5</span> Poco combustible — resiste la ignición</div>
+            </div>
+          </div>
+        </div>
+      </div>
+      <!-- printable version -->
+      <div class="cf-print" id="cf-print" style="display:none"></div>
+    </div>
+
+    <!-- ═══ ANILLOS ═══ -->
     <div class="page" id="page-anillos">
-      <p style="font-size:13px;color:var(--text2);margin-bottom:18px">El <strong>anillo de color</strong> identifica el año de vencimiento de la recarga anual. Sistema estándar utilizado en Argentina conforme IRAM 3517-2 y Res. 349/07 OPDS.</p>
-      <div class="rings-grid" id="rings-display"></div>
+      <p style="font-size:13px;color:var(--text2);margin-bottom:18px;max-width:760px">El <strong style="color:var(--red)">anillo de color</strong> identifica el <strong>año de vencimiento de la recarga anual</strong>. La empresa recargadora lo coloca en cada servicio conforme IRAM 3517-2 y Res. 349/07 OPDS. Sistema estándar en Argentina.</p>
+      <div class="rings-grid" id="rings"></div>
     </div>
 
   </div>
 </main>
 
+<!-- ═══ TOOLTIP ═══ -->
+<div id="tooltip"></div>
+
 <!-- ═══ MODAL MATAFUEGO ═══ -->
 <div class="overlay hidden" id="ov-mat">
-  <div class="modal" onclick="event.stopPropagation()">
-    <div class="modal-hdr">
-      <h2 id="mat-title">Nuevo Matafuego</h2>
-      <button class="btn-ghost" onclick="closeModal('ov-mat')">✕</button>
-    </div>
+  <div class="modal wide" onclick="event.stopPropagation()">
+    <div class="modal-hdr"><h2 id="mat-title">Nuevo Matafuego</h2><button class="btn-ghost" onclick="closeM('ov-mat')">✕</button></div>
     <div class="modal-body">
-
       <div class="fs"><div class="fs-title">📋 Identificación</div>
-        <div class="fg">
-          <div class="field"><label>N° Lote / Interno <span class="req">*</span></label><input id="f-lote" placeholder="Ej: MAT-001"></div>
-          <div class="field"><label>Sector / Ubicación <span class="req">*</span></label><input id="f-sector" placeholder="Ej: Planta Baja — Pasillo Norte"></div>
-          <div class="field"><label>Tipo de Matafuego <span class="req">*</span></label>
-            <select id="f-tipo"><option value="">— Seleccionar —</option>
-              <option>ABC — Polvo triclase</option><option>BC — CO₂</option>
-              <option>BC — Polvo seco</option><option>Agua</option>
-              <option>Espuma AFFF</option><option>Clase D</option><option>Gas limpio HFC-227ea</option>
-            </select></div>
-          <div class="field"><label>Agente Extintor</label><input id="f-agente" placeholder="Ej: Polvo ABC monoamonio fosfato"></div>
-          <div class="field"><label>Capacidad</label><input id="f-cap" placeholder="Ej: 6 kg"></div>
-          <div class="field"><label>Clase de Fuego</label><input id="f-clase" placeholder="Ej: A, B, C"></div>
+        <div class="fg c4">
+          <div class="field"><label>N° Interno <span class="req">*</span></label><input id="f-lote" placeholder="MAT-001"></div>
+          <div class="field s2"><label>Sector / Ubicación <span class="req">*</span></label><input id="f-sector" placeholder="Depósito — Zona Norte"></div>
+          <div class="field"><label>Mercado</label><select id="f-mercado"></select></div>
+          <div class="field s2"><label>Tipo / Tamaño <span class="req">*</span></label><select id="f-tipo" onchange="onTipoChange()"></select></div>
+          <div class="field"><label>Clase de fuego</label><input id="f-clase" readonly></div>
+          <div class="field"><label>Origen</label><input id="f-origen" readonly></div>
+        </div>
+        <div style="margin-top:10px;background:var(--bg2);border:1px solid var(--border);border-radius:8px;padding:10px 14px;display:flex;align-items:center;gap:10px">
+          <span style="font-size:11px;color:var(--text3);text-transform:uppercase;letter-spacing:.06em">Código generado</span>
+          <span class="mono" id="f-code-preview" style="font-weight:700;color:var(--red)">—</span>
         </div>
       </div>
-
-      <div class="fs"><div class="fs-title">🏭 Datos del Equipo (IRAM 3517-2)</div>
+      <div class="fs"><div class="fs-title">🏭 Datos del equipo (IRAM 3517-2)</div>
         <div class="fg c3">
-          <div class="field"><label>Fabricante / Marca</label><input id="f-marca" placeholder="Nombre fabricante"></div>
-          <div class="field"><label>N° de Serie</label><input id="f-serie" placeholder="Ej: 2024-001"></div>
-          <div class="field"><label>Fecha Fabricación <span class="req">*</span></label><input type="month" id="f-fab"></div>
-          <div class="field"><label>Fecha Instalación</label><input type="date" id="f-inst"></div>
-          <div class="field"><label>N° Habilitación OPDS</label><input id="f-opds" placeholder="Ej: OPDS-1234/07"></div>
-          <div class="field"><label>Empresa Recargadora</label><input id="f-empresa" placeholder="Nombre empresa habilitada"></div>
+          <div class="field"><label>Fabricante / Marca</label><input id="f-marca" value="FLAMA"></div>
+          <div class="field"><label>N° de Serie</label><input id="f-serie"></div>
+          <div class="field"><label>CUIT empresa titular <span class="req">*</span></label><input id="f-cuit" placeholder="30-12345678-9" oninput="updCode()"></div>
+          <div class="field"><label>Fecha fabricación <span class="req">*</span></label><input type="month" id="f-fab"></div>
+          <div class="field"><label>Fecha instalación</label><input type="date" id="f-inst"></div>
+          <div class="field"><label>N° habilitación OPDS/ODS</label><input id="f-opds" placeholder="OPDS-1234/07"></div>
         </div>
       </div>
-
-      <div class="fs"><div class="fs-title">🟣 Anillo de Color / Año Vencimiento</div>
-        <div class="fg">
-          <div class="field"><label>Color de Anillo</label>
-            <select id="f-anillo-col"></select></div>
-          <div class="field"><label>Año de Vencimiento del Anillo</label>
-            <input type="number" id="f-anillo-yr" min="2024" max="2040" placeholder="Ej: 2027"></div>
-        </div>
+      <div class="fs"><div class="fs-title">🟣 Anillo de color / año</div>
+        <div class="fg"><div class="field"><label>Color de anillo</label><select id="f-anillo-col"></select></div>
+          <div class="field"><label>Año vencimiento anillo</label><input type="number" id="f-anillo-yr" min="2024" max="2040" placeholder="2027"></div></div>
         <div id="anillo-prev" style="margin-top:8px"></div>
       </div>
-
       <div class="fs"><div class="fs-title">📅 Plazos IRAM 3517-2</div>
         <div class="fg">
-          <div class="field"><label>Última Recarga Anual</label><input type="date" id="f-ult-rec"></div>
-          <div class="field"><label>Próxima Recarga Anual <span class="req">*</span> <span class="f-hint">(máx. 12 meses)</span></label><input type="date" id="f-prox-rec"></div>
-          <div class="field"><label>Último Control Periódico Preventivo</label><input type="date" id="f-ult-cpp"></div>
+          <div class="field"><label>Última recarga anual</label><input type="date" id="f-ult-rec"></div>
+          <div class="field"><label>Próxima recarga anual <span class="req">*</span> <span class="f-hint">(≤12 meses)</span></label><input type="date" id="f-prox-rec"></div>
+          <div class="field"><label>Último CPP</label><input type="date" id="f-ult-cpp"></div>
           <div class="field"><label>Próximo CPP <span class="f-hint">(cada 6 meses)</span></label><input type="date" id="f-prox-cpp"></div>
-          <div class="field"><label>Última Prueba Hidráulica</label><input type="date" id="f-ult-ph"></div>
-          <div class="field"><label>Próxima Prueba Hidráulica <span class="f-hint">(cada 5 años)</span></label><input type="date" id="f-prox-ph"></div>
-          <div class="field"><label>Caducidad Definitiva <span class="f-hint">(fab. + 20 años — auto)</span></label><input type="month" id="f-cad" readonly></div>
-          <div class="field"><label>Estado Actual</label>
-            <select id="f-estado"><option>Operativo</option><option>En mantenimiento</option><option>Vencido</option><option>De baja</option></select></div>
+          <div class="field"><label>Última prueba hidráulica</label><input type="date" id="f-ult-ph"></div>
+          <div class="field"><label>Próxima prueba hidráulica <span class="f-hint">(cada 5 años)</span></label><input type="date" id="f-prox-ph"></div>
+          <div class="field"><label>Caducidad definitiva <span class="f-hint">(fab.+20 años, auto)</span></label><input type="month" id="f-cad" readonly></div>
+          <div class="field"><label>Estado</label><select id="f-estado"><option>Operativo</option><option>En mantenimiento</option><option>Vencido</option><option>De baja</option></select></div>
         </div>
       </div>
-
-      <div class="fs"><div class="fs-title">🔄 Matafuego Provisorio</div>
-        <div class="fg">
-          <div class="field"><label>¿Tiene provisorio?</label>
-            <select id="f-prov" onchange="togProv()"><option value="no">No</option><option value="si">Sí</option></select></div>
-          <div class="field" id="prov-desc-f" style="display:none"><label>Descripción Provisorio</label><input id="f-prov-desc" placeholder="Ej: MAT-PROV-01 — ABC 4kg"></div>
-          <div class="field" id="prov-fecha-f" style="display:none"><label>Fecha prevista matafuego nuevo</label><input type="date" id="f-nuevo-fecha"></div>
+      <div class="fs"><div class="fs-title">🔄 Matafuego provisorio</div>
+        <div class="fg c3">
+          <div class="field"><label>¿Tiene provisorio?</label><select id="f-prov" onchange="togProv()"><option value="no">No</option><option value="si">Sí</option></select></div>
+          <div class="field" id="prov-d" style="display:none"><label>Descripción provisorio</label><input id="f-prov-desc" placeholder="MAT-PROV-01 ABC 5kg"></div>
+          <div class="field" id="prov-f" style="display:none"><label>Fecha matafuego nuevo</label><input type="date" id="f-nuevo-fecha"></div>
         </div>
       </div>
-
-      <div class="fs"><div class="fs-title">👷 Inspección — Seguridad e Higiene (IRAM 3517-2 §8)</div>
-        <div class="fg">
-          <div class="field"><label>Fecha de Inspección</label><input type="date" id="f-finsp"></div>
-          <div class="field"><label>Responsable SyH</label><input id="f-resp" placeholder="Nombre y apellido"></div>
-          <div class="field"><label>Matrícula / CUIL</label><input id="f-mat" placeholder="Ej: 20-12345678-9"></div>
-          <div class="field"><label>Próxima Inspección SyH</label><input type="date" id="f-prox-insp"></div>
+      <div class="fs"><div class="fs-title">👷 Inspección — Seguridad e Higiene</div>
+        <div class="fg c4">
+          <div class="field"><label>Fecha inspección</label><input type="date" id="f-finsp"></div>
+          <div class="field"><label>Responsable SyH</label><input id="f-resp"></div>
+          <div class="field"><label>Matrícula/CUIL</label><input id="f-mat"></div>
+          <div class="field"><label>Próxima inspección</label><input type="date" id="f-prox-insp"></div>
         </div>
-        <div style="margin-top:12px"><label style="display:block;margin-bottom:8px">Verificaciones visuales — IRAM 3517-2 §8.1</label>
-          <div class="syh-grid">
-            <div class="syh-row"><label>Presión / manómetro</label><select class="mini" id="c-pres"><option>✅ Conforme</option><option>⚠️ Regular</option><option>❌ No conforme</option><option>— N/A</option></select></div>
-            <div class="syh-row"><label>Precinto / pasador</label><select class="mini" id="c-prec"><option>✅ Conforme</option><option>⚠️ Regular</option><option>❌ No conforme</option><option>— N/A</option></select></div>
-            <div class="syh-row"><label>Manguera / manga</label><select class="mini" id="c-mang"><option>✅ Conforme</option><option>⚠️ Regular</option><option>❌ No conforme</option><option>— N/A</option></select></div>
-            <div class="syh-row"><label>Boquilla / tobera</label><select class="mini" id="c-boq"><option>✅ Conforme</option><option>⚠️ Regular</option><option>❌ No conforme</option><option>— N/A</option></select></div>
-            <div class="syh-row"><label>Soporte / gancho</label><select class="mini" id="c-sop"><option>✅ Conforme</option><option>⚠️ Regular</option><option>❌ No conforme</option><option>— N/A</option></select></div>
-            <div class="syh-row"><label>Señalización visible</label><select class="mini" id="c-sen"><option>✅ Conforme</option><option>⚠️ Regular</option><option>❌ No conforme</option><option>— N/A</option></select></div>
-            <div class="syh-row"><label>Oblea / etiqueta legible</label><select class="mini" id="c-etq"><option>✅ Conforme</option><option>⚠️ Regular</option><option>❌ No conforme</option><option>— N/A</option></select></div>
-            <div class="syh-row"><label>Accesibilidad</label><select class="mini" id="c-acc"><option>✅ Conforme</option><option>⚠️ Regular</option><option>❌ No conforme</option><option>— N/A</option></select></div>
-          </div>
-        </div>
-        <div class="field" style="margin-top:10px"><label>Observaciones</label>
-          <textarea id="f-obs" placeholder="Notas de inspección, estado general, reparaciones…"></textarea></div>
+        <div style="margin-top:12px"><label style="display:block;margin-bottom:8px">Verificaciones visuales (IRAM 3517-2 §8.1)</label>
+          <div class="syh-grid" id="syh-checks"></div></div>
+        <div class="field" style="margin-top:10px"><label>Observaciones</label><textarea id="f-obs"></textarea></div>
       </div>
-
-      <div class="fs"><div class="fs-title">📷 Documentación Fotográfica</div>
+      <div class="fs"><div class="fs-title">📷 Documentación fotográfica</div>
         <div class="photo-panel">
-          <div class="photo-slot" id="ps-qr" onclick="pickPhoto('qr')">
-            <div class="ph-empty-icon">📷</div>
-            <div class="ph-empty-text">Foto / QR del matafuego</div>
-            <div class="ph-hover"><span>📷 Cambiar</span></div>
-            <div class="ph-label">QR</div>
-            <button class="ph-remove" onclick="removePhoto(event,'qr')">✕</button>
-          </div>
-          <div class="photo-slot" id="ps-oblea" onclick="pickPhoto('oblea')">
-            <div class="ph-empty-icon">🏷</div>
-            <div class="ph-empty-text">Oblea IRAM / tarjeta control</div>
-            <div class="ph-hover"><span>📷 Cambiar</span></div>
-            <div class="ph-label">Oblea IRAM</div>
-            <button class="ph-remove" onclick="removePhoto(event,'oblea')">✕</button>
-          </div>
-          <div class="photo-slot" id="ps-opds" onclick="pickPhoto('opds')">
-            <div class="ph-empty-icon">🛡</div>
-            <div class="ph-empty-text">Etiqueta OPDS / habilitación</div>
-            <div class="ph-hover"><span>📷 Cambiar</span></div>
-            <div class="ph-label">OPDS</div>
-            <button class="ph-remove" onclick="removePhoto(event,'opds')">✕</button>
-          </div>
+          <div class="photo-slot" id="ps-unit" onclick="pickPhoto('unit')"><div class="ph-empty-icon">🧯</div><div class="ph-empty-text">Foto de la unidad</div><div class="ph-label">Unidad</div><button class="ph-remove" onclick="rmPhoto(event,'unit')">✕</button></div>
+          <div class="photo-slot" id="ps-qr" onclick="pickPhoto('qr')"><div class="ph-empty-icon">▦</div><div class="ph-empty-text">Foto / scan del QR</div><div class="ph-label">QR</div><button class="ph-remove" onclick="rmPhoto(event,'qr')">✕</button></div>
+          <div class="photo-slot" id="ps-oblea" onclick="pickPhoto('oblea')"><div class="ph-empty-icon">🏷</div><div class="ph-empty-text">Oblea ODS/OPDS</div><div class="ph-label">Oblea</div><button class="ph-remove" onclick="rmPhoto(event,'oblea')">✕</button></div>
         </div>
         <input type="file" id="ph-inp" accept="image/*" style="display:none" onchange="onPhoto(event)">
       </div>
-
     </div>
-    <div class="modal-ftr">
-      <button class="btn btn-outline" onclick="closeModal('ov-mat')">Cancelar</button>
-      <button class="btn btn-primary" onclick="saveMat()">💾 Guardar</button>
-    </div>
+    <div class="modal-ftr"><button class="btn btn-outline" onclick="closeM('ov-mat')">Cancelar</button><button class="btn btn-primary" onclick="saveMat()">💾 Guardar</button></div>
   </div>
 </div>
 
 <!-- ═══ MODAL EMPRESA ═══ -->
 <div class="overlay hidden" id="ov-emp">
   <div class="modal" onclick="event.stopPropagation()">
-    <div class="modal-hdr">
-      <h2>⚙️ Configuración de Empresa</h2>
-      <button class="btn-ghost" onclick="closeModal('ov-emp')">✕</button>
-    </div>
+    <div class="modal-hdr"><h2>⚙️ Configuración de empresa</h2><button class="btn-ghost" onclick="closeM('ov-emp')">✕</button></div>
     <div class="modal-body">
-      <div class="fs"><div class="fs-title">Datos de la Empresa</div>
+      <div class="fs"><div class="fs-title">Datos de la empresa</div>
         <div style="display:flex;gap:16px;align-items:flex-start;margin-bottom:14px">
-          <div class="logo-upload" id="logo-slot" onclick="pickLogo()" title="Click para cambiar logo">
-            <img id="logo-preview" src="" alt="" style="display:none">
-            <span id="logo-ph">🏭</span>
-          </div>
-          <div style="flex:1">
-            <div class="fg c1">
-              <div class="field"><label>Nombre de la Empresa <span class="req">*</span></label><input id="emp-nombre" placeholder="Razón social"></div>
-            </div>
-          </div>
+          <div class="logo-upload" onclick="pickLogo()"><img id="logo-prev" style="display:none"><span id="logo-ph" style="font-size:28px">🏭</span></div>
+          <div style="flex:1"><div class="fg c1"><div class="field"><label>Nombre / Razón social <span class="req">*</span></label><input id="emp-nombre"></div></div></div>
         </div>
         <div class="fg">
-          <div class="field"><label>CUIT</label><input id="emp-cuit" placeholder="Ej: 30-12345678-9"></div>
-          <div class="field"><label>Dirección</label><input id="emp-dir" placeholder="Calle N°, Ciudad"></div>
-          <div class="field"><label>Teléfono</label><input id="emp-tel" placeholder="Ej: +54 9 11 1234-5678"></div>
-          <div class="field"><label>Email</label><input type="email" id="emp-email" placeholder="contacto@empresa.com"></div>
-          <div class="field"><label>Actividad / Rubro</label><input id="emp-rubro" placeholder="Ej: Manufactura, Logística…"></div>
-          <div class="field"><label>N° Habilitación Municipal</label><input id="emp-hab" placeholder="Ej: HAB-4567/2020"></div>
+          <div class="field"><label>CUIT</label><input id="emp-cuit" placeholder="30-12345678-9"></div>
+          <div class="field"><label>Dirección</label><input id="emp-dir"></div>
+          <div class="field"><label>Teléfono</label><input id="emp-tel"></div>
+          <div class="field"><label>Email</label><input type="email" id="emp-email"></div>
+          <div class="field"><label>Rubro / Actividad</label><input id="emp-rubro"></div>
+          <div class="field"><label>Hab. municipal</label><input id="emp-hab"></div>
         </div>
       </div>
       <div class="fs"><div class="fs-title">Responsable de Seguridad e Higiene</div>
         <div class="fg">
-          <div class="field"><label>Nombre y Apellido</label><input id="emp-syh-nombre" placeholder="Ing. García Lucía"></div>
-          <div class="field"><label>Matrícula / CUIL</label><input id="emp-syh-mat" placeholder="20-12345678-9"></div>
-          <div class="field"><label>Teléfono SyH</label><input id="emp-syh-tel" placeholder="+54 9 11 1234-5678"></div>
-          <div class="field"><label>Email SyH</label><input type="email" id="emp-syh-email" placeholder="syh@empresa.com"></div>
+          <div class="field"><label>Nombre y apellido</label><input id="emp-syh-nombre"></div>
+          <div class="field"><label>Matrícula / CUIL</label><input id="emp-syh-mat"></div>
+          <div class="field"><label>Teléfono</label><input id="emp-syh-tel"></div>
+          <div class="field"><label>Email</label><input type="email" id="emp-syh-email"></div>
         </div>
       </div>
     </div>
-    <div class="modal-ftr">
-      <button class="btn btn-outline" onclick="closeModal('ov-emp')">Cancelar</button>
-      <button class="btn btn-primary" onclick="saveCompany()">💾 Guardar</button>
-    </div>
+    <div class="modal-ftr"><button class="btn btn-outline" onclick="closeM('ov-emp')">Cancelar</button><button class="btn btn-primary" onclick="saveCompany()">💾 Guardar</button></div>
     <input type="file" id="logo-inp" accept="image/*" style="display:none" onchange="onLogo(event)">
+    <input type="file" id="planilla-logo-inp" accept="image/*" style="display:none" onchange="onLogo(event)">
   </div>
 </div>
 
 <!-- ═══ MODAL DETALLE ═══ -->
 <div class="overlay hidden" id="ov-det">
   <div class="modal wide" onclick="event.stopPropagation()">
-    <div class="modal-hdr">
-      <h2 id="det-title">Detalle</h2>
-      <div style="display:flex;gap:8px">
-        <button class="btn btn-outline btn-sm" id="det-edit-btn">✏️ Editar</button>
-        <button class="btn-ghost" onclick="closeModal('ov-det')">✕</button>
-      </div>
-    </div>
+    <div class="modal-hdr"><h2 id="det-title">Detalle</h2>
+      <div style="display:flex;gap:8px"><button class="btn btn-outline btn-sm" id="det-edit">✏️ Editar</button><button class="btn-ghost" onclick="closeM('ov-det')">✕</button></div></div>
     <div class="modal-body" id="det-body"></div>
   </div>
 </div>
 
+<!-- ═══ MODAL COORDINACIÓN ═══ -->
+<div class="overlay hidden" id="ov-coord">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-hdr"><h2>📨 Solicitar coordinación</h2><button class="btn-ghost" onclick="closeM('ov-coord')">✕</button></div>
+    <div class="modal-body">
+      <p style="font-size:13px;color:var(--text2);margin-bottom:16px">Los sectores de <strong style="color:var(--warn)">Salud</strong> y <strong style="color:var(--warn)">Educación</strong> requieren coordinación previa para el recambio de matafuegos (no se puede dejar el establecimiento sin cobertura). Generá una solicitud para corregir los vencimientos.</p>
+      <div class="fg c1">
+        <div class="field"><label>Establecimiento</label><input id="co-est" placeholder="Ej: Hospital Central / Escuela N°12"></div>
+        <div class="field"><label>Ventana horaria propuesta</label><input id="co-window" placeholder="Ej: Lun–Vie 08:00–12:00"></div>
+        <div class="field"><label>Notas para el equipo de logística</label><textarea id="co-notes" placeholder="Detalle de matafuegos a recambiar, provisorios necesarios…"></textarea></div>
+      </div>
+    </div>
+    <div class="modal-ftr"><button class="btn btn-outline" onclick="closeM('ov-coord')">Cancelar</button><button class="btn btn-primary" onclick="sendCoord()">📨 Generar solicitud</button></div>
+  </div>
+</div>
+
 <script>
-// ─── RINGS ───────────────────────────────────────────────────────────────
-const RINGS=[
-  {yr:2024,name:'Amarillo',hex:'#F5D800',txt:'#5C4400'},
-  {yr:2025,name:'Verde',   hex:'#16A34A',txt:'#fff'},
-  {yr:2026,name:'Azul',    hex:'#2563EB',txt:'#fff'},
-  {yr:2027,name:'Violeta', hex:'#7C3AED',txt:'#fff'},
-  {yr:2028,name:'Rojo',    hex:'#DC2626',txt:'#fff'},
-  {yr:2029,name:'Naranja', hex:'#EA580C',txt:'#fff'},
-  {yr:2030,name:'Blanco',  hex:'#F8FAFC',txt:'#1E293B',brd:'#94A3B8'},
-  {yr:2031,name:'Negro',   hex:'#1E293B',txt:'#F8FAFC'},
-  {yr:2032,name:'Amarillo',hex:'#F5D800',txt:'#5C4400'},
-  {yr:2033,name:'Verde',   hex:'#16A34A',txt:'#fff'},
-  {yr:2034,name:'Azul',    hex:'#2563EB',txt:'#fff'},
+/* ═══════════════════════ CATÁLOGO FLAMA (14 tipos) ═══════════════════════ */
+const CATALOG=[
+  {base:'ABC',size:'1 kg',   clase:'A, B, C',  origen:'propia', color:'red'},
+  {base:'ABC',size:'2,5 kg', clase:'A, B, C',  origen:'propia', color:'red'},
+  {base:'ABC',size:'5 kg',   clase:'A, B, C',  origen:'propia', color:'red'},
+  {base:'ABC',size:'10 kg',  clase:'A, B, C',  origen:'propia', color:'red'},
+  {base:'ABC',size:'50 kg',  clase:'A, B, C',  origen:'propia', color:'red', ruedas:true},
+  {base:'Agua',size:'10 l',  clase:'A',        origen:'comerc', color:'silver'},
+  {base:'AFFF',size:'10 l',  clase:'A, B',     origen:'comerc', color:'silver'},
+  {base:'AFFF',size:'50 l',  clase:'A, B',     origen:'comerc', color:'silver', ruedas:true},
+  {base:'BC',size:'5 kg',    clase:'B, C',     origen:'comerc', color:'red'},
+  {base:'CO₂',size:'2 kg',   clase:'B, C',     origen:'comerc', color:'red', horn:true},
+  {base:'CO₂',size:'5 kg',   clase:'B, C',     origen:'comerc', color:'red', horn:true},
+  {base:'Sales K',size:'6 l',clase:'K',        origen:'comerc', color:'steel'},
+  {base:'HCFC/HFC',size:'5 kg',clase:'A,B,C',  origen:'comerc', color:'blue'},
+  {base:'Clase D',size:'9 l',clase:'D',        origen:'comerc', color:'yellow'},
 ];
-function ring(yr){return RINGS.find(r=>r.yr===parseInt(yr))||null}
+const MERCADOS=['Automotor','Edificios','Industrias','Supermercados','Hoteles','Salud','Educación'];
+const MERCADO_GROWTH={Automotor:2.2,Edificios:1.0,Industrias:2.4,Supermercados:0.5,Hoteles:4.5,Salud:3.9,'Educación':0.1};
+const SENSIBLES=['Salud','Educación'];
+const TIPO_COLORS={red:'#D62828',silver:'#C4C9CE',steel:'#9AA3AC',blue:'#5DBBE0',yellow:'#F5C400'};
 
-// ─── STORAGE ──────────────────────────────────────────────────────────────
-function ld(k,def){try{return JSON.parse(localStorage.getItem(k))||def}catch{return def}}
-function sv(k,v){localStorage.setItem(k,JSON.stringify(v))}
+/* ═══ RINGS ═══ */
+const RINGS=[
+  {yr:2024,name:'Amarillo',hex:'#F5D800',txt:'#5C4400'},{yr:2025,name:'Verde',hex:'#16A34A',txt:'#fff'},
+  {yr:2026,name:'Azul',hex:'#2563EB',txt:'#fff'},{yr:2027,name:'Violeta',hex:'#7C3AED',txt:'#fff'},
+  {yr:2028,name:'Rojo',hex:'#DC2626',txt:'#fff'},{yr:2029,name:'Naranja',hex:'#EA580C',txt:'#fff'},
+  {yr:2030,name:'Blanco',hex:'#F1F5F9',txt:'#1E293B',brd:'#94A3B8'},{yr:2031,name:'Negro',hex:'#1E293B',txt:'#F1F5F9'},
+  {yr:2032,name:'Amarillo',hex:'#F5D800',txt:'#5C4400'},{yr:2033,name:'Verde',hex:'#16A34A',txt:'#fff'},{yr:2034,name:'Azul',hex:'#2563EB',txt:'#fff'},
+];
+const ring=y=>RINGS.find(r=>r.yr===parseInt(y))||null;
 
-let data=ld('mats',[]);
-let company=ld('company',{nombre:'Mi Empresa',logo:null});
-let editId=null,curSlot=null;
-let tmpPh={qr:null,oblea:null,opds:null};
-let srtKey='proximaRecarga',srtAsc=true,alFilt='all',galFilt='all';
+/* ═══ MATERIALES CARGA DE FUEGO (kcal/kg) ═══ */
+const MATERIALS={
+  'Madera / muebles':4400,'Papel / cartón':4000,'Textiles / algodón':4000,'Plástico PVC':5000,
+  'Polietileno / PET':11000,'Goma / caucho':9000,'Espuma poliuretano':6500,'Nafta / gasolina':10500,
+  'Gasoil / diesel':10000,'Alcohol etílico':6400,'Aceite / lubricante':9500,'Pintura / solvente':6000,
+  'Neumáticos':8500,'Pallets madera':4400,'Otros combustibles':4400,
+};
+const PC_MADERA=4400;
 
-// ─── UTILS ────────────────────────────────────────────────────────────────
+/* ═══ STORAGE ═══ */
+const ld=(k,d)=>{try{return JSON.parse(localStorage.getItem(k))??d}catch{return d}};
+const sv=(k,v)=>localStorage.setItem(k,JSON.stringify(v));
+let data=ld('flama_mats',[]);
+let company=ld('flama_company',{nombre:'Mi Empresa',logo:null,cuit:''});
+let editId=null,curSlot=null,tmpPh={unit:null,qr:null,oblea:null};
+let srtKey='proximaRecarga',srtAsc=true,alFilt='all',galFilt='all',boardMode='estado',logoTarget='company';
+
+/* ═══ UTILS ═══ */
 const today=()=>new Date().toISOString().split('T')[0];
-function daysTo(d){
-  if(!d)return null;
-  const dt=new Date(d.length===7?d+'-01':d);
-  const now=new Date();now.setHours(0,0,0,0);
-  return Math.round((dt-now)/864e5);
-}
-function fmt(d){
-  if(!d)return '—';
-  if(d.length===7){const[y,m]=d.split('-');return m+'/'+y}
-  const[y,m,dd]=d.split('-');return dd+'/'+m+'/'+y;
-}
-function dayChip(d){
-  const n=daysTo(d);
-  if(n===null)return '<span class="chip grey">Sin fecha</span>';
-  if(n<0)return `<span class="chip crit">Venció hace ${Math.abs(n)}d</span>`;
-  if(n<=30)return `<span class="chip crit">${n}d</span>`;
-  if(n<=90)return `<span class="chip warn">${n}d</span>`;
-  return `<span class="chip ok">${n}d</span>`;
-}
-function statChip(e){
-  const m={Operativo:'ok','En mantenimiento':'warn',Vencido:'crit','De baja':'grey'};
-  return `<span class="chip ${m[e]||'grey'}">${e||'—'}</span>`;
-}
-function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2)}
-function addMo(d,n){const x=new Date(d.length===7?d+'-01':d);x.setMonth(x.getMonth()+n);return x.toISOString().split('T')[0]}
+function daysTo(d){if(!d)return null;const dt=new Date(d.length===7?d+'-01':d);const n=new Date();n.setHours(0,0,0,0);return Math.round((dt-n)/864e5)}
+function fmt(d){if(!d)return '—';if(d.length===7){const[y,m]=d.split('-');return m+'/'+y}const[y,m,dd]=d.split('-');return dd+'/'+m+'/'+y}
+function sevOf(days){if(days===null)return 0;if(days<0)return 4;if(days<=30)return 4;if(days<=60)return 3;if(days<=90)return 2;if(days<=180)return 1;return 0}
+const SEVC=['#22C55E','#A3E635','#F5A623','#FF6A2C','#ED1C24'];
+function dayChip(d){const n=daysTo(d);if(n===null)return '<span class="chip grey">—</span>';const s=sevOf(n);const cls=s>=4?'crit':s>=2?'warn':'ok';return `<span class="chip ${cls}">${n<0?'Venció '+Math.abs(n)+'d':n+'d'}</span>`}
+function statChip(e){const m={Operativo:'ok','En mantenimiento':'warn',Vencido:'crit','De baja':'grey'};return `<span class="chip ${m[e]||'grey'}">${e||'—'}</span>`}
+const uid=()=>Date.now().toString(36)+Math.random().toString(36).slice(2);
 function addYr(m,n){if(!m)return'';const[y,mo]=m.split('-');return(+y+n)+'-'+mo}
-function dcls(d){const n=daysTo(d);if(n===null)return'dim';if(n<0)return'crit';if(n<=90)return'warn';return'ok'}
-
-// ─── RING SELECT INIT ─────────────────────────────────────────────────────
-(function initRings(){
-  const sel=document.getElementById('f-anillo-col');
-  const fsel=document.getElementById('fanillo');
-  RINGS.forEach(r=>{
-    sel.innerHTML+=`<option value="${r.yr}">${r.name} — ${r.yr}</option>`;
-    fsel.innerHTML+=`<option value="${r.yr}">${r.name} ${r.yr}</option>`;
-  });
-  sel.insertAdjacentHTML('afterbegin','<option value="">— Sin anillo —</option>');
-  buildRingCards();
-  // syh filter
-  renderSyhFilter();
-})();
-
-function buildRingCards(){
-  document.getElementById('rings-display').innerHTML=RINGS.map(r=>{
-    const cnt=data.filter(m=>parseInt(m.anilloYr)===r.yr).length;
-    return`<div class="ring-card">
-      <div class="ring-circle" style="background:${r.hex};color:${r.txt};border-color:${r.brd||'rgba(0,0,0,.12)'}">
-        ${r.yr.toString().slice(2)}
-      </div>
-      <div class="ring-info">
-        <h4>${r.name}</h4>
-        <p>Vence en ${r.yr}</p>
-        <small>${cnt} matafuego${cnt!==1?'s':''}</small>
-      </div>
-    </div>`;
-  }).join('');
+function codeOf(m){const cuit=(m.cuit||company.cuit||'').replace(/\D/g,'');return `${m.tipoBase||'?'}-${(m.tamano||'').replace(/\s/g,'')}-${cuit||'SINCUIT'}`}
+function matImg(m,size=90){
+  const c=TIPO_COLORS[m.color||'red']||'#D62828';const w=m.ruedas?1:0;
+  return `<svg viewBox="0 0 80 110" width="${size}" height="${size*1.3}" xmlns="http://www.w3.org/2000/svg">
+    <defs><linearGradient id="g${m.id}" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="${c}" stop-opacity=".65"/><stop offset=".5" stop-color="${c}"/><stop offset="1" stop-color="${c}" stop-opacity=".55"/></linearGradient></defs>
+    <rect x="34" y="6" width="12" height="9" rx="2" fill="#3a3a3a"/>
+    <path d="M28 14 h24 v3 l-3 3 h-18 l-3 -3 z" fill="#4a4a4a"/>
+    <rect x="46" y="9" width="16" height="4" rx="2" fill="#555"/>
+    <rect x="22" y="20" width="36" height="76" rx="14" fill="url(#g${m.id})" stroke="rgba(0,0,0,.25)"/>
+    <rect x="27" y="40" width="26" height="34" rx="3" fill="#fff" opacity=".92"/>
+    <text x="40" y="52" font-size="8" font-weight="800" text-anchor="middle" fill="${c}">FLAMA</text>
+    <text x="40" y="64" font-size="7" font-weight="700" text-anchor="middle" fill="#222">${m.tipoBase||''}</text>
+    <text x="40" y="72" font-size="6" text-anchor="middle" fill="#444">${m.tamano||''}</text>
+    ${w?'<circle cx="26" cy="100" r="7" fill="#222"/><circle cx="54" cy="100" r="7" fill="#222"/>':''}
+  </svg>`;
 }
-
-// ─── COMPANY ──────────────────────────────────────────────────────────────
-function applyCompany(){
-  document.getElementById('sb-empresa').textContent=company.nombre||'Mi Empresa';
-  const img=document.getElementById('sb-logo-img');
-  if(company.logo){
-    img.innerHTML=`<img src="${company.logo}" alt="logo">`;
-  } else {
-    img.innerHTML='🏭';
+/* pseudo-QR determinístico */
+function qrSvg(str,size=110){
+  let h=0;for(let i=0;i<str.length;i++)h=(h*31+str.charCodeAt(i))>>>0;
+  const N=21,cell=size/N;let rects='';
+  const rnd=()=>{h=(h*1103515245+12345)&0x7fffffff;return h/0x7fffffff};
+  const finder=(x,y)=>{rects+=`<rect x="${x*cell}" y="${y*cell}" width="${cell*7}" height="${cell*7}" fill="#000"/><rect x="${(x+1)*cell}" y="${(y+1)*cell}" width="${cell*5}" height="${cell*5}" fill="#fff"/><rect x="${(x+2)*cell}" y="${(y+2)*cell}" width="${cell*3}" height="${cell*3}" fill="#000"/>`};
+  for(let y=0;y<N;y++)for(let x=0;x<N;x++){
+    const inF=(x<8&&y<8)||(x>N-9&&y<8)||(x<8&&y>N-9);
+    if(inF)continue;
+    if(rnd()>0.52)rects+=`<rect x="${x*cell}" y="${y*cell}" width="${cell}" height="${cell}" fill="#000"/>`;
   }
+  finder(0,0);finder(N-7,0);finder(0,N-7);
+  return `<svg viewBox="0 0 ${size} ${size}" width="${size}" height="${size}" xmlns="http://www.w3.org/2000/svg"><rect width="${size}" height="${size}" fill="#fff"/>${rects}</svg>`;
 }
-function openCompany(){
-  const c=company;
-  ['nombre','cuit','dir','tel','email','rubro','hab'].forEach(k=>{
-    const el=document.getElementById('emp-'+k);if(el)el.value=c[k]||'';
-  });
-  ['nombre','mat','tel','email'].forEach(k=>{
-    const el=document.getElementById('emp-syh-'+k);if(el)el.value=c['syh_'+k]||'';
-  });
-  const prev=document.getElementById('logo-preview');
-  const ph=document.getElementById('logo-ph');
-  if(c.logo){prev.src=c.logo;prev.style.display='';ph.style.display='none';}
-  else{prev.style.display='none';ph.style.display='';}
-  document.getElementById('ov-emp').classList.remove('hidden');
-}
-function pickLogo(){document.getElementById('logo-inp').click()}
-function onLogo(e){
-  const f=e.target.files[0];if(!f)return;
-  const r=new FileReader();
-  r.onload=ev=>{
-    const prev=document.getElementById('logo-preview');
-    const ph=document.getElementById('logo-ph');
-    prev.src=ev.target.result;prev.style.display='';ph.style.display='none';
-    company._tmpLogo=ev.target.result;
-  };
-  r.readAsDataURL(f);e.target.value='';
-}
-function saveCompany(){
-  company={
-    nombre:v('emp-nombre')||'Mi Empresa',
-    cuit:v('emp-cuit'),dir:v('emp-dir'),tel:v('emp-tel'),
-    email:v('emp-email'),rubro:v('emp-rubro'),hab:v('emp-hab'),
-    syh_nombre:v('emp-syh-nombre'),syh_mat:v('emp-syh-mat'),
-    syh_tel:v('emp-syh-tel'),syh_email:v('emp-syh-email'),
-    logo:company._tmpLogo||company.logo||null,
-  };
-  sv('company',company);applyCompany();
-  closeModal('ov-emp');renderSyH();
+function obleaSvg(m,size=150){
+  const r=ring(m.anilloYr);const col=r?r.hex:'#7DD3FC';const tx=r?r.txt:'#0A0A0A';
+  return `<svg viewBox="0 0 150 150" width="${size}" height="${size}" xmlns="http://www.w3.org/2000/svg">
+    <rect width="150" height="150" rx="10" fill="${col}"/>
+    <rect x="8" y="8" width="134" height="134" rx="6" fill="none" stroke="${tx}" stroke-width="1.5" opacity=".5"/>
+    <text x="75" y="26" font-size="11" font-weight="800" text-anchor="middle" fill="${tx}">OBLEA ODS / OPDS</text>
+    <line x1="16" y1="34" x2="134" y2="34" stroke="${tx}" opacity=".4"/>
+    <text x="75" y="52" font-size="9" text-anchor="middle" fill="${tx}">IRAM 3517-2 · Res.349/07</text>
+    <text x="75" y="78" font-size="26" font-weight="900" text-anchor="middle" fill="${tx}">${m.anilloYr||'20—'}</text>
+    <text x="75" y="94" font-size="9" font-weight="700" text-anchor="middle" fill="${tx}">VTO. RECARGA ANUAL</text>
+    <text x="75" y="116" font-size="8" text-anchor="middle" fill="${tx}">${(m.opds||'OPDS-0000/07')}</text>
+    <text x="75" y="132" font-size="8" font-weight="700" text-anchor="middle" fill="${tx}">${r?r.name.toUpperCase():'CELESTE'}</text>
+  </svg>`;
 }
 
-// ─── ALERTS ENGINE ────────────────────────────────────────────────────────
+/* ═══ INIT SELECTS ═══ */
+function initSelects(){
+  const ftipo=document.getElementById('ftipo'),fmerc=document.getElementById('fmercado'),ftmerc=document.getElementById('f-mercado'),ftipoModal=document.getElementById('f-tipo');
+  CATALOG.forEach((c,i)=>{const label=`${c.base} ${c.size}`;ftipo.innerHTML+=`<option>${label}</option>`;ftipoModal.innerHTML+=`<option value="${i}">${label} — ${c.origen==='propia'?'Fab. propia':'Comerc.'}</option>`});
+  MERCADOS.forEach(mk=>{fmerc.innerHTML+=`<option>${mk}</option>`;ftmerc.innerHTML+=`<option>${mk}</option>`});
+  const rc=document.getElementById('f-anillo-col'),fa=document.getElementById('fanillo');
+  rc.innerHTML='<option value="">— Sin anillo —</option>';
+  RINGS.forEach(r=>{rc.innerHTML+=`<option value="${r.yr}">${r.name} — ${r.yr}</option>`;fa.innerHTML+=`<option value="${r.yr}">${r.name} ${r.yr}</option>`});
+  const checks=[['cPres','Presión / manómetro'],['cPrec','Precinto / pasador'],['cMang','Manguera'],['cBoq','Boquilla / tobera'],['cSop','Soporte / gancho'],['cSen','Señalización'],['cEtq','Oblea legible'],['cAcc','Accesibilidad']];
+  document.getElementById('syh-checks').innerHTML=checks.map(([id,l])=>`<div class="syh-row"><label>${l}</label><select class="mini" id="${id}"><option>✅ Conforme</option><option>⚠️ Regular</option><option>❌ No conforme</option><option>— N/A</option></select></div>`).join('');
+  // CF ref tables
+  buildRefTables();
+}
+
+/* ═══ CATÁLOGO/CODE en modal ═══ */
+function onTipoChange(){
+  const i=document.getElementById('f-tipo').value;if(i==='')return;
+  const c=CATALOG[i];
+  document.getElementById('f-clase').value=c.clase;
+  document.getElementById('f-origen').value=c.origen==='propia'?'Fabricación propia':'Comercialización';
+  updCode();
+}
+function updCode(){
+  const i=document.getElementById('f-tipo').value;const cuit=(document.getElementById('f-cuit').value||'').replace(/\D/g,'');
+  if(i===''){document.getElementById('f-code-preview').textContent='—';return}
+  const c=CATALOG[i];
+  document.getElementById('f-code-preview').textContent=`${c.base}-${c.size.replace(/\s/g,'')}-${cuit||'SINCUIT'}`;
+}
+
+/* ═══ TREND CARDS (histórico por mes) ═══ */
+function monthKey(d){return d?(d.length===7?d:d.slice(0,7)):null}
+function last6Months(){const arr=[];const n=new Date();for(let i=5;i>=0;i--){const d=new Date(n.getFullYear(),n.getMonth()-i,1);arr.push({key:d.toISOString().slice(0,7),lbl:d.toLocaleDateString('es',{month:'short'})})}return arr}
+function renderTrends(){
+  const months=last6Months();
+  // vencimientos por mes (recarga)
+  const venc=months.map(mo=>data.filter(m=>monthKey(m.proximaRecarga)===mo.key).length);
+  // altas (cargados) por mes
+  const altas=months.map(mo=>data.filter(m=>monthKey(m.fechaAlta)===mo.key).length);
+  // entregas / provisorios
+  const entregas=months.map(mo=>data.filter(m=>monthKey(m.nuevoFecha)===mo.key).length);
+  const spark=(vals,dim)=>{const mx=Math.max(...vals,1);return `<div class="spark">${vals.map((v,i)=>`<div class="spark-bar ${dim&&i<vals.length-1?'':''}"><div class="sb-tip">${v}</div><div class="sb-fill" style="height:${(v/mx*100)||3}%"></div></div>`).join('')}</div><div class="spark-labels">${months.map(m=>`<span>${m.lbl}</span>`).join('')}</div>`};
+  const peakVenc=months[venc.indexOf(Math.max(...venc))];
+  // mercados detail (vencimientos por mercado)
+  const byMkt={};MERCADOS.forEach(mk=>byMkt[mk]=data.filter(m=>m.mercado===mk&&(daysTo(m.proximaRecarga)??999)<=90).length);
+  const mxMkt=Math.max(...Object.values(byMkt),1);
+  const mktRows=MERCADOS.map(mk=>{const sens=SENSIBLES.includes(mk);return `<div class="mkt-row ${sens?'sensible':''}"><span class="mkt-name">${mk}${sens?' ⚠️':''}</span><div class="mkt-bar"><div style="width:${byMkt[mk]/mxMkt*100}%"></div></div><span class="mkt-val">${byMkt[mk]} · +${MERCADO_GROWTH[mk]}%</span></div>`}).join('');
+  document.getElementById('trend-cards').innerHTML=`
+    <div class="trend-card">
+      <div class="tc-head"><div><div class="tc-title">Vencimientos por mes</div><div class="tc-big red">${venc.reduce((a,b)=>a+b,0)}</div><div class="tc-sub">próximos 6 meses · pico en ${peakVenc.lbl}</div></div>
+        <button class="tc-expand" onclick="toggleDetail('d-venc')">Ver mercados ▾</button></div>
+      ${spark(venc)}
+      <div class="tc-detail" id="d-venc"><div style="font-size:11px;color:var(--text3);margin-bottom:8px;text-transform:uppercase;letter-spacing:.05em">Vencimientos ≤90d por mercado</div>${mktRows}
+        <button class="coord-btn" onclick="openCoord()">📨 Coordinar recambio — Salud / Educación</button></div>
+    </div>
+    <div class="trend-card">
+      <div class="tc-head"><div><div class="tc-title">Matafuegos cargados</div><div class="tc-big ok">${altas.reduce((a,b)=>a+b,0)}</div><div class="tc-sub">altas registradas · últimos 6 meses</div></div></div>
+      ${spark(altas)}
+    </div>
+    <div class="trend-card">
+      <div class="tc-head"><div><div class="tc-title">Entregas / recambios</div><div class="tc-big warn">${entregas.reduce((a,b)=>a+b,0)}</div><div class="tc-sub">matafuegos nuevos entregados</div></div></div>
+      ${spark(entregas)}
+    </div>`;
+}
+function toggleDetail(id){document.getElementById(id).classList.toggle('show')}
+
+/* ═══ KPIs ═══ */
+function renderKpis(){
+  const tot=data.length,op=data.filter(m=>m.estadoActual==='Operativo').length;
+  const ven=data.filter(m=>(daysTo(m.proximaRecarga)??999)<0||(daysTo(m.caducidad)??999)<0||m.estadoActual==='Vencido').length;
+  const prox=buildAlerts().filter(a=>a.days>=0&&a.days<=90).length;
+  const prov=data.filter(m=>m.tieneProvisorio==='si').length;
+  document.getElementById('kpis').innerHTML=`
+    <div class="kpi"><div class="kpi-lbl">Total flota</div><div class="kpi-val">${tot}</div></div>
+    <div class="kpi ok"><div class="kpi-lbl">Operativos</div><div class="kpi-val">${op}</div></div>
+    <div class="kpi warn"><div class="kpi-lbl">Alertas 90d</div><div class="kpi-val">${prox}</div></div>
+    <div class="kpi crit"><div class="kpi-lbl">Vencidos</div><div class="kpi-val">${ven}</div></div>
+    <div class="kpi info"><div class="kpi-lbl">Con provisorio</div><div class="kpi-val">${prov}</div></div>`;
+  document.getElementById('dash-urgent').innerHTML=buildAlerts().slice(0,6).map(a=>alertCard(a,true)).join('')||'<p style="color:var(--text3);text-align:center;padding:24px">✅ Sin vencimientos urgentes</p>';
+}
+
+/* ═══ ALERTS ENGINE ═══ */
 function buildAlerts(){
   const res=[];
   data.forEach(m=>{
-    const checks=[
-      {key:'proximaRecarga',lbl:'Recarga Anual'},
-      {key:'proximoCPP',lbl:'Control Periódico Preventivo'},
-      {key:'proximaPH',lbl:'Prueba Hidráulica'},
-      {key:'caducidad',lbl:'Caducidad Definitiva'},
-    ];
-    checks.forEach(c=>{
-      const n=daysTo(m[c.key]);if(n===null)return;
-      const sev=n<0?'crit':n<=30?'crit':n<=90?'warn':'info';
-      res.push({id:m.id,lote:m.lote,sector:m.sector,tipo:m.tipo,lbl:c.lbl,date:m[c.key],days:n,sev});
+    [['proximaRecarga','Recarga Anual'],['proximoCPP','Control Periódico'],['proximaPH','Prueba Hidráulica'],['caducidad','Caducidad Definitiva']].forEach(([k,l])=>{
+      const n=daysTo(m[k]);if(n===null)return;
+      res.push({id:m.id,code:codeOf(m),sector:m.sector,mercado:m.mercado,lbl:l,date:m[k],days:n,sev:sevOf(n)});
     });
   });
   return res.sort((a,b)=>a.days-b.days);
 }
-function renderBanner(){
-  const crits=buildAlerts().filter(a=>a.sev==='crit');
-  const el=document.getElementById('alert-band');
-  const nb=document.getElementById('nb-alertas');
-  if(!crits.length){el.innerHTML='';nb.classList.remove('show');return}
-  nb.textContent=crits.length;nb.classList.add('show');
-  el.innerHTML=`<div class="alert-strip crit">
-    ⚡ <strong>${crits.length} alerta${crits.length!==1?'s':''} crítica${crits.length!==1?'s':''}:</strong>
-    ${crits.slice(0,3).map(a=>`<strong>${a.lote}</strong> — ${a.lbl} (${a.days<0?'venció':'vence en '+a.days+'d'})`).join(' · ')}${crits.length>3?` y ${crits.length-3} más…`:''}
-  </div>`;
+function alertCard(a,live){
+  const dl=a.days<0?`Venció ${Math.abs(a.days)}d`:`${a.days}d`;
+  const tag=a.days<0?'VENCIDO':a.days<=30?'CRÍTICO':a.days<=90?'PRÓXIMO':'FUTURO';
+  return `<div class="alert-card ${live&&a.sev>=3?'live':''}" style="--sc:${SEVC[a.sev]}" onmouseenter="showTip(event,'${a.id}')" onmousemove="moveTip(event)" onmouseleave="hideTip()" onclick="openDet('${a.id}')">
+    <div class="al-pulse"></div>
+    <div class="al-body"><div class="al-title">${a.code}<span class="tag" style="background:${SEVC[a.sev]}">${tag}</span></div>
+    <div class="al-sub">${a.lbl} · ${a.sector} · ${a.mercado||'—'} · ${fmt(a.date)}</div></div>
+    <div class="al-days">${dl}</div></div>`;
+}
+function renderAlertHero(){
+  const all=buildAlerts();
+  const c=all.filter(a=>a.sev>=3).length,w=all.filter(a=>a.sev===2).length,i=all.filter(a=>a.sev<=1&&a.days>=0).length;
+  document.getElementById('alert-hero').innerHTML=`
+    <div class="ah-card crit"><div class="n">${c}</div><div class="l">🔴 Vencidas / críticas &lt;30d</div></div>
+    <div class="ah-card warn"><div class="n">${w}</div><div class="l">🟠 Próximas 30–90d</div></div>
+    <div class="ah-card info"><div class="n">${i}</div><div class="l">🟢 A futuro &gt;90d</div></div>
+    <div class="ah-card ok"><div class="n">${data.length}</div><div class="l">🧯 Total monitoreados</div></div>`;
 }
 function renderAlerts(){
+  renderAlertHero();
   const all=buildAlerts();
-  const filt=alFilt==='all'?all:all.filter(a=>a.sev===alFilt);
-  const el=document.getElementById('al-list');
-  if(!filt.length){el.innerHTML='<p style="text-align:center;padding:40px;color:var(--text3)">Sin alertas en este rango ✅</p>';return}
-  el.innerHTML=filt.map(a=>{
-    const icon=a.sev==='crit'?'🔴':a.sev==='warn'?'🟡':'🔵';
-    const dl=a.days<0?`Venció hace ${Math.abs(a.days)}d`:`${a.days}d`;
-    return`<div class="alert-card ${a.sev}">
-      <div class="al-icon">${icon}</div>
-      <div class="al-body">
-        <div class="al-title">${a.lote} — ${a.lbl}</div>
-        <div class="al-sub">${a.sector} · ${a.tipo} · ${fmt(a.date)}</div>
-      </div>
-      <div class="al-days">${dl}</div>
-      <button class="btn btn-outline btn-sm" onclick="openDet('${a.id}')">Ver</button>
+  const f=alFilt==='all'?all:alFilt==='crit'?all.filter(a=>a.sev>=3):alFilt==='warn'?all.filter(a=>a.sev===2):all.filter(a=>a.sev<=1&&a.days>=0);
+  document.getElementById('al-list').innerHTML=f.length?f.map(a=>alertCard(a,true)).join(''):'<p style="color:var(--text3);text-align:center;padding:40px">Sin alertas en este rango ✅</p>';
+}
+function filtAl(t,btn){alFilt=t;document.querySelectorAll('#page-alertas .tab').forEach(x=>x.classList.remove('active'));btn.classList.add('active');renderAlerts()}
+
+/* ═══ TOOLTIP ═══ */
+function showTip(e,id){
+  const m=data.find(x=>x.id===id);if(!m)return;
+  const r=ring(m.anilloYr);
+  const tls=[['Recarga',m.proximaRecarga],['CPP',m.proximoCPP],['P. Hidr.',m.proximaPH],['Caducidad',m.caducidad]];
+  const tp=document.getElementById('tooltip');
+  tp.innerHTML=`<div class="tt-head"><div class="tt-code">${codeOf(m)}</div><div class="tt-sub">${m.tipoBase} ${m.tamano} · ${m.sector}</div></div>
+    <div class="tt-body">
+      <div class="tt-row"><span class="tt-k">Estado</span><span class="tt-v">${statChip(m.estadoActual)}</span></div>
+      <div class="tt-row"><span class="tt-k">Mercado</span><span class="tt-v">${m.mercado||'—'}</span></div>
+      <div class="tt-row"><span class="tt-k">Anillo</span><span class="tt-v">${r?`<span class="ring-badge" style="background:${r.hex};color:${r.txt}">${r.name} ${r.yr}</span>`:'—'}</span></div>
+      <div class="tt-timeline">${tls.map(([l,d])=>{const n=daysTo(d);const s=sevOf(n);const pct=n===null?0:Math.max(4,Math.min(100,100-(n/365*100)));return `<div class="tt-tl"><span class="lbl">${l}</span><div class="bar"><div style="width:${pct}%;background:${SEVC[s]}"></div></div><span class="d" style="color:${SEVC[s]}">${n===null?'—':n<0?'venc.':n+'d'}</span></div>`}).join('')}</div>
     </div>`;
-  }).join('');
+  tp.classList.add('show');moveTip(e);
 }
-function filtAl(t,btn){
-  alFilt=t;
-  document.querySelectorAll('#page-alertas .tab').forEach(x=>x.classList.remove('active'));
-  btn.classList.add('active');renderAlerts();
-}
+function moveTip(e){const tp=document.getElementById('tooltip');const w=340,h=tp.offsetHeight||280;let x=e.clientX+16,y=e.clientY+12;if(x+w>innerWidth)x=e.clientX-w-16;if(y+h>innerHeight)y=innerHeight-h-10;tp.style.left=x+'px';tp.style.top=Math.max(10,y)+'px'}
+function hideTip(){document.getElementById('tooltip').classList.remove('show')}
 
-// ─── STATS ────────────────────────────────────────────────────────────────
-function renderStats(){
-  const tot=data.length;
-  const op=data.filter(m=>m.estadoActual==='Operativo').length;
-  const ven=data.filter(m=>{
-    const n=Math.min(daysTo(m.proximaRecarga)??999,daysTo(m.caducidad)??999);
-    return n<0||m.estadoActual==='Vencido';
-  }).length;
-  const prox=buildAlerts().filter(a=>a.days>=0&&a.days<=90).length;
-  const prov=data.filter(m=>m.tieneProvisorio==='si').length;
-  document.getElementById('stats').innerHTML=`
-    <div class="stat"><div class="stat-lbl">Total</div><div class="stat-val">${tot}</div><div class="stat-sub">registrados</div></div>
-    <div class="stat ok"><div class="stat-lbl">Operativos</div><div class="stat-val">${op}</div><div class="stat-sub">en condición normal</div></div>
-    <div class="stat warn"><div class="stat-lbl">Alertas 90d</div><div class="stat-val">${prox}</div><div class="stat-sub">vencimientos próximos</div></div>
-    <div class="stat crit"><div class="stat-lbl">Vencidos/Críticos</div><div class="stat-val">${ven}</div><div class="stat-sub">acción inmediata</div></div>
-    <div class="stat info"><div class="stat-lbl">Con Provisorio</div><div class="stat-val">${prov}</div><div class="stat-sub">en reemplazo temp.</div></div>`;
-  document.getElementById('dash-alerts').innerHTML=
-    buildAlerts().filter(a=>a.days<=90).slice(0,8).map(a=>{
-      const dl=a.days<0?`Venció hace ${Math.abs(a.days)}d`:`${a.days}d`;
-      return`<div class="alert-card ${a.sev}">
-        <div class="al-icon">${a.sev==='crit'?'🔴':'🟡'}</div>
-        <div class="al-body"><div class="al-title">${a.lote} — ${a.lbl}</div>
-        <div class="al-sub">${a.sector} · ${fmt(a.date)}</div></div>
-        <div class="al-days">${dl}</div>
-        <button class="btn btn-outline btn-sm" onclick="openDet('${a.id}')">Ver</button>
-      </div>`;
-    }).join('')||'<p style="text-align:center;padding:32px;color:var(--text3)">✅ Sin vencimientos próximos en 90 días</p>';
-}
-
-// ─── TABLE ────────────────────────────────────────────────────────────────
-function sort(k){if(srtKey===k)srtAsc=!srtAsc;else{srtKey=k;srtAsc=true;}renderTbl()}
-function ringBadge(m){
-  if(!m.anilloYr)return'—';
-  const r=ring(m.anilloYr);if(!r)return m.anilloYr;
-  return`<span class="ring-badge" style="background:${r.hex};color:${r.txt};border:1px solid ${r.brd||'transparent'}">
-    <span class="ring-dot" style="background:${r.txt==='#fff'?'rgba(255,255,255,.35)':'rgba(0,0,0,.15)'}"></span>
-    ${r.name} ${r.yr}
-  </span>`;
-}
+/* ═══ TABLE ═══ */
+function sortT(k){if(srtKey===k)srtAsc=!srtAsc;else{srtKey=k;srtAsc=true}renderTbl()}
+function ringBadge(m){if(!m.anilloYr)return'<span style="color:var(--text3)">—</span>';const r=ring(m.anilloYr);if(!r)return m.anilloYr;return `<span class="ring-badge" style="background:${r.hex};color:${r.txt};border:1px solid ${r.brd||'transparent'}"><span class="ring-dot" style="background:${r.txt==='#fff'?'rgba(255,255,255,.4)':'rgba(0,0,0,.2)'}"></span>${r.name} ${r.yr}</span>`}
 function renderTbl(){
   const q=document.getElementById('srch').value.toLowerCase();
-  const ft=document.getElementById('ftipo').value;
-  const fe=document.getElementById('festado').value;
-  const fa=document.getElementById('fanillo').value;
+  const ft=document.getElementById('ftipo').value,fe=document.getElementById('festado').value,fm=document.getElementById('fmercado').value,fa=document.getElementById('fanillo').value;
   let rows=data.filter(m=>{
-    if(q&&!`${m.lote} ${m.sector} ${m.tipo} ${m.agente}`.toLowerCase().includes(q))return false;
-    if(ft&&m.tipo!==ft)return false;
-    if(fe&&m.estadoActual!==fe)return false;
-    if(fa&&String(m.anilloYr)!==fa)return false;
+    const tipoLbl=`${m.tipoBase} ${m.tamano}`;
+    if(q&&!`${codeOf(m)} ${m.sector} ${tipoLbl} ${m.mercado} ${m.cuit}`.toLowerCase().includes(q))return false;
+    if(ft&&tipoLbl!==ft)return false;if(fe&&m.estadoActual!==fe)return false;if(fm&&m.mercado!==fm)return false;if(fa&&String(m.anilloYr)!==fa)return false;
     return true;
   });
-  rows.sort((a,b)=>{
-    const va=a[srtKey]||'9999',vb=b[srtKey]||'9999';
-    return srtAsc?va.localeCompare(vb):vb.localeCompare(va);
-  });
+  rows.sort((a,b)=>{const A=srtKey==='code'?codeOf(a):(a[srtKey]||'zzz'),B=srtKey==='code'?codeOf(b):(b[srtKey]||'zzz');return srtAsc?(''+A).localeCompare(B):(''+B).localeCompare(A)});
   const tb=document.getElementById('tbl-body');
-  if(!rows.length){
-    tb.innerHTML=`<tr><td colspan="12" class="table-empty">Sin resultados. Hacé clic en <strong>+ Nuevo Matafuego</strong> para empezar.</td></tr>`;
-    return;
-  }
-  tb.innerHTML=rows.map(m=>`<tr>
-    <td><strong style="font-family:'JetBrains Mono',monospace;font-size:12px">${m.lote||'—'}</strong></td>
+  if(!rows.length){tb.innerHTML='<tr><td colspan="10" class="table-empty">Sin resultados. Hacé clic en <strong>+ Nuevo Matafuego</strong>.</td></tr>';return}
+  tb.innerHTML=rows.map(m=>`<tr onmouseenter="showTip(event,'${m.id}')" onmousemove="moveTip(event)" onmouseleave="hideTip()">
+    <td><div class="code-cell">${codeOf(m)}</div><small style="color:var(--text3)">${m.lote} · ${m.tipoBase} ${m.tamano}</small></td>
     <td style="max-width:150px;overflow:hidden;text-overflow:ellipsis">${m.sector||'—'}</td>
-    <td style="font-size:12px">${m.tipo||'—'}</td>
-    <td style="font-size:12px">${m.cap||'—'}</td>
+    <td><span style="font-size:12px">${m.mercado||'—'}</span></td>
     <td>${ringBadge(m)}</td>
     <td><div class="date-cell"><div class="date-val">${fmt(m.proximaRecarga)}</div>${dayChip(m.proximaRecarga)}</div></td>
     <td><div class="date-cell"><div class="date-val">${fmt(m.proximoCPP)}</div>${dayChip(m.proximoCPP)}</div></td>
     <td><div class="date-cell"><div class="date-val">${fmt(m.proximaPH)}</div>${dayChip(m.proximaPH)}</div></td>
     <td><div class="date-cell"><div class="date-val">${fmt(m.caducidad)}</div>${dayChip(m.caducidad)}</div></td>
     <td>${statChip(m.estadoActual)}</td>
-    <td>${m.tieneProvisorio==='si'?'<span class="prov-tag">PROV.</span>':''}</td>
-    <td><div style="display:flex;gap:4px">
-      <button class="btn btn-ghost btn-sm" onclick="openDet('${m.id}')" title="Ver detalle">👁</button>
-      <button class="btn btn-ghost btn-sm" onclick="openEdit('${m.id}')" title="Editar">✏️</button>
-      <button class="btn btn-ghost btn-sm" onclick="del('${m.id}')" title="Eliminar">🗑</button>
-    </div></td>
+    <td><div style="display:flex;gap:2px"><button class="btn-ghost" onclick="openDet('${m.id}')" title="Ver">👁</button><button class="btn-ghost" onclick="openEdit('${m.id}')" title="Editar">✏️</button><button class="btn-ghost" onclick="del('${m.id}')" title="Borrar">🗑</button></div></td>
   </tr>`).join('');
 }
-function del(id){if(!confirm('¿Eliminar este matafuego?'))return;data=data.filter(m=>m.id!==id);sv('mats',data);renderAll()}
+function del(id){if(!confirm('¿Eliminar este matafuego?'))return;data=data.filter(m=>m.id!==id);sv('flama_mats',data);renderAll()}
 
-// ─── GALLERY ──────────────────────────────────────────────────────────────
+/* ═══ VENCIMIENTOS BOARD ═══ */
+function setBoard(mode){boardMode=mode;document.getElementById('vt-estado').classList.toggle('active',mode==='estado');document.getElementById('vt-anillo').classList.toggle('active',mode==='anillo');renderBoard()}
+function nextVenc(m){const arr=[['Recarga',m.proximaRecarga],['CPP',m.proximoCPP],['P.Hidr.',m.proximaPH],['Caduc.',m.caducidad]].map(([l,d])=>({l,d,n:daysTo(d)})).filter(x=>x.n!==null).sort((a,b)=>a.n-b.n);return arr[0]||{l:'—',d:null,n:null}}
+function boardCard(m){
+  const nv=nextVenc(m);const s=sevOf(nv.n);const pct=nv.n===null?0:Math.max(4,Math.min(100,100-(nv.n/365*100)));
+  return `<div class="venc-card" style="--sc:${SEVC[s]}" onmouseenter="showTip(event,'${m.id}')" onmousemove="moveTip(event)" onmouseleave="hideTip()" onclick="openDet('${m.id}')">
+    <div class="vc-code">${codeOf(m)}</div><div class="vc-sector">${m.sector}</div>
+    <div class="vc-next"><span class="lbl">${nv.l}: ${fmt(nv.d)}</span><span class="vc-days">${nv.n===null?'—':nv.n<0?'✕':nv.n+'d'}</span></div>
+    <div class="vc-meter"><div style="width:${pct}%"></div></div></div>`;
+}
+function renderBoard(){
+  const el=document.getElementById('board');
+  if(boardMode==='estado'){
+    const cols=[['Vencido','#ED1C24'],['En mantenimiento','#F5A623'],['Operativo','#22C55E'],['De baja','#6B6B78']];
+    el.innerHTML=cols.map(([st,c])=>{
+      const items=data.filter(m=>m.estadoActual===st).sort((a,b)=>(nextVenc(a).n??999)-(nextVenc(b).n??999));
+      return `<div class="board-col"><div class="board-col-hd" style="--col-c:${c};color:${c}">${st}<span class="cnt">${items.length}</span></div><div class="board-col-body">${items.map(boardCard).join('')||'<div class="board-empty">Sin matafuegos</div>'}</div></div>`;
+    }).join('');
+  } else {
+    const years=[...new Set(data.map(m=>m.anilloYr).filter(Boolean))].sort();
+    el.innerHTML=years.map(yr=>{
+      const r=ring(yr);const c=r?r.hex:'#6B6B78';
+      const items=data.filter(m=>String(m.anilloYr)===String(yr)).sort((a,b)=>(nextVenc(a).n??999)-(nextVenc(b).n??999));
+      return `<div class="board-col"><div class="board-col-hd" style="--col-c:${c};color:${r&&r.txt==='#fff'?c:c}">${r?r.name:yr} ${yr}<span class="cnt">${items.length}</span></div><div class="board-col-body">${items.map(boardCard).join('')||'<div class="board-empty">—</div>'}</div></div>`;
+    }).join('')||'<p style="color:var(--text3)">Sin anillos cargados</p>';
+  }
+}
+
+/* ═══ GALLERY ═══ */
 function renderGal(){
-  const types=galFilt==='all'?['qr','oblea','opds']:
-               galFilt==='qr'?['qr']:galFilt==='oblea'?['oblea']:['opds'];
-  const lbls={qr:'QR',oblea:'Oblea IRAM',opds:'OPDS'};
-  const items=[];
-  data.forEach(m=>{types.forEach(t=>{if(m['foto_'+t])items.push({m,t,lbl:lbls[t]})})});
-  const el=document.getElementById('gallery');
-  if(!items.length){el.innerHTML='<p style="color:var(--text3);text-align:center;padding:40px;grid-column:1/-1">Sin imágenes cargadas. Editá un matafuego y subí fotos de las obleas y QR.</p>';return}
-  el.innerHTML=items.map(({m,t,lbl})=>`<div class="gal-card">
-    <div class="gal-img">
-      <img src="${m['foto_'+t]}" alt="${lbl}">
-      <span class="gal-type">${lbl}</span>
-    </div>
-    <div class="gal-foot">
-      <div class="gal-lote">${m.lote||'—'}</div>
-      <div class="gal-sec">${m.sector||'—'}</div>
-    </div>
-  </div>`).join('');
+  const el=document.getElementById('gallery');const items=[];
+  data.forEach(m=>{
+    if(galFilt==='all'||galFilt==='unit')items.push({m,t:'Unidad',svg:m.foto_unit||matImg(m,120)});
+    if(galFilt==='all'||galFilt==='qr')items.push({m,t:'QR',svg:m.foto_qr||qrSvg(codeOf(m))});
+    if(galFilt==='all'||galFilt==='oblea')items.push({m,t:'Oblea ODS/OPDS',svg:m.foto_oblea||obleaSvg(m)});
+  });
+  if(!items.length){el.innerHTML='<p style="color:var(--text3);text-align:center;padding:40px;grid-column:1/-1">Sin matafuegos cargados</p>';return}
+  el.innerHTML=items.map(({m,t,svg})=>`<div class="gal-card" onclick="openDet('${m.id}')" onmouseenter="showTip(event,'${m.id}')" onmousemove="moveTip(event)" onmouseleave="hideTip()">
+    <div class="gal-img"><span class="gal-type">${t}</span>${svg.startsWith('data:')?`<img src="${svg}">`:svg}</div>
+    <div class="gal-foot"><div class="gal-code">${codeOf(m)}</div><div class="gal-sec">${m.sector}</div></div></div>`).join('');
 }
-function filtGal(t,btn){
-  galFilt=t;
-  document.querySelectorAll('#page-fotos .tab').forEach(x=>x.classList.remove('active'));
-  btn.classList.add('active');renderGal();
-}
+function filtGal(t,btn){galFilt=t;document.querySelectorAll('#page-galeria .tab').forEach(x=>x.classList.remove('active'));btn.classList.add('active');renderGal()}
 
-// ─── SYH PLANILLA ─────────────────────────────────────────────────────────
-function renderSyhFilter(){
-  const sel=document.getElementById('syh-filter');
-  if(!sel)return;
-  sel.innerHTML='<option value="">Todos los matafuegos</option>'+
-    data.map(m=>`<option value="${m.id}">${m.lote} — ${m.sector}</option>`).join('');
-}
+/* ═══ PLANILLA SYH ═══ */
+function renderSyhFilter(){const s=document.getElementById('syh-filter');if(!s)return;const cur=s.value;s.innerHTML='<option value="">Todos los matafuegos</option>'+data.map(m=>`<option value="${m.id}">${codeOf(m)} — ${m.sector}</option>`).join('');s.value=cur}
 function renderSyH(){
   renderSyhFilter();
-  const fid=document.getElementById('syh-filter')?.value||'';
+  const fid=document.getElementById('syh-filter').value;
   const rows=fid?data.filter(m=>m.id===fid):data;
-  const c=company;
-  const logo=c.logo?`<img src="${c.logo}" style="height:48px;object-fit:contain">`:
-    `<div style="font-size:28px">🏭</div>`;
-  const checks=['cPres','cPrec','cMang','cBoq','cSop','cSen','cEtq','cAcc'];
-  const clbls=['Presión','Precinto','Manguera','Boquilla','Soporte','Señalización','Oblea','Acceso'];
-  document.getElementById('planilla-preview').innerHTML=`
-    <div class="planilla-header">
-      <div style="display:flex;align-items:center;gap:12px">
-        ${logo}
-        <div class="planilla-empresa">${c.nombre||'Empresa'}
-          <small>${c.dir||''}</small>
-          <small>CUIT: ${c.cuit||'—'}</small>
-        </div>
-      </div>
-      <div class="planilla-title">
-        <h2>PLANILLA DE CONTROL DE MATAFUEGOS</h2>
-        <p>Registro de Inspecciones Periódicas</p>
-      </div>
-      <div class="planilla-norm">
-        <strong>IRAM 3517-2 (ed. 2020)</strong>
-        Res. 349/07 OPDS<br>
-        Fecha: ${fmt(today())}
-        ${c.syh_nombre?`<br>Resp. SyH: ${c.syh_nombre}`:''}
-        ${c.syh_mat?`<br>Mat.: ${c.syh_mat}`:''}
-      </div>
+  const c=company;const logo=c.logo?`<img class="pl-logo" src="${c.logo}">`:`<svg class="pl-logo"><use href="#flameIcon"/></svg>`;
+  const checks=['cPres','cPrec','cMang','cBoq','cSop','cSen','cEtq','cAcc'];const clbl=['Pres.','Prec.','Mang.','Boq.','Sop.','Señ.','Obl.','Acc.'];
+  document.getElementById('planilla').innerHTML=`
+    <div class="pl-head">
+      <div class="pl-emp">${logo}<div class="pl-emp-txt">${c.nombre||'Empresa'}<small>${c.dir||''}</small><small>CUIT: ${c.cuit||'—'} · ${c.rubro||''}</small></div></div>
+      <div class="pl-title"><h2>Planilla de Control de Matafuegos</h2><p>Registro de Inspecciones — Seguridad e Higiene</p></div>
+      <div class="pl-norm"><strong>IRAM 3517-2 (2020)</strong>Ley 19.587 · Dec. 351/79<br>Res. 349/07 OPDS<br>Emisión: ${fmt(today())}${c.syh_nombre?`<br>Resp: ${c.syh_nombre}`:''}</div>
     </div>
-    <div class="tbl-scroll"><table style="font-size:11px">
-      <thead><tr>
-        <th>Lote/N°</th><th>Sector</th><th>Tipo / Cap.</th><th>Anillo</th>
-        <th>Fab.</th><th>Inst.</th><th>Últ. Recarga</th><th>Próx. Recarga</th>
-        <th>Últ. CPP</th><th>Próx. CPP</th><th>Últ. PH</th><th>Próx. PH</th>
-        <th>Caducidad</th><th>OPDS</th>
-        ${clbls.map(l=>`<th>${l}</th>`).join('')}
-        <th>Resul.</th><th>Insp.</th><th>Resp. SyH</th><th>Obs.</th>
-      </tr></thead>
-      <tbody>${rows.length?rows.map(m=>{
-        const r=ring(m.anilloYr);
-        const rb=r?`<span style="display:inline-flex;align-items:center;gap:4px;background:${r.hex};color:${r.txt};padding:1px 6px;border-radius:10px;font-size:10px;font-weight:700">${r.name}</span>`:'—';
-        const hasF=checks.some(k=>(m[k]||'').includes('❌'));
-        const hasW=checks.some(k=>(m[k]||'').includes('⚠️'));
-        const res=hasF?'<span class="chip crit">NO CONF.</span>':hasW?'<span class="chip warn">REGULAR</span>':'<span class="chip ok">CONF.</span>';
-        return`<tr>
-          <td><strong>${m.lote||'—'}</strong></td>
-          <td>${m.sector||'—'}</td>
-          <td>${(m.tipo||'—').replace(' — ',' ')}<br><small>${m.cap||''}</small></td>
-          <td>${rb}</td>
-          <td>${fmt(m.fabricacion)}</td><td>${fmt(m.instalacion)}</td>
-          <td>${fmt(m.ultimaRecarga)}</td><td>${fmt(m.proximaRecarga)}</td>
-          <td>${fmt(m.ultimoCPP)}</td><td>${fmt(m.proximoCPP)}</td>
-          <td>${fmt(m.ultimaPH)}</td><td>${fmt(m.proximaPH)}</td>
-          <td>${fmt(m.caducidad)}</td>
-          <td style="font-size:10px">${m.opds||'—'}</td>
-          ${checks.map(k=>`<td style="font-size:12px">${(m[k]||'—').split(' ')[0]}</td>`).join('')}
-          <td>${res}</td>
-          <td style="font-family:'JetBrains Mono',monospace;font-size:10px">${fmt(m.fechaInsp)}</td>
-          <td style="font-size:11px">${m.responsable||'—'}</td>
-          <td style="max-width:120px;white-space:normal;font-size:11px">${m.obs||'—'}</td>
-        </tr>`;
-      }).join(''):`<tr><td colspan="30" class="table-empty">Sin registros</td></tr>`}
-      </tbody>
-    </table></div>
-    <div style="margin-top:24px;display:flex;justify-content:space-between;gap:40px;font-size:12px">
-      <div style="flex:1;border-top:1px solid var(--text);padding-top:6px;text-align:center">
-        Firma Responsable SyH<br><small>${c.syh_nombre||'_______________________'}</small>
-      </div>
-      <div style="flex:1;border-top:1px solid var(--text);padding-top:6px;text-align:center">
-        Matrícula / CUIL<br><small>${c.syh_mat||'_______________________'}</small>
-      </div>
-      <div style="flex:1;border-top:1px solid var(--text);padding-top:6px;text-align:center">
-        Fecha<br><small>${fmt(today())}</small>
-      </div>
+    <div class="pl-legend"><span>✅ Conforme</span><span>⚠️ Regular</span><span>❌ No conforme</span><span>— N/A</span></div>
+    <div style="overflow-x:auto"><table class="pl-table"><thead><tr>
+      <th>Código</th><th>N° Int.</th><th>Sector</th><th>Tipo/Tam.</th><th>Anillo</th><th>Fab.</th><th>Recarga</th><th>CPP</th><th>P.Hidr.</th><th>Caduc.</th><th>OPDS</th>
+      ${clbl.map(l=>`<th>${l}</th>`).join('')}<th>Result.</th><th>Insp.</th><th>Resp.</th></tr></thead><tbody>
+      ${rows.length?rows.map(m=>{const r=ring(m.anilloYr);const hasF=checks.some(k=>(m[k]||'').includes('❌'));const hasW=checks.some(k=>(m[k]||'').includes('⚠️'));const res=hasF?'NO CONF.':hasW?'REGULAR':'CONF.';const rc=hasF?'#ED1C24':hasW?'#B4700A':'#12813C';
+        return `<tr><td style="font-weight:700">${codeOf(m)}</td><td>${m.lote}</td><td>${m.sector}</td><td>${m.tipoBase} ${m.tamano}</td>
+          <td style="font-weight:700">${r?r.name:'—'}</td><td>${fmt(m.fabricacion)}</td><td>${fmt(m.proximaRecarga)}</td><td>${fmt(m.proximoCPP)}</td><td>${fmt(m.proximaPH)}</td><td>${fmt(m.caducidad)}</td><td>${m.opds||'—'}</td>
+          ${checks.map(k=>`<td style="text-align:center">${(m[k]||'—').split(' ')[0]}</td>`).join('')}<td style="color:${rc};font-weight:700">${res}</td><td>${fmt(m.fechaInsp)}</td><td>${m.responsable||'—'}</td></tr>`;
+      }).join(''):'<tr><td colspan="27" style="text-align:center;padding:20px;color:#888">Sin registros</td></tr>'}
+      </tbody></table></div>
+    <div class="pl-sign"><div>Firma Responsable SyH<br><small>${c.syh_nombre||'________________'}</small></div><div>Matrícula / CUIL<br><small>${c.syh_mat||'________________'}</small></div><div>Aclaración y sello<br><small>&nbsp;</small></div><div>Fecha<br><small>${fmt(today())}</small></div></div>
+    <div class="pl-foot"><strong>Plazos normativos IRAM 3517-2:</strong> Control Periódico Preventivo cada 6 meses · Recarga anual (máx. 12 meses) · Prueba hidráulica cada 5 años · Caducidad definitiva a los 20 años de fabricación. Documento de registro obligatorio conforme Ley 19.587 de Higiene y Seguridad y Decreto 351/79.</div>`;
+}
+function printSyH(){document.body.classList.add('printing-syh');window.print();setTimeout(()=>document.body.classList.remove('printing-syh'),400)}
+function uploadPlanillaLogo(){logoTarget='planilla';document.getElementById('planilla-logo-inp').click()}
+
+/* ═══ CARGA DE FUEGO ═══ */
+let cfRows=[{mat:'Madera / muebles',kg:2000},{mat:'Papel / cartón',kg:800},{mat:'Plástico PVC',kg:400}];
+function renderCFRows(){
+  document.getElementById('cf-rows').innerHTML=cfRows.map((r,i)=>{
+    const pc=MATERIALS[r.mat]||PC_MADERA;const cal=(r.kg*pc/1000).toFixed(0);
+    return `<tr>
+      <td><select onchange="cfSet(${i},'mat',this.value)">${Object.keys(MATERIALS).map(k=>`<option ${k===r.mat?'selected':''}>${k}</option>`).join('')}</select></td>
+      <td><input type="number" value="${r.kg}" oninput="cfSet(${i},'kg',this.value)"></td>
+      <td class="mono" style="color:var(--text3)">${pc}</td>
+      <td class="mono" style="font-weight:700">${cal}</td>
+      <td><button class="mat-del" onclick="cfDel(${i})">🗑</button></td></tr>`;
+  }).join('');
+}
+function cfSet(i,k,v){cfRows[i][k]=k==='kg'?(+v||0):v;renderCFRows();calcCF()}
+function cfDel(i){cfRows.splice(i,1);renderCFRows();calcCF()}
+function addCFRow(){cfRows.push({mat:'Madera / muebles',kg:100});renderCFRows();calcCF()}
+// Tabla 1 (clase A) y Tabla 2 (clase B): [cargaMax, {riesgo:potencial}]
+const TAB_A=[
+  {max:15,  v:{3:'1 A',4:'1 A',5:'1 A'}},
+  {max:30,  v:{3:'2 A',4:'1 A',5:'1 A'}},
+  {max:60,  v:{3:'3 A',4:'2 A',5:'1 A'}},
+  {max:100, v:{3:'6 A',4:'4 A',5:'3 A'}},
+  {max:Infinity,v:{3:'a determinar',4:'a determinar',5:'a determinar'}},
+];
+const TAB_B=[
+  {max:15,  v:{1:'—',2:'6 B',3:'4 B'}},
+  {max:30,  v:{1:'—',2:'8 B',3:'6 B'}},
+  {max:60,  v:{1:'—',2:'10 B',3:'8 B'}},
+  {max:100, v:{1:'—',2:'20 B',3:'10 B'}},
+  {max:Infinity,v:{1:'a determinar',2:'a determinar',3:'a determinar'}},
+];
+// Resistencia al fuego F según carga y riesgo (simplificado Anexo VII, sin ventilación)
+function resistencia(qf,riesgo){
+  const bands=[[15,'F 30'],[30,'F 60'],[60,'F 90'],[100,'F 120'],[Infinity,'F 180']];
+  let f=bands.find(b=>qf<=b[0])[1];
+  if(riesgo<=2)f='F 180'; // riesgos altos exigen máximo
+  return f;
+}
+function buildRefTables(){
+  const riesgos=[3,4,5];
+  document.getElementById('tab-a').innerHTML+=`<tr><th>Carga (kg/m²)</th>${riesgos.map(r=>`<th>R${r}</th>`).join('')}</tr>`+
+    TAB_A.map(row=>`<tr data-max="${row.max}"><td>${row.max===Infinity?'> 100':'≤ '+row.max}</td>${riesgos.map(r=>`<td data-r="${r}">${row.v[r]||'—'}</td>`).join('')}</tr>`).join('');
+  const riesgosB=[1,2,3];
+  document.getElementById('tab-b').innerHTML+=`<tr><th>Carga (kg/m²)</th>${riesgosB.map(r=>`<th>R${r}</th>`).join('')}</tr>`+
+    TAB_B.map(row=>`<tr data-max="${row.max}"><td>${row.max===Infinity?'> 100':'≤ '+row.max}</td>${riesgosB.map(r=>`<td data-r="${r}">${row.v[r]||'—'}</td>`).join('')}</tr>`).join('');
+}
+function calcCF(){
+  const area=+document.getElementById('cf-area').value||1;
+  const riesgo=+document.getElementById('cf-riesgo').value;
+  let totCal=0;cfRows.forEach(r=>{totCal+=(r.kg||0)*(MATERIALS[r.mat]||PC_MADERA)});
+  const qf=totCal/(PC_MADERA*area);
+  document.getElementById('cf-qf').innerHTML=qf.toFixed(1)+' <small>kg/m²</small>';
+  document.getElementById('cf-cal').textContent=(totCal/1e6).toFixed(2)+' Gcal';
+  const clas=qf<=15?'BAJA':qf<=60?'MEDIA':qf<=100?'ALTA':'MUY ALTA';
+  const clasC=qf<=15?'#22C55E':qf<=60?'#F5A623':qf<=100?'#FF6A2C':'#ED1C24';
+  document.getElementById('cf-clas').innerHTML=`<span style="color:${clasC}">${clas}</span>`;
+  const rowA=TAB_A.find(r=>qf<=r.max);const potA=rowA.v[riesgo]||rowA.v[3]||'—';
+  document.getElementById('cf-pa').textContent=(riesgo<=2)?'—':potA;
+  document.getElementById('cf-rf').textContent=resistencia(qf,riesgo);
+  // highlight ref tables
+  document.querySelectorAll('#tab-a td,#tab-b td').forEach(td=>td.classList.remove('hl'));
+  const hl=(tblId,tabArr,rs)=>{const tbl=document.getElementById(tblId);const idx=tabArr.findIndex(r=>qf<=r.max);const tr=tbl.querySelectorAll('tr')[idx+1];if(tr){const td=tr.querySelector(`td[data-r="${riesgo}"]`);if(td)td.classList.add('hl')}};
+  hl('tab-a',TAB_A);
+  const cell=document.querySelector(`#tab-b td[data-r="${riesgo}"]`);
+  const trb=document.getElementById('tab-b').querySelectorAll('tr')[TAB_B.findIndex(r=>qf<=r.max)+1];
+  if(trb){const td=trb.querySelector(`td[data-r="${riesgo}"]`);if(td)td.classList.add('hl')}
+}
+function printCF(){
+  const area=+document.getElementById('cf-area').value||1,riesgo=+document.getElementById('cf-riesgo').value,sector=document.getElementById('cf-sector').value;
+  let totCal=0;cfRows.forEach(r=>totCal+=(r.kg||0)*(MATERIALS[r.mat]||PC_MADERA));
+  const qf=totCal/(PC_MADERA*area);const rowA=TAB_A.find(r=>qf<=r.max);const potA=riesgo<=2?'—':(rowA.v[riesgo]||rowA.v[3]);
+  const clas=qf<=15?'BAJA':qf<=60?'MEDIA':qf<=100?'ALTA':'MUY ALTA';const c=company;
+  const logo=c.logo?`<img class="pl-logo" src="${c.logo}">`:`<svg class="pl-logo"><use href="#flameIcon"/></svg>`;
+  document.getElementById('cf-print').innerHTML=`<div class="planilla">
+    <div class="pl-head"><div class="pl-emp">${logo}<div class="pl-emp-txt">${c.nombre||'Empresa'}<small>${c.dir||''}</small><small>CUIT: ${c.cuit||'—'}</small></div></div>
+      <div class="pl-title"><h2>Estudio de Carga de Fuego</h2><p>${sector}</p></div>
+      <div class="pl-norm"><strong>Dec. 351/79 Anexo VII</strong>Ley 19.587<br>Emisión: ${fmt(today())}</div></div>
+    <table class="pl-table"><thead><tr><th>Material combustible</th><th>Cantidad (kg)</th><th>Poder calorífico (kcal/kg)</th><th>Calor generado (Mcal)</th></tr></thead>
+      <tbody>${cfRows.map(r=>`<tr><td>${r.mat}</td><td>${r.kg}</td><td>${MATERIALS[r.mat]||PC_MADERA}</td><td>${((r.kg||0)*(MATERIALS[r.mat]||PC_MADERA)/1000).toFixed(0)}</td></tr>`).join('')}
+      <tr style="font-weight:800;background:#f0f0f0"><td colspan="3">CALOR TOTAL</td><td>${(totCal/1000).toFixed(0)} Mcal</td></tr></tbody></table>
+    <div style="display:flex;gap:20px;margin-top:16px">
+      <div style="flex:1;text-align:center;border:2px solid #ED1C24;border-radius:8px;padding:14px"><div style="font-size:11px;color:#666;text-transform:uppercase">Carga de fuego (Qf)</div><div style="font-family:'Barlow Condensed';font-size:34px;font-weight:800;color:#ED1C24">${qf.toFixed(1)} kg/m²</div></div>
+      <div style="flex:1;text-align:center;border:1px solid #ccc;border-radius:8px;padding:14px"><div style="font-size:11px;color:#666;text-transform:uppercase">Superficie</div><div style="font-family:'Barlow Condensed';font-size:34px;font-weight:800">${area} m²</div></div>
+      <div style="flex:1;text-align:center;border:1px solid #ccc;border-radius:8px;padding:14px"><div style="font-size:11px;color:#666;text-transform:uppercase">Clasificación</div><div style="font-family:'Barlow Condensed';font-size:28px;font-weight:800">${clas}</div></div>
+      <div style="flex:1;text-align:center;border:1px solid #ccc;border-radius:8px;padding:14px"><div style="font-size:11px;color:#666;text-transform:uppercase">Potencial extintor</div><div style="font-family:'Barlow Condensed';font-size:34px;font-weight:800;color:#ED1C24">${potA}</div></div>
     </div>
-    <div style="margin-top:12px;font-size:10px;color:var(--text3);border-top:1px solid var(--border);padding-top:8px">
-      Registro elaborado conforme IRAM 3517-2 (ed. 2020). Control Periódico Preventivo: cada 6 meses. Recarga anual: máx. 12 meses. Prueba Hidráulica: cada 5 años. Caducidad definitiva: 20 años desde fabricación.
-    </div>`;
+    <div style="margin-top:14px;font-size:12px;color:#333"><strong>Riesgo declarado:</strong> R${riesgo} · <strong>Resistencia al fuego requerida:</strong> ${resistencia(qf,riesgo)} · <strong>Poder calorífico de referencia (madera):</strong> 4.400 kcal/kg (18,41 MJ/kg)</div>
+    <div class="pl-sign"><div>Firma Responsable SyH<br><small>${c.syh_nombre||'________________'}</small></div><div>Matrícula<br><small>${c.syh_mat||'________________'}</small></div><div>Fecha<br><small>${fmt(today())}</small></div></div>
+    <div class="pl-foot"><strong>Fórmula:</strong> Qf = Σ(Pᵢ × Cᵢ) / (Pc × S), donde Pᵢ = peso del material (kg), Cᵢ = poder calorífico (kcal/kg), Pc = 4.400 kcal/kg (madera), S = superficie (m²). Estudio conforme Decreto 351/79 Anexo VII, reglamentario de la Ley 19.587 de Higiene y Seguridad en el Trabajo.</div></div>`;
+  const printEls=document.getElementById('cf-print');printEls.style.display='block';
+  document.body.classList.add('printing-cf');window.print();
+  setTimeout(()=>{document.body.classList.remove('printing-cf');printEls.style.display='none'},400);
 }
 
-// ─── DETAIL ───────────────────────────────────────────────────────────────
+/* ═══ DETAIL ═══ */
 function openDet(id){
-  const m=data.find(x=>x.id===id);if(!m)return;
-  const r=ring(m.anilloYr);
-  const rb=r?`<span class="ring-badge" style="background:${r.hex};color:${r.txt};border:1px solid ${r.brd||'transparent'};font-size:14px;padding:4px 14px">${r.name} — ${r.yr}</span>`:'—';
-  document.getElementById('det-title').textContent=`${m.lote||'Matafuego'} — ${m.tipo||''}`;
-  document.getElementById('det-edit-btn').onclick=()=>{closeModal('ov-det');openEdit(id)};
+  const m=data.find(x=>x.id===id);if(!m)return;const r=ring(m.anilloYr);
+  document.getElementById('det-title').textContent=codeOf(m);
+  document.getElementById('det-edit').onclick=()=>{closeM('ov-det');openEdit(id)};
+  const dr=(k,v)=>`<div class="det-row"><span class="det-k">${k}</span><span class="det-v">${v||'—'}</span></div>`;
+  const tli=(l,d,cls)=>`<div class="tl-item"><div class="tl-dot ${cls}"></div><div class="tl-info"><div class="tl-type">${l}</div><div class="tl-date">${fmt(d)}</div></div></div>`;
+  const dcls=d=>{const n=daysTo(d);if(n===null)return'dim';const s=sevOf(n);return s>=3?'crit':s>=2?'warn':'ok'};
   document.getElementById('det-body').innerHTML=`
     <div class="detail-grid">
       <div>
         <div class="det-card" style="margin-bottom:14px">
-          <h4>📋 Identificación</h4>
-          ${dr('Lote / N°',`<span style="font-family:'JetBrains Mono',monospace">${m.lote||'—'}</span>`)}
-          ${dr('Sector',m.sector)}${dr('Tipo',m.tipo)}${dr('Agente',m.agente)}
-          ${dr('Capacidad',m.cap)}${dr('Clase de fuego',m.claseFuego)}
-          ${dr('Fabricante',m.marca)}${dr('N° Serie',`<span style="font-family:'JetBrains Mono',monospace">${m.serie||'—'}</span>`)}
-          ${dr('N° OPDS',m.opds)}${dr('Empresa recargadora',m.empresa)}
-          ${dr('Estado',statChip(m.estadoActual))}${dr('Anillo',rb)}
+          <div style="display:flex;gap:14px;align-items:center;margin-bottom:10px">${matImg(m,64)}<div><div class="mono" style="font-weight:700;color:var(--red);font-size:15px">${codeOf(m)}</div><div style="color:var(--text3);font-size:12px">${m.tipoBase} ${m.tamano} · ${m.origen==='propia'?'Fab. propia':'Comercialización'}</div></div></div>
+          ${dr('N° Interno',m.lote)}${dr('Sector',m.sector)}${dr('Mercado',m.mercado)}${dr('Clase fuego',m.clase)}${dr('Agente',m.agente)}
+          ${dr('Fabricante',m.marca)}${dr('N° Serie',m.serie)}${dr('CUIT titular',m.cuit)}${dr('N° OPDS/ODS',m.opds)}
+          ${dr('Estado',statChip(m.estadoActual))}${dr('Anillo',r?`<span class="ring-badge" style="background:${r.hex};color:${r.txt}">${r.name} ${r.yr}</span>`:'—')}
         </div>
-        <div class="det-card">
-          <h4>👷 Inspección SyH</h4>
-          ${dr('Fecha inspección',`<span style="font-family:'JetBrains Mono',monospace">${fmt(m.fechaInsp)}</span>`)}
-          ${dr('Responsable',m.responsable)}${dr('Matrícula',m.matricula)}
-          ${dr('Próxima inspección',`<span style="font-family:'JetBrains Mono',monospace">${fmt(m.proximaInsp)}</span>`)}
+        <div class="det-card"><h4>👷 Inspección SyH</h4>
+          ${dr('Responsable',m.responsable)}${dr('Matrícula',m.matricula)}${dr('Fecha insp.',fmt(m.fechaInsp))}${dr('Próx. insp.',fmt(m.proximaInsp))}
           <div style="margin-top:8px;display:grid;grid-template-columns:1fr 1fr;gap:4px;font-size:11px">
-            ${[['Presión',m.cPres],['Precinto',m.cPrec],['Manguera',m.cMang],['Boquilla',m.cBoq],['Soporte',m.cSop],['Señalización',m.cSen],['Oblea',m.cEtq],['Acceso',m.cAcc]].map(([l,val])=>
-              `<div style="background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:4px 8px;display:flex;justify-content:space-between">
-                <span style="color:var(--text3)">${l}</span><span>${(val||'—').split(' ')[0]}</span>
-              </div>`).join('')}
-          </div>
+          ${[['Presión',m.cPres],['Precinto',m.cPrec],['Manguera',m.cMang],['Boquilla',m.cBoq],['Soporte',m.cSop],['Señaliz.',m.cSen],['Oblea',m.cEtq],['Acceso',m.cAcc]].map(([l,v])=>`<div style="background:var(--surface);border:1px solid var(--border);border-radius:5px;padding:4px 8px;display:flex;justify-content:space-between"><span style="color:var(--text3)">${l}</span><span>${(v||'—').split(' ')[0]}</span></div>`).join('')}</div>
           ${m.obs?`<div style="margin-top:8px;background:var(--surface);border-radius:6px;padding:8px;font-size:12px;color:var(--text2)">${m.obs}</div>`:''}
         </div>
       </div>
       <div>
-        <div class="det-card" style="margin-bottom:14px">
-          <h4>📅 Plazos IRAM 3517-2</h4>
-          <div class="tl">
-            ${tli('Fabricación',m.fabricacion,'dim')}
-            ${tli('Instalación',m.instalacion,'ok')}
-            ${tli('Última Recarga',m.ultimaRecarga,'ok')}
-            ${tli('Próxima Recarga ★',m.proximaRecarga,dcls(m.proximaRecarga))}
-            ${tli('Último CPP',m.ultimoCPP,'ok')}
-            ${tli('Próximo CPP ★',m.proximoCPP,dcls(m.proximoCPP))}
-            ${tli('Última Prueba Hidr.',m.ultimaPH,'ok')}
-            ${tli('Próxima Prueba Hidr. ★',m.proximaPH,dcls(m.proximaPH))}
-            ${tli('Caducidad Definitiva ★',m.caducidad,dcls(m.caducidad))}
-          </div>
-        </div>
-        ${m.tieneProvisorio==='si'?`<div class="alert-strip warn" style="margin:0 0 14px;border-radius:8px">
-          🔄 <strong>Provisorio activo:</strong> ${m.provDesc||'—'}
-          ${m.nuevoFecha?`<br>Nuevo previsto: ${fmt(m.nuevoFecha)}`:''}
-        </div>`:''}
-        ${(m.foto_qr||m.foto_oblea||m.foto_opds)?`<div class="det-card">
-          <h4>📷 Documentación</h4>
-          <div class="photo-panel">
-            ${['qr','oblea','opds'].map(t=>m['foto_'+t]?`<div class="photo-slot filled" style="cursor:default">
-              <img class="preview" src="${m['foto_'+t]}"><div class="ph-label">${t==='qr'?'QR':t==='oblea'?'Oblea IRAM':'OPDS'}</div>
-            </div>`:'').join('')}
-          </div>
-        </div>`:''}
+        <div class="det-card" style="margin-bottom:14px"><h4>📅 Plazos IRAM 3517-2</h4><div class="tl">
+          ${tli('Fabricación',m.fabricacion,'dim')}${tli('Instalación',m.instalacion,'ok')}
+          ${tli('Última recarga',m.ultimaRecarga,'ok')}${tli('Próxima recarga ★',m.proximaRecarga,dcls(m.proximaRecarga))}
+          ${tli('Último CPP',m.ultimoCPP,'ok')}${tli('Próximo CPP ★',m.proximoCPP,dcls(m.proximoCPP))}
+          ${tli('Última prueba hidr.',m.ultimaPH,'ok')}${tli('Próxima prueba hidr. ★',m.proximaPH,dcls(m.proximaPH))}
+          ${tli('Caducidad definitiva ★',m.caducidad,dcls(m.caducidad))}</div></div>
+        ${m.tieneProvisorio==='si'?`<div style="background:var(--warn-bg);border:1px solid var(--warn);border-radius:8px;padding:12px;margin-bottom:14px;font-size:12px;color:var(--warn)">🔄 <strong>Provisorio:</strong> ${m.provDesc||'—'}${m.nuevoFecha?`<br>Nuevo previsto: ${fmt(m.nuevoFecha)}`:''}</div>`:''}
+        <div class="det-card"><h4>📷 Documentación</h4><div class="photo-panel">
+          <div class="photo-slot filled" style="cursor:default">${m.foto_unit?`<img class="preview" src="${m.foto_unit}">`:matImg(m,110)}<div class="ph-label">Unidad</div></div>
+          <div class="photo-slot filled" style="cursor:default">${m.foto_qr?`<img class="preview" src="${m.foto_qr}">`:qrSvg(codeOf(m),120)}<div class="ph-label">QR</div></div>
+          <div class="photo-slot filled" style="cursor:default">${m.foto_oblea?`<img class="preview" src="${m.foto_oblea}">`:obleaSvg(m,120)}<div class="ph-label">Oblea ODS/OPDS</div></div>
+        </div></div>
       </div>
     </div>`;
   document.getElementById('ov-det').classList.remove('hidden');
 }
-function dr(k,v){return`<div class="det-row"><span class="det-k">${k}</span><span class="det-v">${v||'—'}</span></div>`}
-function tli(lbl,d,cls){return`<div class="tl-item"><div class="tl-dot ${cls}"></div><div class="tl-info"><div class="tl-type">${lbl}</div><div class="tl-date">${fmt(d)}</div></div></div>`}
 
-// ─── MODAL MATAFUEGO ──────────────────────────────────────────────────────
-function openAdd(){
-  editId=null;tmpPh={qr:null,oblea:null,opds:null};
-  clearF();document.getElementById('mat-title').textContent='Nuevo Matafuego';
-  document.getElementById('ov-mat').classList.remove('hidden');
-}
-function openEdit(id){
-  const m=data.find(x=>x.id===id);if(!m)return;
-  editId=id;tmpPh={qr:m.foto_qr||null,oblea:m.foto_oblea||null,opds:m.foto_opds||null};
-  fillF(m);document.getElementById('mat-title').textContent=`Editar — ${m.lote}`;
-  document.getElementById('ov-mat').classList.remove('hidden');
-}
+/* ═══ MODAL CRUD ═══ */
+function openAdd(){editId=null;tmpPh={unit:null,qr:null,oblea:null};clearF();document.getElementById('mat-title').textContent='Nuevo Matafuego';document.getElementById('ov-mat').classList.remove('hidden')}
+function openEdit(id){const m=data.find(x=>x.id===id);if(!m)return;editId=id;tmpPh={unit:m.foto_unit||null,qr:m.foto_qr||null,oblea:m.foto_oblea||null};fillF(m);document.getElementById('mat-title').textContent='Editar — '+codeOf(m);document.getElementById('ov-mat').classList.remove('hidden')}
+const gv=id=>(document.getElementById(id)?.value||'').trim();
 function clearF(){
-  const ids=['f-lote','f-sector','f-agente','f-cap','f-clase','f-marca','f-serie','f-opds',
-    'f-empresa','f-anillo-yr','f-ult-rec','f-prox-rec','f-ult-cpp','f-prox-cpp',
-    'f-ult-ph','f-prox-ph','f-cad','f-inst','f-finsp','f-resp','f-mat','f-prox-insp','f-obs','f-prov-desc','f-nuevo-fecha'];
-  ids.forEach(id=>{const el=document.getElementById(id);if(el)el.value=''});
-  document.getElementById('f-tipo').value='';
-  document.getElementById('f-estado').value='Operativo';
-  document.getElementById('f-prov').value='no';
-  document.getElementById('f-anillo-col').value='';
-  ['c-pres','c-prec','c-mang','c-boq','c-sop','c-sen','c-etq','c-acc'].forEach(id=>{
-    const el=document.getElementById(id);if(el)el.value='✅ Conforme';
-  });
-  togProv();updateSlots();
+  ['f-lote','f-sector','f-serie','f-cuit','f-opds','f-anillo-yr','f-ult-rec','f-prox-rec','f-ult-cpp','f-prox-cpp','f-ult-ph','f-prox-ph','f-cad','f-inst','f-finsp','f-resp','f-mat','f-prox-insp','f-obs','f-prov-desc','f-nuevo-fecha','f-fab','f-clase','f-origen'].forEach(id=>{const e=document.getElementById(id);if(e)e.value=''});
+  document.getElementById('f-marca').value='FLAMA';document.getElementById('f-tipo').value='';document.getElementById('f-mercado').value=MERCADOS[0];
+  document.getElementById('f-estado').value='Operativo';document.getElementById('f-prov').value='no';document.getElementById('f-anillo-col').value='';
+  document.getElementById('f-cuit').value=company.cuit||'';
+  ['cPres','cPrec','cMang','cBoq','cSop','cSen','cEtq','cAcc'].forEach(id=>{const e=document.getElementById(id);if(e)e.value='✅ Conforme'});
+  togProv();updSlots();updCode();document.getElementById('anillo-prev').innerHTML='';
 }
 function fillF(m){
-  const set=(id,val)=>{const el=document.getElementById(id);if(el)el.value=val||''};
-  set('f-lote',m.lote);set('f-sector',m.sector);set('f-agente',m.agente);
-  set('f-cap',m.cap);set('f-clase',m.claseFuego);set('f-marca',m.marca);
-  set('f-serie',m.serie);set('f-opds',m.opds);set('f-empresa',m.empresa);
-  set('f-anillo-yr',m.anilloYr);set('f-ult-rec',m.ultimaRecarga);
-  set('f-prox-rec',m.proximaRecarga);set('f-ult-cpp',m.ultimoCPP);
-  set('f-prox-cpp',m.proximoCPP);set('f-ult-ph',m.ultimaPH);
-  set('f-prox-ph',m.proximaPH);set('f-cad',m.caducidad);set('f-inst',m.instalacion);
-  set('f-finsp',m.fechaInsp);set('f-resp',m.responsable);set('f-mat',m.matricula);
-  set('f-prox-insp',m.proximaInsp);set('f-obs',m.obs);
-  set('f-prov-desc',m.provDesc);set('f-nuevo-fecha',m.nuevoFecha);
-  set('f-fab',m.fabricacion);
-  if(m.tipo)document.getElementById('f-tipo').value=m.tipo;
-  if(m.estadoActual)document.getElementById('f-estado').value=m.estadoActual;
-  if(m.tieneProvisorio)document.getElementById('f-prov').value=m.tieneProvisorio;
-  if(m.anilloYr)document.getElementById('f-anillo-col').value=m.anilloYr;
-  ['cPres','cPrec','cMang','cBoq','cSop','cSen','cEtq','cAcc'].forEach((k,i)=>{
-    const ids=['c-pres','c-prec','c-mang','c-boq','c-sop','c-sen','c-etq','c-acc'];
-    const el=document.getElementById(ids[i]);if(el&&m[k])el.value=m[k];
-  });
-  togProv();updateSlots();
-  showAnilloPrev();
+  const set=(id,v)=>{const e=document.getElementById(id);if(e)e.value=v||''};
+  const idx=CATALOG.findIndex(c=>c.base===m.tipoBase&&c.size===m.tamano);
+  document.getElementById('f-tipo').value=idx>=0?idx:'';onTipoChange();
+  set('f-lote',m.lote);set('f-sector',m.sector);set('f-serie',m.serie);set('f-cuit',m.cuit);set('f-opds',m.opds);
+  set('f-anillo-yr',m.anilloYr);set('f-ult-rec',m.ultimaRecarga);set('f-prox-rec',m.proximaRecarga);
+  set('f-ult-cpp',m.ultimoCPP);set('f-prox-cpp',m.proximoCPP);set('f-ult-ph',m.ultimaPH);set('f-prox-ph',m.proximaPH);
+  set('f-cad',m.caducidad);set('f-inst',m.instalacion);set('f-finsp',m.fechaInsp);set('f-resp',m.responsable);
+  set('f-mat',m.matricula);set('f-prox-insp',m.proximaInsp);set('f-obs',m.obs);set('f-prov-desc',m.provDesc);set('f-nuevo-fecha',m.nuevoFecha);set('f-fab',m.fabricacion);set('f-marca',m.marca||'FLAMA');
+  document.getElementById('f-mercado').value=m.mercado||MERCADOS[0];document.getElementById('f-estado').value=m.estadoActual||'Operativo';
+  document.getElementById('f-prov').value=m.tieneProvisorio||'no';if(m.anilloYr)document.getElementById('f-anillo-col').value=m.anilloYr;
+  ['cPres','cPrec','cMang','cBoq','cSop','cSen','cEtq','cAcc'].forEach(k=>{const e=document.getElementById(k);if(e&&m[k])e.value=m[k]});
+  togProv();updSlots();updCode();showAnilloPrev();
 }
-function togProv(){
-  const has=document.getElementById('f-prov').value==='si';
-  document.getElementById('prov-desc-f').style.display=has?'':'none';
-  document.getElementById('prov-fecha-f').style.display=has?'':'none';
-}
-document.getElementById('f-prov').addEventListener('change',togProv);
-document.getElementById('f-fab').addEventListener('change',function(){
-  if(this.value)document.getElementById('f-cad').value=addYr(this.value,20);
-});
-document.getElementById('f-anillo-col').addEventListener('change',function(){
-  document.getElementById('f-anillo-yr').value=this.value;showAnilloPrev();
-});
-document.getElementById('f-anillo-yr').addEventListener('change',function(){
-  document.getElementById('f-anillo-col').value=this.value;showAnilloPrev();
-});
-function showAnilloPrev(){
-  const yr=document.getElementById('f-anillo-yr').value;
-  const r=ring(yr);const el=document.getElementById('anillo-prev');
-  if(!r){el.innerHTML='';return}
-  el.innerHTML=`<span class="ring-badge" style="background:${r.hex};color:${r.txt};border:1px solid ${r.brd||'transparent'};font-size:13px;padding:4px 14px;border-radius:20px">Anillo ${r.name} — vence ${r.yr}</span>`;
-}
-
-// ─── PHOTOS ───────────────────────────────────────────────────────────────
-function pickPhoto(slot){curSlot=slot;document.getElementById('ph-inp').click()}
-function onPhoto(e){
-  const f=e.target.files[0];if(!f)return;
-  const r=new FileReader();
-  r.onload=ev=>{tmpPh[curSlot]=ev.target.result;updateSlots()};
-  r.readAsDataURL(f);e.target.value='';
-}
-function removePhoto(e,slot){
-  e.stopPropagation();tmpPh[slot]=null;updateSlots();
-}
-function updateSlots(){
-  ['qr','oblea','opds'].forEach(k=>{
-    const sl=document.getElementById('ps-'+k);if(!sl)return;
-    const prev=sl.querySelector('img.preview');
-    if(prev)prev.remove();
-    if(tmpPh[k]){
-      sl.classList.add('filled');
-      const img=document.createElement('img');
-      img.src=tmpPh[k];img.className='preview';
-      sl.insertBefore(img,sl.firstChild);
-    } else {
-      sl.classList.remove('filled');
-    }
-  });
-}
-
-// ─── SAVE MAT ─────────────────────────────────────────────────────────────
-function v(id){return(document.getElementById(id)?.value||'').trim()}
+function togProv(){const h=document.getElementById('f-prov').value==='si';document.getElementById('prov-d').style.display=h?'':'none';document.getElementById('prov-f').style.display=h?'':'none'}
 function saveMat(){
-  const lote=v('f-lote'),fab=v('f-fab'),prec=v('f-prox-rec');
-  if(!lote){alert('El N° de Lote es obligatorio.');return}
+  const i=document.getElementById('f-tipo').value,lote=gv('f-lote'),fab=gv('f-fab'),prec=gv('f-prox-rec'),cuit=gv('f-cuit');
+  if(i===''){alert('Seleccioná el tipo de matafuego.');return}
+  if(!lote){alert('El N° interno es obligatorio.');return}
   if(!fab){alert('La fecha de fabricación es obligatoria.');return}
-  if(!prec){alert('La próxima fecha de recarga es obligatoria.');return}
-  const m={
-    id:editId||uid(),
-    lote,sector:v('f-sector'),tipo:v('f-tipo'),agente:v('f-agente'),
-    cap:v('f-cap'),claseFuego:v('f-clase'),marca:v('f-marca'),serie:v('f-serie'),
-    opds:v('f-opds'),empresa:v('f-empresa'),fabricacion:fab,instalacion:v('f-inst'),
-    anilloYr:v('f-anillo-yr'),anilloCol:document.getElementById('f-anillo-col').value,
-    ultimaRecarga:v('f-ult-rec'),proximaRecarga:prec,
-    ultimoCPP:v('f-ult-cpp'),proximoCPP:v('f-prox-cpp'),
-    ultimaPH:v('f-ult-ph'),proximaPH:v('f-prox-ph'),
-    caducidad:v('f-cad'),estadoActual:v('f-estado'),
-    tieneProvisorio:document.getElementById('f-prov').value,
-    provDesc:v('f-prov-desc'),nuevoFecha:v('f-nuevo-fecha'),
-    fechaInsp:v('f-finsp'),responsable:v('f-resp'),matricula:v('f-mat'),
-    proximaInsp:v('f-prox-insp'),obs:v('f-obs'),
-    cPres:document.getElementById('c-pres').value,
-    cPrec:document.getElementById('c-prec').value,
-    cMang:document.getElementById('c-mang').value,
-    cBoq:document.getElementById('c-boq').value,
-    cSop:document.getElementById('c-sop').value,
-    cSen:document.getElementById('c-sen').value,
-    cEtq:document.getElementById('c-etq').value,
-    cAcc:document.getElementById('c-acc').value,
-    foto_qr:tmpPh.qr,foto_oblea:tmpPh.oblea,foto_opds:tmpPh.opds,
-  };
-  if(editId){data=data.map(x=>x.id===editId?m:x)}else{data.push(m)}
-  sv('mats',data);closeModal('ov-mat');renderAll();
+  if(!prec){alert('La próxima recarga es obligatoria.');return}
+  if(!cuit){alert('El CUIT de la empresa es obligatorio (forma parte del código).');return}
+  const c=CATALOG[i];
+  const m={id:editId||uid(),lote,tipoBase:c.base,tamano:c.size,clase:c.clase,origen:c.origen,color:c.color,ruedas:!!c.ruedas,horn:!!c.horn,
+    agente:c.base.includes('CO')?'CO₂':c.base==='ABC'||c.base==='BC'?'Polvo químico':c.base==='AFFF'?'Espuma AFFF':c.base,
+    sector:gv('f-sector'),mercado:gv('f-mercado'),marca:gv('f-marca'),serie:gv('f-serie'),cuit,opds:gv('f-opds'),
+    fabricacion:fab,instalacion:gv('f-inst'),anilloYr:gv('f-anillo-yr'),
+    ultimaRecarga:gv('f-ult-rec'),proximaRecarga:prec,ultimoCPP:gv('f-ult-cpp'),proximoCPP:gv('f-prox-cpp'),
+    ultimaPH:gv('f-ult-ph'),proximaPH:gv('f-prox-ph'),caducidad:gv('f-cad'),estadoActual:gv('f-estado'),
+    tieneProvisorio:document.getElementById('f-prov').value,provDesc:gv('f-prov-desc'),nuevoFecha:gv('f-nuevo-fecha'),
+    fechaInsp:gv('f-finsp'),responsable:gv('f-resp'),matricula:gv('f-mat'),proximaInsp:gv('f-prox-insp'),obs:gv('f-obs'),
+    fechaAlta:editId?(data.find(x=>x.id===editId)?.fechaAlta||today()):today(),
+    cPres:gv('cPres'),cPrec:gv('cPrec'),cMang:gv('cMang'),cBoq:gv('cBoq'),cSop:gv('cSop'),cSen:gv('cSen'),cEtq:gv('cEtq'),cAcc:gv('cAcc'),
+    foto_unit:tmpPh.unit,foto_qr:tmpPh.qr,foto_oblea:tmpPh.oblea};
+  if(editId)data=data.map(x=>x.id===editId?m:x);else data.push(m);
+  sv('flama_mats',data);closeM('ov-mat');renderAll();
 }
+document.getElementById('f-fab').addEventListener('change',function(){if(this.value)document.getElementById('f-cad').value=addYr(this.value,20)});
+document.getElementById('f-anillo-col').addEventListener('change',function(){document.getElementById('f-anillo-yr').value=this.value;showAnilloPrev()});
+document.getElementById('f-anillo-yr').addEventListener('change',function(){document.getElementById('f-anillo-col').value=this.value;showAnilloPrev()});
+function showAnilloPrev(){const r=ring(document.getElementById('f-anillo-yr').value);document.getElementById('anillo-prev').innerHTML=r?`<span class="ring-badge" style="background:${r.hex};color:${r.txt};padding:5px 14px">Anillo ${r.name} — vence ${r.yr}</span>`:''}
 
-// ─── EXPORT ───────────────────────────────────────────────────────────────
+/* ═══ PHOTOS ═══ */
+function pickPhoto(s){curSlot=s;document.getElementById('ph-inp').click()}
+function onPhoto(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{tmpPh[curSlot]=ev.target.result;updSlots()};r.readAsDataURL(f);e.target.value=''}
+function rmPhoto(e,s){e.stopPropagation();tmpPh[s]=null;updSlots()}
+function updSlots(){['unit','qr','oblea'].forEach(k=>{const sl=document.getElementById('ps-'+k);if(!sl)return;const p=sl.querySelector('img.preview');if(p)p.remove();if(tmpPh[k]){sl.classList.add('filled');const img=document.createElement('img');img.src=tmpPh[k];img.className='preview';sl.insertBefore(img,sl.firstChild)}else sl.classList.remove('filled')})}
+
+/* ═══ COMPANY ═══ */
+function applyCompany(){document.getElementById('sb-emp').textContent=company.nombre||'Control de Matafuegos';const l=document.getElementById('sb-logo');if(company.logo){l.outerHTML=`<img class="flama-flame" id="sb-logo" src="${company.logo}" style="border-radius:6px;object-fit:contain">`}}
+function openCompany(){['nombre','cuit','dir','tel','email','rubro','hab'].forEach(k=>{const e=document.getElementById('emp-'+k);if(e)e.value=company[k]||''});['nombre','mat','tel','email'].forEach(k=>{const e=document.getElementById('emp-syh-'+k);if(e)e.value=company['syh_'+k]||''});const pv=document.getElementById('logo-prev'),ph=document.getElementById('logo-ph');if(company.logo){pv.src=company.logo;pv.style.display='';ph.style.display='none'}else{pv.style.display='none';ph.style.display=''}document.getElementById('ov-emp').classList.remove('hidden')}
+function pickLogo(){logoTarget='company';document.getElementById('logo-inp').click()}
+function onLogo(e){const f=e.target.files[0];if(!f)return;const r=new FileReader();r.onload=ev=>{company.logo=ev.target.result;sv('flama_company',company);const pv=document.getElementById('logo-prev'),ph=document.getElementById('logo-ph');if(pv){pv.src=ev.target.result;pv.style.display='';ph.style.display='none'}applyCompany();if(logoTarget==='planilla')renderSyH()};r.readAsDataURL(f);e.target.value=''}
+function saveCompany(){company={...company,nombre:gv('emp-nombre')||'Mi Empresa',cuit:gv('emp-cuit'),dir:gv('emp-dir'),tel:gv('emp-tel'),email:gv('emp-email'),rubro:gv('emp-rubro'),hab:gv('emp-hab'),syh_nombre:gv('emp-syh-nombre'),syh_mat:gv('emp-syh-mat'),syh_tel:gv('emp-syh-tel'),syh_email:gv('emp-syh-email')};sv('flama_company',company);applyCompany();closeM('ov-emp');renderSyH()}
+
+/* ═══ COORD ═══ */
+function openCoord(){document.getElementById('ov-coord').classList.remove('hidden')}
+function sendCoord(){const est=gv('co-est');if(!est){alert('Indicá el establecimiento.');return}alert(`✅ Solicitud de coordinación generada para "${est}".\n\nSe notificó al equipo de logística para coordinar el recambio sin dejar el establecimiento sin cobertura (Salud / Educación).`);closeM('ov-coord')}
+
+/* ═══ EXPORT ═══ */
 function exportCSV(){
-  const cols=['lote','sector','tipo','agente','cap','fabricacion','ultimaRecarga','proximaRecarga','ultimoCPP','proximoCPP','ultimaPH','proximaPH','caducidad','estadoActual','anilloYr','responsable','obs'];
-  const hdrs=['Lote','Sector','Tipo','Agente','Capacidad','Fabricación','Últ.Recarga','Próx.Recarga','Últ.CPP','Próx.CPP','Últ.PH','Próx.PH','Caducidad','Estado','Anillo Año','Resp.SyH','Observaciones'];
-  const csv=[hdrs.join(';'),...data.map(m=>cols.map(c=>`"${(m[c]||'').replace(/"/g,'""')}"`).join(';'))].join('\n');
-  const a=document.createElement('a');
-  a.href='data:text/csv;charset=utf-8,﻿'+encodeURIComponent(csv);
-  a.download=`matafuegos_${today()}.csv`;a.click();
+  const cols=['code','lote','sector','mercado','tipoBase','tamano','cuit','fabricacion','proximaRecarga','proximoCPP','proximaPH','caducidad','estadoActual','anilloYr','responsable','obs'];
+  const h=['Codigo','N Interno','Sector','Mercado','Tipo','Tamaño','CUIT','Fabricacion','Prox.Recarga','Prox.CPP','Prox.PH','Caducidad','Estado','Anillo','Resp.SyH','Obs'];
+  const csv=[h.join(';'),...data.map(m=>cols.map(c=>`"${((c==='code'?codeOf(m):m[c])||'').toString().replace(/"/g,'""')}"`).join(';'))].join('\n');
+  const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,﻿'+encodeURIComponent(csv);a.download='flama_matafuegos_'+today()+'.csv';a.click();
 }
 
-// ─── NAV ──────────────────────────────────────────────────────────────────
-const pgTitles={
-  dashboard:'Dashboard <span>General</span>',
-  matafuegos:'Matafuegos <span>Registrados</span>',
-  alertas:'Alertas <span>de Vencimiento</span>',
-  fotos:'Galería <span>Obleas y QRs</span>',
-  syh:'Planilla <span>SyH — IRAM 3517-2</span>',
-  anillos:'Sistema de <span>Anillos</span>',
-};
-function nav(p){
-  document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
-  document.getElementById('page-'+p).classList.add('active');
-  document.querySelectorAll('.nav-btn').forEach(x=>x.classList.toggle('active',x.dataset.p===p));
-  document.getElementById('pg-title').innerHTML=pgTitles[p]||p;
-  if(p==='alertas')renderAlerts();
-  if(p==='fotos')renderGal();
-  if(p==='syh')renderSyH();
-  if(p==='anillos')buildRingCards();
-}
-function toggleTheme(){
-  const r=document.documentElement;
-  r.dataset.theme=r.dataset.theme==='dark'?'light':'dark';
-}
-function closeModal(id){document.getElementById(id).classList.add('hidden')}
-document.querySelectorAll('.overlay').forEach(ov=>{
-  ov.addEventListener('click',function(e){if(e.target===this)closeModal(this.id)});
-});
+/* ═══ RINGS PAGE ═══ */
+function renderRings(){document.getElementById('rings').innerHTML=RINGS.map(r=>{const cnt=data.filter(m=>parseInt(m.anilloYr)===r.yr).length;return `<div class="ring-card"><div class="ring-circle" style="background:${r.hex};color:${r.txt};border-color:${r.brd||'rgba(255,255,255,.15)'}">${r.yr.toString().slice(2)}</div><div class="ring-info"><h4>${r.name}</h4><p>Vence en ${r.yr}</p><small>${cnt} matafuego${cnt!==1?'s':''}</small></div></div>`}).join('')}
 
-// ─── DEMO SEED ────────────────────────────────────────────────────────────
+/* ═══ NAV ═══ */
+const T={dashboard:'Dashboard <span>General</span>',matafuegos:'Matafuegos <span>Registrados</span>',vencimientos:'Vencimientos <span>Visual</span>',alertas:'Alertas <span>de Vencimiento</span>',galeria:'Galería <span>QR / Obleas</span>',syh:'Planilla <span>SyH</span>',cf:'Carga de <span>Fuego</span>',anillos:'Anillos <span>por Año</span>'};
+function nav(p){document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));document.getElementById('page-'+p).classList.add('active');document.querySelectorAll('.nav-btn').forEach(x=>x.classList.toggle('active',x.dataset.p===p));document.getElementById('pg-title').innerHTML=T[p]||p;
+  if(p==='vencimientos')renderBoard();if(p==='alertas')renderAlerts();if(p==='galeria')renderGal();if(p==='syh')renderSyH();if(p==='cf'){renderCFRows();calcCF()}if(p==='anillos')renderRings();if(window.innerWidth<=820)document.getElementById('sidebar').classList.remove('open')}
+function toggleTheme(){const r=document.documentElement;r.dataset.theme=r.dataset.theme==='light'?'dark':'light'}
+function closeM(id){document.getElementById(id).classList.add('hidden')}
+document.querySelectorAll('.overlay').forEach(o=>o.addEventListener('click',function(e){if(e.target===this)closeM(this.id)}));
+
+/* ═══ SEED (20+ matafuegos) ═══ */
 function seed(){
   if(data.length>0)return;
-  data=[
-    {id:uid(),lote:'MAT-001',sector:'PB — Pasillo Norte',tipo:'ABC — Polvo triclase',agente:'Polvo ABC monoamonio fosfato',cap:'6 kg',claseFuego:'A, B, C',marca:'Matafuegos Rojo',serie:'2024-001',opds:'OPDS-1234/07',empresa:'Extingas S.R.L.',fabricacion:'2024-01',instalacion:'2024-02-15',anilloYr:'2027',anilloCol:'2027',ultimaRecarga:'2025-02-15',proximaRecarga:'2026-02-15',ultimoCPP:'2025-08-15',proximoCPP:'2026-02-15',ultimaPH:'2024-02-15',proximaPH:'2029-02-15',caducidad:'2044-01',estadoActual:'Operativo',tieneProvisorio:'no',provDesc:'',nuevoFecha:'',fechaInsp:'2025-08-15',responsable:'Ing. García Lucía',matricula:'20-12345678-9',proximaInsp:'2026-02-15',obs:'',cPres:'✅ Conforme',cPrec:'✅ Conforme',cMang:'✅ Conforme',cBoq:'✅ Conforme',cSop:'✅ Conforme',cSen:'✅ Conforme',cEtq:'✅ Conforme',cAcc:'✅ Conforme',foto_qr:null,foto_oblea:null,foto_opds:null},
-    {id:uid(),lote:'MAT-002',sector:'PA — Oficinas',tipo:'BC — CO₂',agente:'CO₂ / Dióxido de carbono',cap:'5 kg',claseFuego:'B, C',marca:'Extingas',serie:'2022-087',opds:'OPDS-5678/07',empresa:'Extingas S.R.L.',fabricacion:'2022-06',instalacion:'2022-07-10',anilloYr:'2026',anilloCol:'2026',ultimaRecarga:'2024-07-10',proximaRecarga:'2025-09-01',ultimoCPP:'2025-01-10',proximoCPP:'2025-10-01',ultimaPH:'2022-07-10',proximaPH:'2027-07-10',caducidad:'2042-06',estadoActual:'Operativo',tieneProvisorio:'no',provDesc:'',nuevoFecha:'',fechaInsp:'2025-01-10',responsable:'Ing. García Lucía',matricula:'20-12345678-9',proximaInsp:'2025-10-01',obs:'Precinto con desgaste leve.',cPres:'✅ Conforme',cPrec:'⚠️ Regular',cMang:'✅ Conforme',cBoq:'✅ Conforme',cSop:'✅ Conforme',cSen:'✅ Conforme',cEtq:'✅ Conforme',cAcc:'✅ Conforme',foto_qr:null,foto_oblea:null,foto_opds:null},
-    {id:uid(),lote:'MAT-003',sector:'Depósito — Zona Carga',tipo:'ABC — Polvo triclase',agente:'Polvo ABC monoamonio fosfato',cap:'10 kg',claseFuego:'A, B, C',marca:'Kobalt',serie:'2020-334',opds:'OPDS-1234/07',empresa:'Extingas S.R.L.',fabricacion:'2020-03',instalacion:'2020-04-01',anilloYr:'2025',anilloCol:'2025',ultimaRecarga:'2024-04-01',proximaRecarga:'2025-10-01',ultimoCPP:'2025-04-01',proximoCPP:'2025-10-01',ultimaPH:'2020-04-01',proximaPH:'2025-04-01',caducidad:'2040-03',estadoActual:'En mantenimiento',tieneProvisorio:'si',provDesc:'MAT-PROV-01 — ABC 6kg en Zona Carga',nuevoFecha:'2025-11-15',fechaInsp:'2025-04-01',responsable:'Ing. García Lucía',matricula:'20-12345678-9',proximaInsp:'2025-10-01',obs:'Enviado a recarga. Manguera con desgaste.',cPres:'⚠️ Regular',cPrec:'✅ Conforme',cMang:'⚠️ Regular',cBoq:'✅ Conforme',cSop:'✅ Conforme',cSen:'⚠️ Regular',cEtq:'⚠️ Regular',cAcc:'✅ Conforme',foto_qr:null,foto_oblea:null,foto_opds:null},
-    {id:uid(),lote:'MAT-004',sector:'Comedor',tipo:'ABC — Polvo triclase',agente:'Polvo ABC monoamonio fosfato',cap:'4 kg',claseFuego:'A, B, C',marca:'Matafuegos Rojo',serie:'2019-112',opds:'OPDS-1234/07',empresa:'Extingas S.R.L.',fabricacion:'2019-08',instalacion:'2019-09-01',anilloYr:'2024',anilloCol:'2024',ultimaRecarga:'2024-09-01',proximaRecarga:'2025-09-01',ultimoCPP:'2025-03-01',proximoCPP:'2025-09-01',ultimaPH:'2024-09-01',proximaPH:'2029-09-01',caducidad:'2039-08',estadoActual:'Operativo',tieneProvisorio:'no',provDesc:'',nuevoFecha:'',fechaInsp:'2025-03-01',responsable:'Ing. García Lucía',matricula:'20-12345678-9',proximaInsp:'2025-09-01',obs:'Soporte roto. Reemplazar.',cPres:'✅ Conforme',cPrec:'✅ Conforme',cMang:'✅ Conforme',cBoq:'✅ Conforme',cSop:'❌ No conforme',cSen:'✅ Conforme',cEtq:'✅ Conforme',cAcc:'✅ Conforme',foto_qr:null,foto_oblea:null,foto_opds:null},
-  ];
-  sv('mats',data);
+  const cuit='30504835126';const resp='Ing. García Lucía';const mat='20-12345678-9';
+  const sectors=['PB — Pasillo Norte','PA — Oficinas','Depósito — Zona Carga','Comedor','Sala de Máquinas','Estacionamiento','Cocina Industrial','Laboratorio','Recepción','Pañol','Playa de Carga','Sector Envasado','Archivo','Sala de Servidores','Taller Mecánico','Sala Caldera','Farmacia','Aula Magna','Pasillo Central','Sala de Guardia'];
+  const mk=['Industrias','Edificios','Industrias','Hoteles','Industrias','Automotor','Hoteles','Salud','Edificios','Supermercados','Industrias','Industrias','Educación','Edificios','Automotor','Industrias','Salud','Educación','Supermercados','Salud'];
+  const out=[];const now=new Date();
+  for(let i=0;i<20;i++){
+    const c=CATALOG[i%CATALOG.length];
+    // vary next recarga: some vencidos, some próximos, some lejanos
+    const offset=[-190,-120,-50,-20,10,25,45,70,95,140,200,260,310,-15,55,120,-80,35,180,300][i];
+    const prox=new Date(now.getFullYear(),now.getMonth(),now.getDate()+offset);
+    const proxStr=prox.toISOString().split('T')[0];
+    const fabYr=2019+(i%6);const anilloYr=2024+((i+2)%6);
+    const estado=offset<0?(i%3===0?'En mantenimiento':'Vencido'):'Operativo';
+    const alta=new Date(now.getFullYear(),now.getMonth()-(i%6),5).toISOString().split('T')[0];
+    const nuevo=(i%5===0)?new Date(now.getFullYear(),now.getMonth()-(i%4),12).toISOString().split('T')[0]:'';
+    const chk=(g)=>g?'✅ Conforme':(i%4===0?'⚠️ Regular':i%7===0?'❌ No conforme':'✅ Conforme');
+    out.push({id:uid(),lote:'MAT-'+String(i+1).padStart(3,'0'),tipoBase:c.base,tamano:c.size,clase:c.clase,origen:c.origen,color:c.color,ruedas:!!c.ruedas,horn:!!c.horn,
+      agente:c.base.includes('CO')?'CO₂':c.base==='ABC'||c.base==='BC'?'Polvo químico':c.base==='AFFF'?'Espuma AFFF':c.base,
+      sector:sectors[i],mercado:mk[i],marca:'FLAMA',serie:fabYr+'-'+String(100+i),cuit,opds:'OPDS-'+(1000+i*7)+'/07',
+      fabricacion:fabYr+'-'+String(1+(i%12)).padStart(2,'0'),instalacion:fabYr+'-06-01',anilloYr:String(anilloYr),
+      ultimaRecarga:new Date(prox.getFullYear()-1,prox.getMonth(),prox.getDate()).toISOString().split('T')[0],proximaRecarga:proxStr,
+      ultimoCPP:new Date(now.getFullYear(),now.getMonth()-3,1).toISOString().split('T')[0],proximoCPP:new Date(now.getFullYear(),now.getMonth()+3+offset%3,1).toISOString().split('T')[0],
+      ultimaPH:fabYr+'-06-01',proximaPH:(fabYr+5)+'-06-01',caducidad:(fabYr+20)+'-'+String(1+(i%12)).padStart(2,'0'),
+      estadoActual:estado,tieneProvisorio:offset<-30?'si':'no',provDesc:offset<-30?('MAT-PROV-'+(i+1)+' '+c.base+' '+c.size):'',nuevoFecha:nuevo,
+      fechaAlta:alta,fechaInsp:new Date(now.getFullYear(),now.getMonth()-2,10).toISOString().split('T')[0],responsable:resp,matricula:mat,proximaInsp:new Date(now.getFullYear(),now.getMonth()+4,10).toISOString().split('T')[0],
+      obs:offset<0?'Requiere recambio / recarga urgente.':'',
+      cPres:chk(i%4),cPrec:chk(i%3),cMang:chk(i%5),cBoq:chk(1),cSop:chk(i%6),cSen:chk(i%3),cEtq:chk(1),cAcc:chk(1),
+      foto_unit:null,foto_qr:null,foto_oblea:null});
+  }
+  data=out;sv('flama_mats',data);
 }
 
-// ─── INIT ─────────────────────────────────────────────────────────────────
-function renderAll(){
-  renderStats();renderBanner();renderTbl();
-  renderSyhFilter();buildRingCards();
-}
-applyCompany();seed();renderAll();
+/* ═══ INIT ═══ */
+function renderAll(){renderTrends();renderKpis();renderTbl();renderSyhFilter();
+  const c=buildAlerts().filter(a=>a.sev>=3).length;const nb=document.getElementById('nb-al');if(c){nb.textContent=c;nb.classList.add('show')}else nb.classList.remove('show')}
+initSelects();seed();applyCompany();renderAll();
 </script>
 </body>
 </html>
