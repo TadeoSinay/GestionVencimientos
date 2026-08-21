@@ -532,6 +532,7 @@ img,svg{max-width:100%}
     <button onclick="openCompany()" title="Configurar empresa">⚙️</button>
     <button onclick="toggleTheme()" title="Tema">🌗</button>
     <button onclick="exportCSV()" title="Exportar CSV">↓</button>
+    <button onclick="resetDemo()" title="Recargar datos de ejemplo">🔄</button>
   </div>
 </nav>
 <div id="sb-backdrop" onclick="closeSidebar()"></div>
@@ -1297,25 +1298,36 @@ function buildRefTables(){var rs=[3,4,5];document.getElementById('tab-a').innerH
 var IVA=0.21;
 var RAT_A={'ABC 1 kg':1,'ABC 2,5 kg':2,'ABC 5 kg':4,'ABC 10 kg':6,'ABC 50 kg':10};
 var RAT_B={'CO₂ 2 kg':5,'CO₂ 5 kg':10,'BC 5 kg':20};
-var FLAMMABLE=['Nafta / gasolina','Gasoil / diesel','Alcohol etílico','Aceite / lubricante','Pintura / solvente'];
+var LIQUIDS=['Nafta / gasolina','Gasoil / diesel','Alcohol etílico','Aceite / lubricante','Pintura / solvente'];
+var SOLIDS=['Madera / muebles','Papel / cartón','Textiles / algodón','Plástico PVC','Polietileno / PET','Goma / caucho','Espuma poliuretano','Neumáticos','Pallets madera','Otros combustibles'];
 function catBS(base,size){for(var i=0;i<CATALOG.length;i++)if(CATALOG[i].base===base&&CATALOG[i].size===size)return CATALOG[i];return null;}
 function recommendExt(qf,riesgo,area){
-  var nBy=Math.max(1,Math.ceil(area/200));var items=[];
+  var nBy=Math.max(1,Math.ceil(area/200)),nEl=Math.max(1,Math.ceil(area/400)),items=[];
   function add(base,size,qty,motivo){var c=catBS(base,size);if(!c)return;var unit=c.pFinal;items.push({label:base+' '+size,qty:qty,unit:unit,subNo:unit*qty,subIva:unit*qty*(1+IVA),motivo:motivo});}
-  var hasLiquid=cfRows.some(function(r){return FLAMMABLE.indexOf(r.mat)>=0&&(r.kg||0)>0;});
-  if(riesgo>=3){
-    var rowA=TAB_A.filter(function(r){return qf<=r.max;})[0];var potA=rowA.v[riesgo]||rowA.v[3]||'1 A';var reqA=parseInt(potA);if(isNaN(reqA))reqA=10;
-    var order=['1 kg','2,5 kg','5 kg','10 kg','50 kg'],chosen='10 kg';
+  var used=cfRows.filter(function(r){return (r.kg||0)>0;}).map(function(r){return r.mat;});
+  var hasLiquid=used.some(function(m){return LIQUIDS.indexOf(m)>=0;});
+  var hasSolid=used.some(function(m){return SOLIDS.indexOf(m)>=0;})||used.length===0;
+  var sector=((document.getElementById('cf-sector')||{}).value||'');
+  var isCocina=/cocina|gastro|comedor/i.test(sector);
+  var isMetal=/metal|magnesio|aluminio|litio|torno|fundici/i.test(sector);
+  // Clase A — sólidos (ABC polvo triclase, cubre A/B/C)
+  if(hasSolid||riesgo>=3){
+    var rowA=TAB_A.filter(function(r){return qf<=r.max;})[0];var potA=rowA.v[riesgo]||rowA.v[3]||'2 A';var reqA=parseInt(potA);if(isNaN(reqA))reqA=10;
+    var order=['1 kg','2,5 kg','5 kg','10 kg','50 kg'],chosen='5 kg';
     for(var i=0;i<order.length;i++){if((RAT_A['ABC '+order[i]]||0)>=reqA){chosen=order[i];break;}}
-    add('ABC',chosen,nBy,'Fuegos clase A (sólidos) · potencial ≥ '+potA);
-    if(hasLiquid)add('CO₂','5 kg',Math.max(1,Math.ceil(area/300)),'Líquidos inflamables (clase B) y tableros eléctricos');
-  }else{
-    var rowB=TAB_B.filter(function(r){return qf<=r.max;})[0];var potB=rowB.v[riesgo]||rowB.v[2]||'6 B';var reqB=parseInt(potB);if(isNaN(reqB))reqB=20;
-    var orderB=[['CO₂','2 kg'],['CO₂','5 kg'],['BC','5 kg']],pickB=['BC','5 kg'];
-    for(var i=0;i<orderB.length;i++){if((RAT_B[orderB[i][0]+' '+orderB[i][1]]||0)>=reqB){pickB=orderB[i];break;}}
-    add(pickB[0],pickB[1],nBy,'Líquidos/gases inflamables (clase B) · potencial ≥ '+potB);
-    add('ABC','5 kg',Math.max(1,Math.ceil(area/300)),'Complemento para clase A');
+    add('ABC',chosen,nBy,'Fuegos clase A (sólidos) — polvo ABC, potencial ≥ '+potA);
   }
+  // Clase B — líquidos inflamables (espuma AFFF)
+  if(hasLiquid||riesgo<=2){
+    add(area>800?'AFFF':'AFFF',area>800?'50 l':'10 l',Math.max(1,Math.ceil(area/250)),'Líquidos inflamables (clase B) — espuma AFFF forma film sobre el derrame');
+  }
+  // Clase C — equipos eléctricos / electrónicos (CO₂, no deja residuo)
+  add('CO₂','5 kg',nEl,'Equipos eléctricos y electrónicos (clase C) — CO₂ no conductivo, sin residuo');
+  // Clase K — cocinas (aceites y grasas)
+  if(isCocina)add('Sales K','6 l',Math.max(1,Math.ceil(area/300)),'Cocina — aceites y grasas vegetales/animales (clase K)');
+  // Clase D — metales combustibles
+  if(isMetal)add('Clase D','9 l',Math.max(1,Math.ceil(area/300)),'Metales combustibles (clase D) — polvo especial');
+  if(!items.length)add('ABC','5 kg',nBy,'Protección general clase A/B/C');
   var totNo=items.reduce(function(a,b){return a+b.subNo;},0);
   return {items:items,totNo:totNo,totIva:totNo*(1+IVA),nBy:nBy};
 }
@@ -1646,21 +1658,22 @@ function renderAll(){renderTrends();renderKpis();renderTbl();renderSyhFilter();r
   var fc=(fijos||[]).filter(function(f){var n=daysTo(f.prox);return n!=null&&n<=30;}).length,fb=document.getElementById('nb-fj');if(fb){if(fc){fb.textContent=fc;fb.classList.add('show');}else fb.classList.remove('show');}}
 /* boot */
 initSelects();
-var SEEDVER='4';
+var SEEDVER='5';
+function isDemoWs(w){return !!(w._demo||(w.company&&w.company.nombre==='FLAMA — Empresa Demo')||(w.company&&(w.company.cuit||'').replace(/\D/g,'')==='30504835126'&&(w.mats||[]).length>=50));}
 var wsIds=Object.keys(workspaces);
-if(!wsIds.length){newWorkspace('FLAMA — Empresa Demo','30504835126',true);}
+if(!wsIds.length){var demoId=newWorkspace('FLAMA — Empresa Demo','30504835126',true);workspaces[demoId]._demo=true;persist();}
 else{bindWs((currentWs&&workspaces[currentWs])?currentWs:wsIds[0]);}
-// Re-generar SOLO la empresa demo si cambió la versión de datos (no toca empresas creadas por el usuario)
+// Re-generar SOLO la empresa demo cuando cambia la versión de datos (no toca empresas creadas por el usuario)
 if(ld('flama_seedver',null)!==SEEDVER){
   var target=currentWs;
   Object.keys(workspaces).forEach(function(id){
-    var w=workspaces[id];
-    if(w.company&&w.company.nombre==='FLAMA — Empresa Demo'){bindWs(id);data.length=0;seed(true);fijos.length=0;seedFijos();}
+    if(isDemoWs(workspaces[id])){workspaces[id]._demo=true;bindWs(id);data.length=0;seed(true);fijos.length=0;seedFijos();}
   });
-  if(workspaces[target])bindWs(target);
+  if(workspaces[target]&&currentWs!==target)bindWs(target);
   sv('flama_seedver',SEEDVER);
 }
 if((!fijos||!fijos.length)&&data.length>=50)seedFijos();
+function resetDemo(){if(!confirm('Recargar los datos de ejemplo en ESTA empresa? Se reemplazan los matafuegos y sistemas por el set de demostración.'))return;data.length=0;seed(true);fijos.length=0;seedFijos();applyCompany();renderAll();nav('dashboard');}
 applyCompany();renderAll();routeHash();
 </script>
 </body>
