@@ -2,7 +2,10 @@
 <html lang="es" data-theme="dark">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+<meta name="theme-color" content="#08080A">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
 <title>Flama Control</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&family=Barlow+Condensed:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap">
 <style>
@@ -404,12 +407,55 @@ body.print-landscape{}
 .qr-label .qc{font-family:'JetBrains Mono',monospace;font-size:10px;font-weight:700;margin-top:6px}
 .qr-label .qs{font-size:9px;color:#555}
 
-@media(max-width:820px){
+/* MOBILE */
+.menu-btn{display:none;background:var(--surface2);border:1px solid var(--border2);color:var(--text);border-radius:9px;width:38px;height:38px;align-items:center;justify-content:center;cursor:pointer;flex-shrink:0;padding:0}
+.menu-btn svg{width:20px;height:20px}
+.add-btn .add-short{display:none}
+#sb-backdrop{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:99;backdrop-filter:blur(2px)}
+#sb-backdrop.show{display:block}
+@media(max-width:900px){
   :root{--sw:0px}
-  .sb{transform:translateX(-250px);transition:transform .2s;width:250px}.sb.open{transform:translateX(0)}
-  .main{margin-left:0}.fg,.fg.c3,.fg.c4{grid-template-columns:1fr}.cf-layout{grid-template-columns:1fr}
+  .sb{transform:translateX(-100%);transition:transform .22s ease;width:min(84vw,290px);box-shadow:none}
+  .sb.open{transform:translateX(0);box-shadow:12px 0 40px rgba(0,0,0,.5)}
+  .main{margin-left:0;min-width:0}
+  .menu-btn{display:flex}
+  .topbar{padding:10px 14px;gap:8px}
+  .topbar h2{font-size:19px}
+  .content{padding:16px 14px 60px}
+  .add-btn .add-full{display:none}.add-btn .add-short{display:inline;font-size:18px;line-height:1}
+  .add-btn{padding:0;width:38px;height:38px;justify-content:center;border-radius:9px}
+  .csv-btn{display:none}
+  .fg,.fg.c3,.fg.c4{grid-template-columns:1fr}.cf-layout{grid-template-columns:1fr}
   .photo-panel{grid-template-columns:1fr 1fr}.detail-grid{grid-template-columns:1fr}.cf-tables{grid-template-columns:1fr}
+  .trend-grid{grid-template-columns:1fr;gap:12px}
+  .kpi-row{grid-template-columns:1fr 1fr}
+  .stats-grid,.alert-hero,.tray-hero{grid-template-columns:1fr 1fr}
+  .board{grid-template-columns:1fr}
+  .sec-hdr{flex-wrap:wrap}
+  .toolbar input{min-width:0;width:100%}
+  .toolbar select{flex:1;min-width:0}
+  .overlay{padding:0;align-items:stretch}
+  .modal,.modal.wide{max-width:100%;border-radius:0;min-height:100dvh;margin:0}
+  .modal-hdr{border-radius:0}
+  .modal-body{max-height:none}
+  .modal-ftr{border-radius:0}
+  .al-days{font-size:22px;min-width:70px}
+  .alert-card{padding:11px 12px;gap:10px}
+  .tabs{overflow-x:auto;flex-wrap:nowrap}
+  .tab{white-space:nowrap}
+  #tooltip{display:none!important}
+  .ficha-wrap{padding:14px}
 }
+@media(max-width:420px){
+  .kpi-row,.stats-grid,.alert-hero,.tray-hero{grid-template-columns:1fr 1fr}
+  .photo-panel{grid-template-columns:1fr 1fr}
+  .topbar h2{font-size:17px}
+}
+/* iOS: usar dinámico dvh y evitar scroll horizontal */
+html,body{max-width:100%;overflow-x:hidden}
+.overlay,#ficha{min-height:100vh;min-height:100dvh}
+*{-webkit-tap-highlight-color:rgba(237,28,36,.15)}
+@media(max-width:900px){input:not([type=range]),select,textarea{font-size:16px}}
 @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
@@ -462,12 +508,14 @@ body.print-landscape{}
     <button onclick="exportCSV()" title="Exportar CSV">↓</button>
   </div>
 </nav>
+<div id="sb-backdrop" onclick="closeSidebar()"></div>
 
 <main class="main">
   <div class="topbar">
+    <button class="menu-btn no-print" onclick="toggleSidebar()" aria-label="Menú"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="3" y1="6" x2="21" y2="6"/><line x1="3" y1="12" x2="21" y2="12"/><line x1="3" y1="18" x2="21" y2="18"/></svg></button>
     <h2 id="pg-title">Dashboard <span>General</span></h2>
-    <button class="btn btn-outline btn-sm no-print" onclick="exportCSV()">↓ CSV</button>
-    <button class="btn btn-primary no-print" onclick="openAdd()">+ Nuevo Matafuego</button>
+    <button class="btn btn-outline btn-sm no-print csv-btn" onclick="exportCSV()">↓ CSV</button>
+    <button class="btn btn-primary no-print add-btn" onclick="openAdd()"><span class="add-full">+ Nuevo Matafuego</span><span class="add-short">+</span></button>
   </div>
   <div class="content">
     <!-- DASHBOARD -->
@@ -1276,7 +1324,7 @@ function openDet(id){
 }
 
 /* ===== CRUD ===== */
-function openAdd(){editId=null;tmpPh={unit:null,qr:null,oblea:null,remito:null};clearF();document.getElementById('mat-title').textContent='Nuevo Matafuego';document.getElementById('ov-mat').classList.remove('hidden');}
+function openAdd(){closeSidebar();editId=null;tmpPh={unit:null,qr:null,oblea:null,remito:null};clearF();document.getElementById('mat-title').textContent='Nuevo Matafuego';document.getElementById('ov-mat').classList.remove('hidden');}
 function openEdit(id){var m=null;for(var i=0;i<data.length;i++)if(data[i].id===id)m=data[i];if(!m)return;editId=id;tmpPh={unit:m.foto_unit||null,qr:m.foto_qr||null,oblea:m.foto_oblea||null,remito:m.foto_remito||null};fillF(m);document.getElementById('mat-title').textContent='Editar — '+codeOf(m);document.getElementById('ov-mat').classList.remove('hidden');}
 function gv(id){var e=document.getElementById(id);return e?(e.value||'').trim():'';}
 function clearF(){
@@ -1334,7 +1382,7 @@ function applyCompany(){document.getElementById('sb-cli-cuit').textContent='CUIT
 function renderWsSwitcher(){var s=document.getElementById('ws-select');if(!s)return;s.innerHTML=Object.keys(workspaces).map(function(id){return '<option value="'+id+'" '+(id===currentWs?'selected':'')+'>'+(workspaces[id].company.nombre||'Empresa')+'</option>';}).join('');}
 function switchWs(id){if(!workspaces[id])return;bindWs(id);applyCompany();renderAll();nav('dashboard');}
 function promptNewWs(){var n=prompt('Nombre / razón social de la nueva empresa:');if(n===null)return;var cuit=prompt('CUIT (opcional):')||'';newWorkspace(n||'Nueva empresa',cuit,false);applyCompany();renderAll();nav('dashboard');alert('✅ Empresa "'+(n||'Nueva empresa')+'" creada. Sus datos se guardan por separado. Cargá sus matafuegos con "+ Nuevo Matafuego".');}
-function openCompany(){['nombre','cuit','dir','tel','email','loc','hab'].forEach(function(k){var e=document.getElementById('emp-'+k);if(e)e.value=company[k]||'';});['nombre','mat','tel','email'].forEach(function(k){var e=document.getElementById('emp-syh-'+k);if(e)e.value=company['syh_'+k]||'';});var pv=document.getElementById('logo-prev'),ph=document.getElementById('logo-ph');if(company.logo){pv.src=company.logo;pv.style.display='';ph.style.display='none';}else{pv.style.display='none';ph.style.display='';}document.getElementById('ov-emp').classList.remove('hidden');}
+function openCompany(){closeSidebar();['nombre','cuit','dir','tel','email','loc','hab'].forEach(function(k){var e=document.getElementById('emp-'+k);if(e)e.value=company[k]||'';});['nombre','mat','tel','email'].forEach(function(k){var e=document.getElementById('emp-syh-'+k);if(e)e.value=company['syh_'+k]||'';});var pv=document.getElementById('logo-prev'),ph=document.getElementById('logo-ph');if(company.logo){pv.src=company.logo;pv.style.display='';ph.style.display='none';}else{pv.style.display='none';ph.style.display='';}document.getElementById('ov-emp').classList.remove('hidden');}
 function pickLogo(){logoTarget='company';document.getElementById('logo-inp').click();}
 function onLogo(e){var f=e.target.files[0];if(!f)return;var r=new FileReader();r.onload=function(ev){company.logo=ev.target.result;persist();var pv=document.getElementById('logo-prev'),ph=document.getElementById('logo-ph');if(pv){pv.src=ev.target.result;pv.style.display='';ph.style.display='none';}applyCompany();if(logoTarget==='planilla')renderSyH();};r.readAsDataURL(f);e.target.value='';}
 function saveCompany(){company.nombre=gv('emp-nombre')||'Mi Empresa';company.cuit=gv('emp-cuit');company.dir=gv('emp-dir');company.tel=gv('emp-tel');company.email=gv('emp-email');company.loc=gv('emp-loc');company.hab=gv('emp-hab');company.syh_nombre=gv('emp-syh-nombre');company.syh_mat=gv('emp-syh-mat');company.syh_tel=gv('emp-syh-tel');company.syh_email=gv('emp-syh-email');persist();applyCompany();closeM('ov-emp');renderAll();renderSyH();renderContract();}
@@ -1386,7 +1434,9 @@ window.addEventListener('hashchange',routeHash);
 /* ===== NAV ===== */
 var T={dashboard:'Dashboard <span>General</span>',matafuegos:'Matafuegos <span>Registrados</span>',vencimientos:'Vencimientos <span>Visual</span>',alertas:'Alertas <span>de Vencimiento</span>',galeria:'Galería <span>QR / Obleas</span>',syh:'Planilla <span>SyH</span>',cf:'Carga de <span>Fuego</span>',contrato:'Contrato <span>Digital</span>',trayectoria:'Trayectoria <span>& Ahorro</span>',anillos:'Anillos <span>por Año</span>'};
 function nav(p){var pgs=document.querySelectorAll('.page');for(var i=0;i<pgs.length;i++)pgs[i].classList.remove('active');document.getElementById('page-'+p).classList.add('active');var nb=document.querySelectorAll('.nav-btn');for(var i=0;i<nb.length;i++)nb[i].classList.toggle('active',nb[i].getAttribute('data-p')===p);document.getElementById('pg-title').innerHTML=T[p]||p;
-  if(p==='vencimientos')renderBoard();if(p==='alertas')renderAlerts();if(p==='galeria')renderGal();if(p==='syh')renderSyH();if(p==='cf'){renderCFRows();calcCF();}if(p==='contrato')renderContract();if(p==='trayectoria')renderTray();if(p==='anillos')renderRings();if(innerWidth<=820)document.getElementById('sidebar').classList.remove('open');}
+  if(p==='vencimientos')renderBoard();if(p==='alertas')renderAlerts();if(p==='galeria')renderGal();if(p==='syh')renderSyH();if(p==='cf'){renderCFRows();calcCF();}if(p==='contrato')renderContract();if(p==='trayectoria')renderTray();if(p==='anillos')renderRings();closeSidebar();window.scrollTo(0,0);}
+function toggleSidebar(){var sb=document.getElementById('sidebar'),bd=document.getElementById('sb-backdrop');var open=sb.classList.toggle('open');bd.classList.toggle('show',open);}
+function closeSidebar(){document.getElementById('sidebar').classList.remove('open');document.getElementById('sb-backdrop').classList.remove('show');}
 function toggleTheme(){var r=document.documentElement;r.dataset.theme=r.dataset.theme==='light'?'dark':'light';}
 function closeM(id){document.getElementById(id).classList.add('hidden');}
 var ovs=document.querySelectorAll('.overlay');for(var oi=0;oi<ovs.length;oi++)ovs[oi].addEventListener('click',function(e){if(e.target===this)closeM(this.id);});
