@@ -6,1556 +6,1260 @@
 <title>Control Matafuegos</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;600;700;800&family=Inter:wght@400;500;600&family=JetBrains+Mono:wght@400;500&display=swap">
 <style>
-/* ─── TOKENS ─────────────────────────────────── */
-:root {
-  --bg:        #EEF1F5;
-  --surface:   #FFFFFF;
-  --surface2:  #F5F7FA;
-  --border:    #D4DAE3;
-  --text:      #1A2332;
-  --text2:     #4A5568;
-  --text3:     #8A96A8;
-  --accent:    #CC3A15;
-  --accent-h:  #A82E0E;
-  --navy:      #1E3A5F;
-  --ok:        #16803C;
-  --ok-bg:     #D1FAE5;
-  --warn:      #B45309;
-  --warn-bg:   #FEF3C7;
-  --crit:      #B91C1C;
-  --crit-bg:   #FEE2E2;
-  --info:      #1D4ED8;
-  --info-bg:   #DBEAFE;
-  --shadow:    0 1px 3px rgba(0,0,0,.08), 0 1px 2px rgba(0,0,0,.04);
-  --shadow-md: 0 4px 16px rgba(0,0,0,.10);
-  --radius:    8px;
-  --sidebar-w: 220px;
+:root{
+  --bg:#EEF1F5;--surface:#fff;--surface2:#F5F7FA;--border:#D4DAE3;
+  --text:#1A2332;--text2:#4A5568;--text3:#8A96A8;
+  --accent:#CC3A15;--accent-h:#A82E0E;--navy:#1E3A5F;--navy2:#162d4a;
+  --ok:#16803C;--ok-bg:#D1FAE5;--warn:#B45309;--warn-bg:#FEF3C7;
+  --crit:#B91C1C;--crit-bg:#FEE2E2;--info:#1D4ED8;--info-bg:#DBEAFE;
+  --sh:0 1px 3px rgba(0,0,0,.08);--shmd:0 4px 20px rgba(0,0,0,.12);
+  --r:8px;--sw:240px;
 }
-@media (prefers-color-scheme: dark) {
-  :root:not([data-theme="light"]) {
-    --bg:        #0A1520;
-    --surface:   #111D2B;
-    --surface2:  #172438;
-    --border:    #263345;
-    --text:      #E8EDF3;
-    --text2:     #9AAABB;
-    --text3:     #5A6B7C;
-    --accent:    #E84B1A;
-    --accent-h:  #CC3A15;
-    --navy:      #2D5A8E;
-    --ok:        #22C55E;
-    --ok-bg:     #052E16;
-    --warn:      #F59E0B;
-    --warn-bg:   #1C1505;
-    --crit:      #F87171;
-    --crit-bg:   #1C0505;
-    --info:      #60A5FA;
-    --info-bg:   #0A1F3A;
-    --shadow:    0 1px 3px rgba(0,0,0,.30);
-    --shadow-md: 0 4px 16px rgba(0,0,0,.40);
-  }
+@media(prefers-color-scheme:dark){:root:not([data-theme=light]){
+  --bg:#090F18;--surface:#101C2B;--surface2:#162438;--border:#1E3045;
+  --text:#E2E8F0;--text2:#94A3B8;--text3:#4A5E72;
+  --accent:#E84B1A;--accent-h:#CC3A15;--navy:#1a3050;--navy2:#12243d;
+  --ok:#22C55E;--ok-bg:#052E16;--warn:#F59E0B;--warn-bg:#1C1205;
+  --crit:#F87171;--crit-bg:#1C0505;--info:#60A5FA;--info-bg:#0A1F3A;
+  --sh:0 1px 3px rgba(0,0,0,.4);--shmd:0 4px 20px rgba(0,0,0,.5);
+}}
+:root[data-theme=dark]{
+  --bg:#090F18;--surface:#101C2B;--surface2:#162438;--border:#1E3045;
+  --text:#E2E8F0;--text2:#94A3B8;--text3:#4A5E72;
+  --accent:#E84B1A;--accent-h:#CC3A15;--navy:#1a3050;--navy2:#12243d;
+  --ok:#22C55E;--ok-bg:#052E16;--warn:#F59E0B;--warn-bg:#1C1205;
+  --crit:#F87171;--crit-bg:#1C0505;--info:#60A5FA;--info-bg:#0A1F3A;
+  --sh:0 1px 3px rgba(0,0,0,.4);--shmd:0 4px 20px rgba(0,0,0,.5);
 }
-:root[data-theme="dark"] {
-  --bg:        #0A1520;
-  --surface:   #111D2B;
-  --surface2:  #172438;
-  --border:    #263345;
-  --text:      #E8EDF3;
-  --text2:     #9AAABB;
-  --text3:     #5A6B7C;
-  --accent:    #E84B1A;
-  --accent-h:  #CC3A15;
-  --navy:      #2D5A8E;
-  --ok:        #22C55E;
-  --ok-bg:     #052E16;
-  --warn:      #F59E0B;
-  --warn-bg:   #1C1505;
-  --crit:      #F87171;
-  --crit-bg:   #1C0505;
-  --info:      #60A5FA;
-  --info-bg:   #0A1F3A;
-  --shadow:    0 1px 3px rgba(0,0,0,.30);
-  --shadow-md: 0 4px 16px rgba(0,0,0,.40);
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Inter',sans-serif;background:var(--bg);color:var(--text);min-height:100vh;display:flex;font-size:14px;line-height:1.5}
+
+/* SIDEBAR */
+.sb{width:var(--sw);background:var(--navy);min-height:100vh;position:fixed;top:0;left:0;z-index:100;display:flex;flex-direction:column;box-shadow:var(--shmd)}
+.sb-logo{padding:18px 16px;border-bottom:1px solid rgba(255,255,255,.08);display:flex;align-items:center;gap:12px;cursor:pointer}
+.sb-logo-img{width:42px;height:42px;border-radius:8px;object-fit:cover;background:rgba(255,255,255,.1);display:flex;align-items:center;justify-content:center;font-size:20px;flex-shrink:0;overflow:hidden}
+.sb-logo-img img{width:100%;height:100%;object-fit:cover}
+.sb-logo-text h1{font-family:'Barlow Condensed',sans-serif;font-size:17px;font-weight:700;color:#fff;line-height:1.1}
+.sb-logo-text p{font-size:10px;color:rgba(255,255,255,.4);text-transform:uppercase;letter-spacing:.08em;margin-top:1px}
+.sb-nav{padding:12px 8px;flex:1;overflow-y:auto}
+.sb-group{font-size:10px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:rgba(255,255,255,.3);padding:12px 12px 6px;margin-top:4px}
+.nav-btn{display:flex;align-items:center;gap:10px;width:100%;padding:9px 12px;border-radius:6px;background:none;border:none;color:rgba(255,255,255,.6);font-size:13px;font-weight:500;cursor:pointer;transition:all .15s;text-align:left;position:relative}
+.nav-btn:hover{background:rgba(255,255,255,.08);color:#fff}
+.nav-btn.active{background:var(--accent);color:#fff}
+.nav-btn svg{width:16px;height:16px;flex-shrink:0}
+.nav-badge{margin-left:auto;background:var(--crit);color:#fff;font-size:10px;font-weight:700;padding:1px 6px;border-radius:10px;display:none}
+.nav-badge.show{display:block}
+.sb-footer{padding:10px 8px;border-top:1px solid rgba(255,255,255,.08)}
+.sb-footer-btn{display:flex;align-items:center;gap:8px;width:100%;padding:8px 12px;border-radius:6px;background:rgba(255,255,255,.06);border:none;color:rgba(255,255,255,.5);font-size:12px;cursor:pointer;transition:all .15s;margin-bottom:4px}
+.sb-footer-btn:hover{background:rgba(255,255,255,.12);color:#fff}
+
+/* MAIN */
+.main{margin-left:var(--sw);flex:1;display:flex;flex-direction:column;min-height:100vh}
+
+/* TOPBAR */
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:11px 24px;display:flex;align-items:center;gap:10px;position:sticky;top:0;z-index:50;box-shadow:var(--sh)}
+.topbar h2{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700;flex:1}
+.topbar h2 span{color:var(--accent)}
+
+/* BUTTONS */
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 14px;border-radius:6px;font-size:13px;font-weight:500;cursor:pointer;border:none;font-family:inherit;transition:all .15s;white-space:nowrap}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover{background:var(--accent-h)}
+.btn-secondary{background:var(--navy);color:#fff}
+.btn-secondary:hover{background:var(--navy2)}
+.btn-outline{background:transparent;color:var(--text2);border:1px solid var(--border)}
+.btn-outline:hover{background:var(--surface2);color:var(--text)}
+.btn-ghost{background:transparent;color:var(--text3);border:none;padding:6px 8px}
+.btn-ghost:hover{color:var(--text);background:var(--surface2)}
+.btn-sm{padding:5px 10px;font-size:12px}
+.btn-danger{background:#DC2626;color:#fff}
+.btn-danger:hover{background:#B91C1C}
+
+/* ALERT BANNER */
+.alert-band{padding:0 24px}
+.alert-strip{margin:14px 0 0;border-radius:var(--r);padding:10px 14px;display:flex;align-items:flex-start;gap:10px;font-size:13px}
+.alert-strip.crit{background:var(--crit-bg);border:1px solid var(--crit);color:var(--crit)}
+.alert-strip.warn{background:var(--warn-bg);border:1px solid var(--warn);color:var(--warn)}
+
+/* CONTENT */
+.content{padding:18px 24px 40px;flex:1}
+.page{display:none}.page.active{display:block}
+
+/* STATS */
+.stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:12px;margin-bottom:20px}
+.stat{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;box-shadow:var(--sh)}
+.stat-lbl{font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.07em;color:var(--text3);margin-bottom:4px}
+.stat-val{font-family:'Barlow Condensed',sans-serif;font-size:34px;font-weight:800;line-height:1}
+.stat-sub{font-size:11px;color:var(--text3);margin-top:3px}
+.stat.ok .stat-val{color:var(--ok)}
+.stat.warn .stat-val{color:var(--warn)}
+.stat.crit .stat-val{color:var(--crit)}
+.stat.info .stat-val{color:var(--info)}
+
+/* SECTION HEADER */
+.sec-hdr{display:flex;align-items:center;gap:10px;margin-bottom:14px}
+.sec-hdr h3{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:700}
+.sec-hdr .ct{font-size:13px;color:var(--text3)}
+.sec-hdr .spacer{flex:1}
+
+/* CHIPS */
+.chip{display:inline-flex;align-items:center;gap:4px;padding:2px 8px;border-radius:20px;font-size:11px;font-weight:600;white-space:nowrap}
+.chip.ok{background:var(--ok-bg);color:var(--ok)}
+.chip.warn{background:var(--warn-bg);color:var(--warn)}
+.chip.crit{background:var(--crit-bg);color:var(--crit)}
+.chip.info{background:var(--info-bg);color:var(--info)}
+.chip.grey{background:var(--surface2);color:var(--text3);border:1px solid var(--border)}
+
+/* TABLE */
+.tbl-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;box-shadow:var(--sh)}
+.tbl-scroll{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:13px}
+thead{background:var(--surface2)}
+th{padding:9px 12px;text-align:left;font-size:11px;font-weight:600;text-transform:uppercase;letter-spacing:.06em;color:var(--text2);border-bottom:1px solid var(--border);white-space:nowrap;cursor:pointer;user-select:none}
+th:hover{color:var(--text)}
+td{padding:10px 12px;border-bottom:1px solid var(--border);vertical-align:middle;white-space:nowrap}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:var(--surface2)}
+.date-cell{display:flex;flex-direction:column;gap:2px}
+.date-val{font-family:'JetBrains Mono',monospace;font-size:12px}
+.table-empty{text-align:center;padding:48px;color:var(--text3)}
+
+/* TOOLBAR */
+.toolbar{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-bottom:12px}
+.toolbar input,.toolbar select{background:var(--surface);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:7px 10px;font-size:13px;font-family:inherit;outline:none;transition:border-color .15s}
+.toolbar input:focus,.toolbar select:focus{border-color:var(--accent)}
+.toolbar input{min-width:200px;flex:1}
+
+/* RING */
+.ring-badge{display:inline-flex;align-items:center;gap:6px;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:700}
+.ring-dot{width:10px;height:10px;border-radius:50%;flex-shrink:0}
+
+/* ALERTS LIST */
+.alerts-list{display:flex;flex-direction:column;gap:10px}
+.alert-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:14px 16px;display:flex;align-items:center;gap:14px;box-shadow:var(--sh)}
+.alert-card.crit{border-left:4px solid var(--crit)}
+.alert-card.warn{border-left:4px solid var(--warn)}
+.alert-card.info{border-left:4px solid var(--info)}
+.al-icon{font-size:22px;flex-shrink:0}
+.al-body{flex:1;min-width:0}
+.al-title{font-size:13px;font-weight:600}
+.al-sub{font-size:12px;color:var(--text2);margin-top:2px}
+.al-days{font-family:'Barlow Condensed',sans-serif;font-size:24px;font-weight:800;flex-shrink:0;text-align:right}
+.alert-card.crit .al-days{color:var(--crit)}
+.alert-card.warn .al-days{color:var(--warn)}
+.alert-card.info .al-days{color:var(--info)}
+
+/* TABS */
+.tabs{display:flex;border-bottom:2px solid var(--border);margin-bottom:18px;gap:0}
+.tab{padding:9px 16px;font-size:13px;font-weight:500;color:var(--text2);cursor:pointer;border:none;background:none;border-bottom:2px solid transparent;margin-bottom:-2px;transition:all .15s;font-family:inherit}
+.tab:hover{color:var(--text)}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent);font-weight:600}
+
+/* MODAL */
+.overlay{position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:200;display:flex;align-items:flex-start;justify-content:center;padding:20px;overflow-y:auto;backdrop-filter:blur(3px)}
+.overlay.hidden{display:none}
+.modal{background:var(--surface);border-radius:12px;width:100%;max-width:760px;box-shadow:var(--shmd);margin:auto}
+.modal.wide{max-width:960px}
+.modal-hdr{display:flex;align-items:center;justify-content:space-between;padding:16px 22px;border-bottom:1px solid var(--border)}
+.modal-hdr h2{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:700}
+.modal-body{padding:22px;max-height:80vh;overflow-y:auto}
+.modal-ftr{padding:14px 22px;border-top:1px solid var(--border);display:flex;gap:8px;justify-content:flex-end}
+
+/* FORM */
+.fs{margin-bottom:18px}
+.fs-title{font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;color:var(--accent);margin-bottom:10px;padding-bottom:6px;border-bottom:1px solid var(--border)}
+.fg{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.fg.c3{grid-template-columns:1fr 1fr 1fr}
+.fg.c1{grid-template-columns:1fr}
+.field{display:flex;flex-direction:column;gap:4px}
+.field.s2{grid-column:span 2}
+.field.s3{grid-column:span 3}
+label{font-size:12px;font-weight:600;color:var(--text2)}
+label .req{color:var(--crit)}
+.f-hint{font-size:11px;color:var(--text3)}
+input,select,textarea{background:var(--surface2);border:1px solid var(--border);color:var(--text);border-radius:6px;padding:8px 10px;font-size:13px;font-family:inherit;outline:none;transition:border-color .15s;width:100%}
+input:focus,select:focus,textarea:focus{border-color:var(--accent);background:var(--surface)}
+input[readonly]{opacity:.7;cursor:default}
+textarea{resize:vertical;min-height:68px}
+
+/* SYH CHECKS */
+.syh-grid{display:grid;grid-template-columns:1fr 1fr;gap:8px}
+.syh-row{background:var(--surface2);border:1px solid var(--border);border-radius:6px;padding:8px 12px;display:flex;align-items:center;justify-content:space-between;gap:8px}
+.syh-row label{font-size:12px;font-weight:500;color:var(--text)}
+select.mini{padding:4px 8px;font-size:11px;width:auto}
+
+/* PHOTO PANEL */
+.photo-panel{display:grid;grid-template-columns:repeat(3,1fr);gap:12px}
+.photo-slot{border:2px dashed var(--border);border-radius:var(--r);aspect-ratio:4/3;position:relative;overflow:hidden;cursor:pointer;background:var(--surface2);display:flex;flex-direction:column;align-items:center;justify-content:center;gap:8px;transition:all .15s}
+.photo-slot:hover{border-color:var(--accent);background:var(--surface)}
+.photo-slot.filled{border-style:solid;border-color:var(--ok)}
+.photo-slot img.preview{position:absolute;inset:0;width:100%;height:100%;object-fit:cover}
+.photo-slot .ph-label{position:absolute;bottom:0;left:0;right:0;background:rgba(0,0,0,.65);color:#fff;font-size:10px;font-weight:700;text-align:center;padding:4px;text-transform:uppercase;letter-spacing:.06em}
+.photo-slot .ph-hover{position:absolute;inset:0;background:rgba(0,0,0,0);display:flex;align-items:center;justify-content:center;opacity:0;transition:all .15s}
+.photo-slot:hover .ph-hover{background:rgba(0,0,0,.45);opacity:1}
+.ph-hover span{color:#fff;font-size:12px;font-weight:600}
+.ph-empty-icon{color:var(--text3);font-size:28px}
+.ph-empty-text{font-size:11px;color:var(--text3);text-align:center;padding:0 6px}
+.ph-remove{position:absolute;top:4px;right:4px;background:rgba(0,0,0,.6);border:none;color:#fff;width:20px;height:20px;border-radius:50%;font-size:11px;cursor:pointer;display:none;align-items:center;justify-content:center;z-index:2}
+.photo-slot.filled .ph-remove{display:flex}
+
+/* DETAIL */
+.detail-grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.det-card{background:var(--surface2);border:1px solid var(--border);border-radius:var(--r);padding:14px}
+.det-card h4{font-family:'Barlow Condensed',sans-serif;font-size:15px;font-weight:700;margin-bottom:10px;color:var(--text)}
+.det-row{display:flex;justify-content:space-between;align-items:center;padding:5px 0;border-bottom:1px solid var(--border);gap:8px}
+.det-row:last-child{border-bottom:none}
+.det-k{font-size:11px;color:var(--text3);font-weight:500;flex-shrink:0}
+.det-v{font-size:12px;color:var(--text);font-weight:600;text-align:right}
+.det-v.mono{font-family:'JetBrains Mono',monospace}
+
+/* TIMELINE */
+.tl{display:flex;flex-direction:column;gap:0}
+.tl-item{display:flex;gap:10px}
+.tl-dot{width:9px;height:9px;border-radius:50%;flex-shrink:0;margin-top:4px;border:2px solid}
+.tl-dot.ok{background:var(--ok);border-color:var(--ok)}
+.tl-dot.warn{background:var(--warn);border-color:var(--warn)}
+.tl-dot.crit{background:var(--crit);border-color:var(--crit)}
+.tl-dot.dim{background:transparent;border-color:var(--border)}
+.tl-info{flex:1;padding-bottom:12px}
+.tl-type{font-size:12px;font-weight:600}
+.tl-date{font-size:11px;color:var(--text3);font-family:'JetBrains Mono',monospace}
+
+/* GALLERY */
+.gallery{display:grid;grid-template-columns:repeat(auto-fill,minmax(160px,1fr));gap:12px}
+.gal-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;box-shadow:var(--sh)}
+.gal-img{aspect-ratio:4/3;background:var(--surface2);display:flex;align-items:center;justify-content:center;overflow:hidden;position:relative}
+.gal-img img{width:100%;height:100%;object-fit:cover}
+.gal-img .gal-type{position:absolute;top:6px;left:6px;background:rgba(0,0,0,.6);color:#fff;font-size:9px;font-weight:700;padding:2px 6px;border-radius:4px;text-transform:uppercase}
+.gal-foot{padding:8px 10px}
+.gal-lote{font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600}
+.gal-sec{font-size:11px;color:var(--text3)}
+
+/* PRINT PLANILLA */
+.planilla-preview{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:24px;box-shadow:var(--sh)}
+.planilla-header{display:flex;justify-content:space-between;align-items:flex-start;border-bottom:2px solid var(--text);padding-bottom:12px;margin-bottom:16px}
+.planilla-empresa{font-size:13px;font-weight:600}
+.planilla-empresa small{display:block;font-size:11px;font-weight:400;color:var(--text2)}
+.planilla-title{text-align:center;flex:1;padding:0 16px}
+.planilla-title h2{font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:800}
+.planilla-title p{font-size:11px;color:var(--text2)}
+.planilla-norm{font-size:10px;text-align:right;color:var(--text3)}
+.planilla-norm strong{display:block;font-size:11px;color:var(--text)}
+@media print{
+  .sb,.topbar,.no-print{display:none!important}
+  .main{margin-left:0!important}
+  .content{padding:0!important}
+  .page{display:block!important}
+  .planilla-preview{box-shadow:none;border:none}
+  body{font-size:12px}
 }
 
-/* ─── RESET ──────────────────────────────────── */
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: 'Inter', system-ui, sans-serif; background: var(--bg); color: var(--text); min-height: 100vh; display: flex; overflow-x: hidden; font-size: 14px; }
+/* RINGS PAGE */
+.rings-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:14px}
+.ring-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:18px;box-shadow:var(--sh);display:flex;align-items:center;gap:14px}
+.ring-circle{width:54px;height:54px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:800;border:3px solid rgba(0,0,0,.1)}
+.ring-info h4{font-family:'Barlow Condensed',sans-serif;font-size:18px;font-weight:800}
+.ring-info p{font-size:12px;color:var(--text2)}
+.ring-info small{font-size:11px;color:var(--text3)}
 
-/* ─── SIDEBAR ─────────────────────────────────── */
-.sidebar {
-  width: var(--sidebar-w);
-  background: var(--navy);
-  min-height: 100vh;
-  display: flex;
-  flex-direction: column;
-  position: fixed;
-  top: 0; left: 0;
-  z-index: 100;
-  transition: transform .2s;
-}
-.sidebar-logo {
-  padding: 20px 16px 16px;
-  border-bottom: 1px solid rgba(255,255,255,.1);
-  display: flex; align-items: center; gap: 10px;
-}
-.sidebar-logo .fire-icon { font-size: 26px; }
-.sidebar-logo h1 { font-family: 'Barlow Condensed', sans-serif; font-size: 18px; font-weight: 700; color: #fff; line-height: 1.1; }
-.sidebar-logo span { font-size: 10px; font-weight: 400; color: rgba(255,255,255,.5); text-transform: uppercase; letter-spacing: .08em; }
-.nav { padding: 12px 8px; flex: 1; }
-.nav-item {
-  display: flex; align-items: center; gap: 10px;
-  padding: 9px 12px; border-radius: 6px;
-  color: rgba(255,255,255,.65); font-size: 13px; font-weight: 500;
-  cursor: pointer; transition: all .15s; margin-bottom: 2px;
-  border: none; background: none; width: 100%; text-align: left;
-}
-.nav-item:hover { background: rgba(255,255,255,.08); color: #fff; }
-.nav-item.active { background: var(--accent); color: #fff; }
-.nav-item svg { width: 16px; height: 16px; flex-shrink: 0; }
-.sidebar-footer { padding: 12px 8px; border-top: 1px solid rgba(255,255,255,.1); }
-.theme-btn {
-  display: flex; align-items: center; gap: 8px; width: 100%;
-  padding: 8px 12px; border-radius: 6px; border: none;
-  background: rgba(255,255,255,.07); color: rgba(255,255,255,.6);
-  font-size: 12px; cursor: pointer; transition: all .15s;
-}
-.theme-btn:hover { background: rgba(255,255,255,.12); color: #fff; }
+/* COMPANY MODAL */
+.logo-upload{width:80px;height:80px;border:2px dashed var(--border);border-radius:10px;cursor:pointer;overflow:hidden;display:flex;align-items:center;justify-content:center;background:var(--surface2);transition:all .15s;flex-shrink:0}
+.logo-upload:hover{border-color:var(--accent)}
+.logo-upload img{width:100%;height:100%;object-fit:cover}
 
-/* ─── MAIN ────────────────────────────────────── */
-.main { margin-left: var(--sidebar-w); flex: 1; display: flex; flex-direction: column; }
+/* PROV */
+.prov-tag{font-size:10px;background:var(--info-bg);color:var(--info);padding:2px 6px;border-radius:4px;font-weight:700}
 
-/* ─── TOPBAR ──────────────────────────────────── */
-.topbar {
-  background: var(--surface);
-  border-bottom: 1px solid var(--border);
-  padding: 12px 24px;
-  display: flex; align-items: center; gap: 12px;
-  position: sticky; top: 0; z-index: 50;
-  box-shadow: var(--shadow);
+/* RESPONSIVE */
+@media(max-width:768px){
+  :root{--sw:0px}
+  .sb{transform:translateX(-240px);transition:transform .2s}.sb.open{transform:translateX(0);width:240px}
+  .main{margin-left:0}.fg{grid-template-columns:1fr}.fg.c3{grid-template-columns:1fr 1fr}
+  .photo-panel{grid-template-columns:1fr 1fr}.detail-grid{grid-template-columns:1fr}
 }
-.topbar-title { font-family: 'Barlow Condensed', sans-serif; font-size: 22px; font-weight: 700; color: var(--text); flex: 1; }
-.topbar-title span { color: var(--accent); }
-.btn {
-  display: inline-flex; align-items: center; gap: 6px;
-  padding: 8px 14px; border-radius: 6px; font-size: 13px;
-  font-weight: 500; cursor: pointer; border: none; transition: all .15s; font-family: 'Inter', sans-serif;
-}
-.btn-primary { background: var(--accent); color: #fff; }
-.btn-primary:hover { background: var(--accent-h); }
-.btn-outline { background: transparent; color: var(--text2); border: 1px solid var(--border); }
-.btn-outline:hover { background: var(--surface2); color: var(--text); }
-.btn-sm { padding: 5px 10px; font-size: 12px; }
-.btn-icon { padding: 7px; border-radius: 6px; }
-
-/* ─── ALERT BANNER ───────────────────────────── */
-.alert-banner { padding: 0 24px; }
-.alert-strip {
-  margin: 16px 0 0;
-  border-radius: var(--radius);
-  padding: 10px 16px;
-  display: flex; align-items: flex-start; gap: 10px;
-  font-size: 13px; line-height: 1.5;
-}
-.alert-strip.critical { background: var(--crit-bg); border: 1px solid var(--crit); color: var(--crit); }
-.alert-strip.warning  { background: var(--warn-bg); border: 1px solid var(--warn); color: var(--warn); }
-.alert-strip.info     { background: var(--info-bg); border: 1px solid var(--info); color: var(--info); }
-.alert-strip svg { flex-shrink: 0; margin-top: 1px; }
-
-/* ─── CONTENT ─────────────────────────────────── */
-.content { padding: 16px 24px 32px; flex: 1; }
-
-/* ─── STATS CARDS ─────────────────────────────── */
-.stats { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 14px; margin-bottom: 20px; }
-.stat-card {
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: var(--radius); padding: 16px; box-shadow: var(--shadow);
-}
-.stat-card .stat-label { font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .07em; color: var(--text3); margin-bottom: 6px; }
-.stat-card .stat-val { font-family: 'Barlow Condensed', sans-serif; font-size: 32px; font-weight: 800; line-height: 1; color: var(--text); }
-.stat-card .stat-sub { font-size: 11px; color: var(--text3); margin-top: 4px; }
-.stat-card.ok  .stat-val { color: var(--ok); }
-.stat-card.warn .stat-val { color: var(--warn); }
-.stat-card.crit .stat-val { color: var(--crit); }
-
-/* ─── TOOLBAR ─────────────────────────────────── */
-.toolbar {
-  display: flex; gap: 10px; align-items: center;
-  margin-bottom: 14px; flex-wrap: wrap;
-}
-.toolbar select, .toolbar input {
-  background: var(--surface); border: 1px solid var(--border);
-  color: var(--text); border-radius: 6px; padding: 7px 10px;
-  font-size: 13px; font-family: 'Inter', sans-serif; outline: none;
-  transition: border-color .15s;
-}
-.toolbar select:focus, .toolbar input:focus { border-color: var(--accent); }
-.toolbar input { flex: 1; min-width: 180px; }
-.ring-legend { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-left: auto; }
-.ring-dot { width: 14px; height: 14px; border-radius: 50%; border: 2px solid rgba(0,0,0,.2); display: inline-block; flex-shrink: 0; }
-.ring-label { font-size: 11px; color: var(--text2); display: flex; align-items: center; gap: 4px; }
-
-/* ─── TABLE ────────────────────────────────────── */
-.table-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); }
-.table-scroll { overflow-x: auto; }
-table { width: 100%; border-collapse: collapse; font-size: 13px; }
-thead { position: sticky; top: 0; z-index: 10; }
-th {
-  background: var(--surface2); color: var(--text2);
-  font-size: 11px; font-weight: 600; text-transform: uppercase;
-  letter-spacing: .06em; padding: 10px 12px; text-align: left;
-  border-bottom: 1px solid var(--border); white-space: nowrap; user-select: none; cursor: pointer;
-}
-th:hover { color: var(--text); }
-th.sorted { color: var(--accent); }
-td { padding: 10px 12px; border-bottom: 1px solid var(--border); vertical-align: middle; color: var(--text); white-space: nowrap; }
-tr:last-child td { border-bottom: none; }
-tr:hover td { background: var(--surface2); }
-.table-empty { text-align: center; padding: 48px 24px; color: var(--text3); }
-.table-empty svg { width: 40px; height: 40px; margin: 0 auto 12px; display: block; color: var(--border); }
-
-/* ─── RING ─────────────────────────────────────── */
-.ring-badge {
-  display: inline-flex; align-items: center; gap: 6px;
-  padding: 2px 8px 2px 4px; border-radius: 20px;
-  font-size: 12px; font-weight: 600;
-}
-
-/* ─── STATUS CHIPS ─────────────────────────────── */
-.chip {
-  display: inline-flex; align-items: center; gap: 4px;
-  padding: 2px 8px; border-radius: 20px; font-size: 11px; font-weight: 600; white-space: nowrap;
-}
-.chip.ok   { background: var(--ok-bg); color: var(--ok); }
-.chip.warn { background: var(--warn-bg); color: var(--warn); }
-.chip.crit { background: var(--crit-bg); color: var(--crit); }
-.chip.info { background: var(--info-bg); color: var(--info); }
-.chip.grey { background: var(--surface2); color: var(--text3); border: 1px solid var(--border); }
-
-/* ─── DATE CELL ────────────────────────────────── */
-.date-cell { display: flex; flex-direction: column; gap: 2px; }
-.date-cell .date { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text); }
-.date-cell .days { font-size: 11px; }
-
-/* ─── ACTIONS ──────────────────────────────────── */
-.actions { display: flex; gap: 4px; }
-
-/* ─── SECTION HEADER ──────────────────────────── */
-.section-header { display: flex; align-items: center; gap: 8px; margin-bottom: 14px; }
-.section-header h2 { font-family: 'Barlow Condensed', sans-serif; font-size: 20px; font-weight: 700; color: var(--text); }
-.section-header .count { font-size: 13px; color: var(--text3); font-weight: 400; }
-
-/* ─── MODAL ────────────────────────────────────── */
-.overlay {
-  position: fixed; inset: 0; background: rgba(0,0,0,.5); z-index: 200;
-  display: flex; align-items: flex-start; justify-content: center; padding: 24px;
-  backdrop-filter: blur(2px); overflow-y: auto;
-}
-.overlay.hidden { display: none; }
-.modal {
-  background: var(--surface); border-radius: 12px;
-  width: 100%; max-width: 720px; box-shadow: var(--shadow-md);
-  margin: auto;
-}
-.modal-header {
-  display: flex; align-items: center; justify-content: space-between;
-  padding: 18px 24px; border-bottom: 1px solid var(--border);
-}
-.modal-header h2 { font-family: 'Barlow Condensed', sans-serif; font-size: 20px; font-weight: 700; }
-.modal-header .close-btn { border: none; background: none; color: var(--text2); cursor: pointer; padding: 4px; border-radius: 4px; }
-.modal-header .close-btn:hover { color: var(--text); background: var(--surface2); }
-.modal-body { padding: 24px; }
-.modal-footer { padding: 16px 24px; border-top: 1px solid var(--border); display: flex; gap: 8px; justify-content: flex-end; }
-
-/* ─── FORM ─────────────────────────────────────── */
-.form-section { margin-bottom: 20px; }
-.form-section-title {
-  font-size: 11px; font-weight: 700; text-transform: uppercase;
-  letter-spacing: .08em; color: var(--accent); margin-bottom: 12px;
-  padding-bottom: 6px; border-bottom: 1px solid var(--border);
-  display: flex; align-items: center; gap: 8px;
-}
-.form-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
-.form-grid.cols3 { grid-template-columns: 1fr 1fr 1fr; }
-.form-grid.cols1 { grid-template-columns: 1fr; }
-.field { display: flex; flex-direction: column; gap: 4px; }
-.field.span2 { grid-column: span 2; }
-.field.span3 { grid-column: span 3; }
-label { font-size: 12px; font-weight: 600; color: var(--text2); }
-label .req { color: var(--crit); }
-input, select, textarea {
-  background: var(--surface2); border: 1px solid var(--border);
-  color: var(--text); border-radius: 6px; padding: 8px 10px;
-  font-size: 13px; font-family: 'Inter', sans-serif; outline: none;
-  transition: border-color .15s; width: 100%;
-}
-input:focus, select:focus, textarea:focus { border-color: var(--accent); background: var(--surface); }
-textarea { resize: vertical; min-height: 72px; }
-.checkbox-group { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-.checkbox-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: var(--text2); cursor: pointer; }
-.checkbox-item input[type=checkbox] { width: 14px; height: 14px; }
-
-/* ─── PHOTO UPLOAD ────────────────────────────── */
-.photo-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
-.photo-slot {
-  border: 2px dashed var(--border); border-radius: var(--radius);
-  aspect-ratio: 4/3; display: flex; flex-direction: column;
-  align-items: center; justify-content: center; gap: 8px;
-  cursor: pointer; transition: all .15s; overflow: hidden; position: relative;
-  background: var(--surface2);
-}
-.photo-slot:hover { border-color: var(--accent); background: var(--surface); }
-.photo-slot.has-photo { border-style: solid; border-color: var(--ok); }
-.photo-slot img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: cover; }
-.photo-slot .photo-label {
-  position: absolute; bottom: 0; left: 0; right: 0;
-  background: rgba(0,0,0,.6); color: #fff; font-size: 11px;
-  font-weight: 600; text-align: center; padding: 4px;
-  text-transform: uppercase; letter-spacing: .05em;
-}
-.photo-slot .photo-overlay {
-  position: absolute; inset: 0; background: rgba(0,0,0,.0); display: flex;
-  align-items: center; justify-content: center; opacity: 0; transition: all .15s;
-}
-.photo-slot:hover .photo-overlay { background: rgba(0,0,0,.4); opacity: 1; }
-.photo-slot .photo-overlay span { color: #fff; font-size: 12px; font-weight: 600; }
-.photo-empty-label { font-size: 12px; color: var(--text3); text-align: center; padding: 0 8px; }
-.photo-icon { color: var(--text3); }
-
-/* ─── DETAIL VIEW ─────────────────────────────── */
-.detail-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
-.detail-card { background: var(--surface2); border: 1px solid var(--border); border-radius: var(--radius); padding: 16px; }
-.detail-card h3 { font-family: 'Barlow Condensed', sans-serif; font-size: 16px; font-weight: 700; margin-bottom: 12px; color: var(--text); }
-.detail-row { display: flex; justify-content: space-between; align-items: flex-start; padding: 6px 0; border-bottom: 1px solid var(--border); gap: 8px; }
-.detail-row:last-child { border-bottom: none; }
-.detail-key { font-size: 12px; color: var(--text3); font-weight: 500; flex-shrink: 0; }
-.detail-val { font-size: 12px; color: var(--text); font-weight: 600; text-align: right; }
-.detail-val.mono { font-family: 'JetBrains Mono', monospace; }
-
-/* ─── TIMELINE ────────────────────────────────── */
-.timeline { display: flex; flex-direction: column; gap: 0; }
-.tl-item { display: flex; gap: 12px; align-items: flex-start; }
-.tl-dot {
-  width: 10px; height: 10px; border-radius: 50%; flex-shrink: 0;
-  margin-top: 4px; border: 2px solid;
-}
-.tl-dot.ok   { background: var(--ok);   border-color: var(--ok); }
-.tl-dot.warn { background: var(--warn); border-color: var(--warn); }
-.tl-dot.crit { background: var(--crit); border-color: var(--crit); }
-.tl-dot.future { background: transparent; border-color: var(--border); }
-.tl-line { display: flex; flex-direction: column; }
-.tl-line { flex: 1; padding-bottom: 14px; }
-.tl-type { font-size: 12px; font-weight: 600; color: var(--text); }
-.tl-date { font-size: 11px; color: var(--text3); font-family: 'JetBrains Mono', monospace; }
-
-/* ─── ALERTS PAGE ─────────────────────────────── */
-.alerts-list { display: flex; flex-direction: column; gap: 10px; }
-.alert-card {
-  background: var(--surface); border: 1px solid var(--border);
-  border-radius: var(--radius); padding: 14px 16px;
-  display: flex; align-items: center; gap: 14px; box-shadow: var(--shadow);
-}
-.alert-card.critical { border-left: 4px solid var(--crit); }
-.alert-card.warning  { border-left: 4px solid var(--warn); }
-.alert-card.info     { border-left: 4px solid var(--info); }
-.alert-card .al-icon { font-size: 22px; flex-shrink: 0; }
-.alert-card .al-info { flex: 1; }
-.alert-card .al-title { font-size: 13px; font-weight: 600; color: var(--text); }
-.alert-card .al-sub   { font-size: 12px; color: var(--text2); margin-top: 2px; }
-.alert-card .al-days  { font-family: 'Barlow Condensed', sans-serif; font-size: 22px; font-weight: 800; flex-shrink: 0; white-space: nowrap; }
-.alert-card.critical .al-days { color: var(--crit); }
-.alert-card.warning  .al-days { color: var(--warn); }
-.alert-card.info     .al-days { color: var(--info); }
-
-/* ─── TABS ─────────────────────────────────────── */
-.tabs { display: flex; gap: 0; border-bottom: 2px solid var(--border); margin-bottom: 20px; }
-.tab {
-  padding: 10px 18px; font-size: 13px; font-weight: 500;
-  color: var(--text2); cursor: pointer; border-bottom: 2px solid transparent;
-  margin-bottom: -2px; transition: all .15s; border-top: none; border-left: none; border-right: none;
-  background: none;
-}
-.tab:hover { color: var(--text); }
-.tab.active { color: var(--accent); border-bottom-color: var(--accent); font-weight: 600; }
-
-/* ─── GALLERY ──────────────────────────────────── */
-.gallery-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 14px; }
-.gallery-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); overflow: hidden; box-shadow: var(--shadow); }
-.gallery-img { aspect-ratio: 4/3; overflow: hidden; background: var(--surface2); display: flex; align-items: center; justify-content: center; }
-.gallery-img img { width: 100%; height: 100%; object-fit: cover; }
-.gallery-img .no-img { color: var(--text3); font-size: 11px; }
-.gallery-footer { padding: 8px 10px; }
-.gallery-footer .gf-lote { font-family: 'JetBrains Mono', monospace; font-size: 12px; font-weight: 600; color: var(--text); }
-.gallery-footer .gf-type { font-size: 11px; color: var(--text3); }
-
-/* ─── SYH FIELDS ──────────────────────────────── */
-.syh-checks { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-.syh-check { background: var(--surface2); border: 1px solid var(--border); border-radius: 6px; padding: 8px 12px; display: flex; align-items: center; justify-content: space-between; }
-.syh-check label { font-size: 12px; color: var(--text); font-weight: 500; }
-select.mini { padding: 3px 6px; font-size: 11px; }
-
-/* ─── PROVISORIO ──────────────────────────────── */
-.prov-badge { font-size: 11px; background: var(--info-bg); color: var(--info); padding: 2px 6px; border-radius: 4px; font-weight: 600; }
-
-/* ─── SCROLL ───────────────────────────────────── */
-.page { display: none; }
-.page.active { display: block; }
-
-/* ─── RESPONSIVE ───────────────────────────────── */
-@media (max-width: 768px) {
-  :root { --sidebar-w: 0px; }
-  .sidebar { transform: translateX(-220px); }
-  .sidebar.open { transform: translateX(0); width: 220px; }
-  .main { margin-left: 0; }
-  .form-grid { grid-template-columns: 1fr; }
-  .form-grid.cols3 { grid-template-columns: 1fr 1fr; }
-  .photo-grid { grid-template-columns: 1fr 1fr; }
-  .detail-grid { grid-template-columns: 1fr; }
-  .syh-checks { grid-template-columns: 1fr; }
-}
-@media (prefers-reduced-motion: reduce) {
-  * { transition: none !important; animation: none !important; }
-}
+@media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
 </style>
 </head>
 <body>
 
 <!-- ═══ SIDEBAR ═══ -->
-<nav class="sidebar" id="sidebar">
-  <div class="sidebar-logo">
-    <span class="fire-icon">🔥</span>
-    <div>
-      <h1>Matafuegos</h1>
-      <span>Control de vencimientos</span>
+<nav class="sb" id="sidebar">
+  <div class="sb-logo" onclick="openCompany()">
+    <div class="sb-logo-img" id="sb-logo-img"><span>🏭</span></div>
+    <div class="sb-logo-text">
+      <h1 id="sb-empresa">Mi Empresa</h1>
+      <p>Control Matafuegos</p>
     </div>
   </div>
-  <div class="nav">
-    <button class="nav-item active" onclick="showPage('dashboard')" data-page="dashboard">
+  <div class="sb-nav">
+    <div class="sb-group">Principal</div>
+    <button class="nav-btn active" onclick="nav('dashboard')" data-p="dashboard">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>
       Dashboard
     </button>
-    <button class="nav-item" onclick="showPage('matafuegos')" data-page="matafuegos">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2a4 4 0 0 0-4 4v2H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V10a2 2 0 0 0-2-2h-2V6a4 4 0 0 0-4-4z"/></svg>
+    <button class="nav-btn" onclick="nav('matafuegos')" data-p="matafuegos">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2c0 0-1 2-1 4s2 3 2 5c0 1.5-1 2.5-2 3"/><path d="M8 22h8M12 22v-4"/><ellipse cx="12" cy="14" rx="5" ry="4"/></svg>
       Matafuegos
     </button>
-    <button class="nav-item" onclick="showPage('alertas')" data-page="alertas">
+    <button class="nav-btn" onclick="nav('alertas')" data-p="alertas">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
       Alertas
-      <span id="alert-badge" class="chip crit" style="margin-left:auto;display:none;font-size:10px;padding:1px 5px;"></span>
+      <span class="nav-badge" id="nb-alertas"></span>
     </button>
-    <button class="nav-item" onclick="showPage('galeria')" data-page="galeria">
+    <div class="sb-group">Documentación</div>
+    <button class="nav-btn" onclick="nav('fotos')" data-p="fotos">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg>
       Galería / Obleas
     </button>
-    <button class="nav-item" onclick="showPage('planillaSyH')" data-page="planillaSyH">
+    <button class="nav-btn" onclick="nav('syh')" data-p="syh">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
       Planilla SyH
     </button>
-    <button class="nav-item" onclick="showPage('anillos')" data-page="anillos">
+    <div class="sb-group">Referencia</div>
+    <button class="nav-btn" onclick="nav('anillos')" data-p="anillos">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="4"/></svg>
-      Anillos / Años
+      Anillos por Año
     </button>
   </div>
-  <div class="sidebar-footer">
-    <button class="theme-btn" onclick="toggleTheme()">
-      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="5"/><line x1="12" y1="1" x2="12" y2="3"/><line x1="12" y1="21" x2="12" y2="23"/><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"/><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"/><line x1="1" y1="12" x2="3" y2="12"/><line x1="21" y1="12" x2="23" y2="12"/><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"/><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"/></svg>
-      Cambiar tema
-    </button>
+  <div class="sb-footer">
+    <button class="sb-footer-btn" onclick="openCompany()">⚙️ Configurar empresa</button>
+    <button class="sb-footer-btn" onclick="toggleTheme()">🌓 Cambiar tema</button>
+    <button class="sb-footer-btn" onclick="exportCSV()">↓ Exportar CSV</button>
   </div>
 </nav>
 
 <!-- ═══ MAIN ═══ -->
 <main class="main">
-
-  <!-- TOPBAR -->
   <div class="topbar">
-    <button class="btn btn-icon btn-outline" onclick="toggleSidebar()" style="display:none" id="menu-btn">☰</button>
-    <span class="topbar-title" id="page-title">Dashboard <span>General</span></span>
-    <button class="btn btn-outline btn-sm" onclick="exportCSV()">↓ Exportar CSV</button>
-    <button class="btn btn-primary" onclick="openAddModal()">+ Nuevo Matafuego</button>
+    <h2 id="pg-title">Dashboard <span>General</span></h2>
+    <button class="btn btn-outline btn-sm no-print" onclick="exportCSV()">↓ CSV</button>
+    <button class="btn btn-primary no-print" onclick="openAdd()">+ Nuevo Matafuego</button>
   </div>
+  <div class="alert-band" id="alert-band"></div>
 
-  <!-- ALERT BANNER (critico) -->
-  <div class="alert-banner" id="alert-banner"></div>
-
-  <!-- CONTENT -->
   <div class="content">
 
-    <!-- ═══ DASHBOARD ═══ -->
+    <!-- DASHBOARD -->
     <div class="page active" id="page-dashboard">
-      <div class="stats" id="stats-cards"></div>
-
-      <div class="section-header" style="margin-top:8px">
-        <h2>Próximos Vencimientos</h2>
-        <span class="count">— 90 días</span>
+      <div class="stats-grid" id="stats"></div>
+      <div class="sec-hdr" style="margin-top:8px">
+        <h3>Vencimientos próximos</h3><span class="ct">— 90 días</span>
       </div>
       <div class="alerts-list" id="dash-alerts"></div>
     </div>
 
-    <!-- ═══ MATAFUEGOS TABLE ═══ -->
+    <!-- MATAFUEGOS -->
     <div class="page" id="page-matafuegos">
       <div class="toolbar">
-        <input type="text" id="search" placeholder="Buscar lote, sector, tipo…" oninput="renderTable()">
-        <select id="filter-tipo" onchange="renderTable()">
+        <input type="text" id="srch" placeholder="Buscar lote, sector, tipo…" oninput="renderTbl()">
+        <select id="ftipo" onchange="renderTbl()">
           <option value="">Todos los tipos</option>
           <option>ABC — Polvo triclase</option>
-          <option>BC — CO₂ / Dióxido de carbono</option>
-          <option>BC — Polvo seco BC</option>
-          <option>Agua</option>
-          <option>Espuma AFFF</option>
-          <option>Clase D</option>
-          <option>Gas limpio HFC-227ea</option>
+          <option>BC — CO₂</option>
+          <option>BC — Polvo seco</option>
+          <option>Agua</option><option>Espuma AFFF</option>
+          <option>Clase D</option><option>Gas limpio HFC-227ea</option>
         </select>
-        <select id="filter-estado" onchange="renderTable()">
+        <select id="festado" onchange="renderTbl()">
           <option value="">Todos los estados</option>
-          <option>Operativo</option>
-          <option>En mantenimiento</option>
-          <option>Vencido</option>
-          <option>De baja</option>
+          <option>Operativo</option><option>En mantenimiento</option>
+          <option>Vencido</option><option>De baja</option>
         </select>
-        <select id="filter-anillo" onchange="renderTable()">
-          <option value="">Todos los anillos</option>
-        </select>
-        <div class="ring-legend" id="ring-legend"></div>
+        <select id="fanillo" onchange="renderTbl()"><option value="">Todos los anillos</option></select>
       </div>
-      <div class="table-wrap">
-        <div class="table-scroll">
-          <table id="main-table">
-            <thead>
-              <tr>
-                <th onclick="sortBy('lote')">Lote / N°</th>
-                <th onclick="sortBy('sector')">Sector</th>
-                <th onclick="sortBy('tipo')">Tipo</th>
-                <th>Cap.</th>
-                <th>Anillo</th>
-                <th onclick="sortBy('proximaRecarga')">Recarga Anual</th>
-                <th onclick="sortBy('proximoCPP')">Ctrl. Periódico</th>
-                <th onclick="sortBy('proximaPH')">Prueba Hidr.</th>
-                <th onclick="sortBy('caducidad')">Caducidad Def.</th>
-                <th onclick="sortBy('estadoActual')">Estado</th>
-                <th>Prov.</th>
-                <th style="width:100px">Acciones</th>
-              </tr>
-            </thead>
-            <tbody id="table-body">
-              <tr><td colspan="12" class="table-empty">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 2a4 4 0 0 0-4 4v2H6a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V10a2 2 0 0 0-2-2h-2V6a4 4 0 0 0-4-4z"/></svg>
-                <div>Sin matafuegos registrados</div>
-                <div style="font-size:12px;margin-top:4px">Hacé clic en <strong>+ Nuevo Matafuego</strong> para empezar</div>
-              </td></tr>
-            </tbody>
-          </table>
-        </div>
-      </div>
+      <div class="tbl-wrap"><div class="tbl-scroll">
+        <table><thead><tr>
+          <th onclick="sort('lote')">Lote</th>
+          <th onclick="sort('sector')">Sector</th>
+          <th onclick="sort('tipo')">Tipo</th>
+          <th>Cap.</th>
+          <th>Anillo</th>
+          <th onclick="sort('proximaRecarga')">Recarga Anual</th>
+          <th onclick="sort('proximoCPP')">CPP</th>
+          <th onclick="sort('proximaPH')">Prueba Hidr.</th>
+          <th onclick="sort('caducidad')">Caducidad</th>
+          <th onclick="sort('estadoActual')">Estado</th>
+          <th>Prov.</th>
+          <th>Acciones</th>
+        </tr></thead>
+        <tbody id="tbl-body"></tbody></table>
+      </div></div>
     </div>
 
-    <!-- ═══ ALERTAS ═══ -->
+    <!-- ALERTAS -->
     <div class="page" id="page-alertas">
       <div class="tabs">
-        <button class="tab active" onclick="filterAlerts('all', this)">Todas</button>
-        <button class="tab" onclick="filterAlerts('crit', this)">Críticas (&lt;30d)</button>
-        <button class="tab" onclick="filterAlerts('warn', this)">Próximas (30–90d)</button>
-        <button class="tab" onclick="filterAlerts('info', this)">Informativas (&gt;90d)</button>
+        <button class="tab active" onclick="filtAl('all',this)">Todas</button>
+        <button class="tab" onclick="filtAl('crit',this)">Críticas &lt;30d</button>
+        <button class="tab" onclick="filtAl('warn',this)">Próximas 30–90d</button>
+        <button class="tab" onclick="filtAl('info',this)">Informativas</button>
       </div>
-      <div class="alerts-list" id="alerts-list"></div>
+      <div class="alerts-list" id="al-list"></div>
     </div>
 
-    <!-- ═══ GALERÍA ═══ -->
-    <div class="page" id="page-galeria">
+    <!-- FOTOS -->
+    <div class="page" id="page-fotos">
       <div class="tabs">
-        <button class="tab active" onclick="filterGallery('all', this)">Todas</button>
-        <button class="tab" onclick="filterGallery('qr', this)">QR</button>
-        <button class="tab" onclick="filterGallery('oblea', this)">Obleas IRAM</button>
-        <button class="tab" onclick="filterGallery('opds', this)">Etiquetas OPDS</button>
+        <button class="tab active" onclick="filtGal('all',this)">Todas</button>
+        <button class="tab" onclick="filtGal('qr',this)">QR</button>
+        <button class="tab" onclick="filtGal('oblea',this)">Obleas IRAM</button>
+        <button class="tab" onclick="filtGal('opds',this)">Etiquetas OPDS</button>
       </div>
-      <div class="gallery-grid" id="gallery-grid"></div>
+      <div class="gallery" id="gallery"></div>
     </div>
 
-    <!-- ═══ PLANILLA SyH ═══ -->
-    <div class="page" id="page-planillaSyH">
-      <div class="section-header">
-        <h2>Planilla de Control — SyH</h2>
-        <span class="count">IRAM 3517-2 / Resolución 349/07 OPDS</span>
+    <!-- PLANILLA SYH -->
+    <div class="page" id="page-syh">
+      <div class="sec-hdr no-print">
+        <h3>Planilla de Control SyH</h3>
+        <span class="ct">IRAM 3517-2 (ed. 2020) — Res. 349/07 OPDS</span>
+        <div class="spacer"></div>
+        <button class="btn btn-secondary btn-sm" onclick="window.print()">🖨 Imprimir</button>
+        <select id="syh-filter" class="btn btn-outline btn-sm" onchange="renderSyH()" style="border:1px solid var(--border)">
+          <option value="">Todos los matafuegos</option>
+        </select>
       </div>
-      <p style="font-size:13px;color:var(--text2);margin-bottom:20px">
-        Registro de inspecciones periódicas según <strong>IRAM 3517-2 (ed. 2020)</strong>. El responsable de Seguridad e Higiene debe completar este formulario en cada control periódico preventivo. Conservar original firmado por 5 años.
-      </p>
-      <div class="table-wrap">
-        <div class="table-scroll">
-          <table id="syh-table">
-            <thead>
-              <tr>
-                <th>Lote / N°</th>
-                <th>Sector</th>
-                <th>Tipo</th>
-                <th>Fecha Insp.</th>
-                <th>Presión</th>
-                <th>Precinto</th>
-                <th>Manguera</th>
-                <th>Boquilla</th>
-                <th>Soporte</th>
-                <th>Señalización</th>
-                <th>Resultado</th>
-                <th>Responsable SyH</th>
-                <th>Observaciones</th>
-              </tr>
-            </thead>
-            <tbody id="syh-body"></tbody>
-          </table>
-        </div>
-      </div>
+      <div class="planilla-preview" id="planilla-preview"></div>
     </div>
 
-    <!-- ═══ ANILLOS ═══ -->
+    <!-- ANILLOS -->
     <div class="page" id="page-anillos">
-      <div class="section-header">
-        <h2>Sistema de Anillos por Año</h2>
-        <span class="count">Identificación visual de vencimiento de recarga</span>
-      </div>
-      <p style="font-size:13px;color:var(--text2);margin-bottom:24px">
-        El anillo de color identifica el <strong>año de vencimiento de la recarga anual</strong> del matafuego. El color es asignado por la empresa habilitada recargadora según el año en que debe retornar para recarga. Sistema estándar utilizado en Argentina conforme IRAM 3517-2 y Res. 349/07 OPDS.
-      </p>
-      <div id="rings-display" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:16px;"></div>
+      <p style="font-size:13px;color:var(--text2);margin-bottom:18px">El <strong>anillo de color</strong> identifica el año de vencimiento de la recarga anual. Sistema estándar utilizado en Argentina conforme IRAM 3517-2 y Res. 349/07 OPDS.</p>
+      <div class="rings-grid" id="rings-display"></div>
     </div>
 
-  </div><!-- /content -->
+  </div>
 </main>
 
-<!-- ═══ MODAL AGREGAR/EDITAR ═══ -->
-<div class="overlay hidden" id="modal-overlay" onclick="handleOverlayClick(event)">
+<!-- ═══ MODAL MATAFUEGO ═══ -->
+<div class="overlay hidden" id="ov-mat">
   <div class="modal" onclick="event.stopPropagation()">
-    <div class="modal-header">
-      <h2 id="modal-title">Nuevo Matafuego</h2>
-      <button class="close-btn" onclick="closeModal()">✕</button>
+    <div class="modal-hdr">
+      <h2 id="mat-title">Nuevo Matafuego</h2>
+      <button class="btn-ghost" onclick="closeModal('ov-mat')">✕</button>
     </div>
-    <div class="modal-body" id="modal-body">
+    <div class="modal-body">
 
-      <!-- IDENTIFICACIÓN -->
-      <div class="form-section">
-        <div class="form-section-title">📋 Identificación</div>
-        <div class="form-grid">
-          <div class="field">
-            <label>N° de Lote / Interno <span class="req">*</span></label>
-            <input type="text" id="f-lote" placeholder="Ej: MAT-001">
-          </div>
-          <div class="field">
-            <label>Sector / Ubicación <span class="req">*</span></label>
-            <input type="text" id="f-sector" placeholder="Ej: Planta Baja – Pasillo Norte">
-          </div>
-          <div class="field">
-            <label>Tipo de Matafuego <span class="req">*</span></label>
-            <select id="f-tipo">
-              <option value="">— Seleccionar —</option>
-              <option>ABC — Polvo triclase</option>
-              <option>BC — CO₂ / Dióxido de carbono</option>
-              <option>BC — Polvo seco BC</option>
-              <option>Agua</option>
-              <option>Espuma AFFF</option>
-              <option>Clase D</option>
-              <option>Gas limpio HFC-227ea</option>
-            </select>
-          </div>
-          <div class="field">
-            <label>Agente Extintor</label>
-            <input type="text" id="f-agente" placeholder="Ej: Polvo ABC – Monoamonio fosfato">
-          </div>
-          <div class="field">
-            <label>Capacidad</label>
-            <input type="text" id="f-capacidad" placeholder="Ej: 6 kg / 5 L / 10 kg">
-          </div>
-          <div class="field">
-            <label>Clase de Fuego</label>
-            <input type="text" id="f-clase" placeholder="Ej: A, B, C">
-          </div>
+      <div class="fs"><div class="fs-title">📋 Identificación</div>
+        <div class="fg">
+          <div class="field"><label>N° Lote / Interno <span class="req">*</span></label><input id="f-lote" placeholder="Ej: MAT-001"></div>
+          <div class="field"><label>Sector / Ubicación <span class="req">*</span></label><input id="f-sector" placeholder="Ej: Planta Baja — Pasillo Norte"></div>
+          <div class="field"><label>Tipo de Matafuego <span class="req">*</span></label>
+            <select id="f-tipo"><option value="">— Seleccionar —</option>
+              <option>ABC — Polvo triclase</option><option>BC — CO₂</option>
+              <option>BC — Polvo seco</option><option>Agua</option>
+              <option>Espuma AFFF</option><option>Clase D</option><option>Gas limpio HFC-227ea</option>
+            </select></div>
+          <div class="field"><label>Agente Extintor</label><input id="f-agente" placeholder="Ej: Polvo ABC monoamonio fosfato"></div>
+          <div class="field"><label>Capacidad</label><input id="f-cap" placeholder="Ej: 6 kg"></div>
+          <div class="field"><label>Clase de Fuego</label><input id="f-clase" placeholder="Ej: A, B, C"></div>
         </div>
       </div>
 
-      <!-- DATOS DEL EQUIPO -->
-      <div class="form-section">
-        <div class="form-section-title">🏭 Datos del Equipo (IRAM 3517-2)</div>
-        <div class="form-grid cols3">
-          <div class="field">
-            <label>Fabricante / Marca</label>
-            <input type="text" id="f-marca" placeholder="Ej: Matafuegos Rojo">
-          </div>
-          <div class="field">
-            <label>N° de Serie / Fabricación</label>
-            <input type="text" id="f-serie" placeholder="Ej: 2024-8834">
-          </div>
-          <div class="field">
-            <label>Fecha de Fabricación <span class="req">*</span></label>
-            <input type="month" id="f-fabricacion">
-          </div>
-          <div class="field">
-            <label>Fecha de Instalación</label>
-            <input type="date" id="f-instalacion">
-          </div>
-          <div class="field">
-            <label>N° Habilitación OPDS</label>
-            <input type="text" id="f-opds" placeholder="Ej: OPDS-1234/07">
-          </div>
-          <div class="field">
-            <label>Empresa Recargadora</label>
-            <input type="text" id="f-empresa" placeholder="Nombre empresa habilitada">
-          </div>
+      <div class="fs"><div class="fs-title">🏭 Datos del Equipo (IRAM 3517-2)</div>
+        <div class="fg c3">
+          <div class="field"><label>Fabricante / Marca</label><input id="f-marca" placeholder="Nombre fabricante"></div>
+          <div class="field"><label>N° de Serie</label><input id="f-serie" placeholder="Ej: 2024-001"></div>
+          <div class="field"><label>Fecha Fabricación <span class="req">*</span></label><input type="month" id="f-fab"></div>
+          <div class="field"><label>Fecha Instalación</label><input type="date" id="f-inst"></div>
+          <div class="field"><label>N° Habilitación OPDS</label><input id="f-opds" placeholder="Ej: OPDS-1234/07"></div>
+          <div class="field"><label>Empresa Recargadora</label><input id="f-empresa" placeholder="Nombre empresa habilitada"></div>
         </div>
       </div>
 
-      <!-- ANILLO DE COLOR -->
-      <div class="form-section">
-        <div class="form-section-title">🟣 Anillo de Color / Año de Vencimiento</div>
-        <div class="form-grid">
-          <div class="field">
-            <label>Color del Anillo</label>
-            <select id="f-anillo-color">
-              <option value="">— Sin anillo / No aplica —</option>
-            </select>
-          </div>
-          <div class="field">
-            <label>Año de Vencimiento del Anillo</label>
-            <input type="number" id="f-anillo-anio" min="2020" max="2040" placeholder="Ej: 2027">
-          </div>
+      <div class="fs"><div class="fs-title">🟣 Anillo de Color / Año Vencimiento</div>
+        <div class="fg">
+          <div class="field"><label>Color de Anillo</label>
+            <select id="f-anillo-col"></select></div>
+          <div class="field"><label>Año de Vencimiento del Anillo</label>
+            <input type="number" id="f-anillo-yr" min="2024" max="2040" placeholder="Ej: 2027"></div>
         </div>
-        <div id="anillo-preview" style="margin-top:10px;font-size:13px;color:var(--text2)"></div>
+        <div id="anillo-prev" style="margin-top:8px"></div>
       </div>
 
-      <!-- FECHAS CLAVE (IRAM 3517-2) -->
-      <div class="form-section">
-        <div class="form-section-title">📅 Plazos IRAM 3517-2</div>
-        <div class="form-grid">
-          <div class="field">
-            <label>Última Recarga Anual</label>
-            <input type="date" id="f-ult-recarga">
-          </div>
-          <div class="field">
-            <label>Próxima Recarga Anual <span class="req">*</span> <small style="color:var(--text3)">(máx. 12 meses)</small></label>
-            <input type="date" id="f-prox-recarga">
-          </div>
-          <div class="field">
-            <label>Último Control Periódico Preventivo</label>
-            <input type="date" id="f-ult-cpp">
-          </div>
-          <div class="field">
-            <label>Próximo CPP <small style="color:var(--text3)">(cada 6 meses)</small></label>
-            <input type="date" id="f-prox-cpp">
-          </div>
-          <div class="field">
-            <label>Última Prueba Hidráulica</label>
-            <input type="date" id="f-ult-ph">
-          </div>
-          <div class="field">
-            <label>Próxima Prueba Hidráulica <small style="color:var(--text3)">(cada 5 años)</small></label>
-            <input type="date" id="f-prox-ph">
-          </div>
-          <div class="field">
-            <label>Caducidad Definitiva <small style="color:var(--text3)">(fabricación + 20 años)</small></label>
-            <input type="month" id="f-caducidad" readonly style="background:var(--surface2);cursor:default">
-          </div>
-          <div class="field">
-            <label>Estado Actual</label>
-            <select id="f-estado">
-              <option>Operativo</option>
-              <option>En mantenimiento</option>
-              <option>Vencido</option>
-              <option>De baja</option>
-            </select>
-          </div>
+      <div class="fs"><div class="fs-title">📅 Plazos IRAM 3517-2</div>
+        <div class="fg">
+          <div class="field"><label>Última Recarga Anual</label><input type="date" id="f-ult-rec"></div>
+          <div class="field"><label>Próxima Recarga Anual <span class="req">*</span> <span class="f-hint">(máx. 12 meses)</span></label><input type="date" id="f-prox-rec"></div>
+          <div class="field"><label>Último Control Periódico Preventivo</label><input type="date" id="f-ult-cpp"></div>
+          <div class="field"><label>Próximo CPP <span class="f-hint">(cada 6 meses)</span></label><input type="date" id="f-prox-cpp"></div>
+          <div class="field"><label>Última Prueba Hidráulica</label><input type="date" id="f-ult-ph"></div>
+          <div class="field"><label>Próxima Prueba Hidráulica <span class="f-hint">(cada 5 años)</span></label><input type="date" id="f-prox-ph"></div>
+          <div class="field"><label>Caducidad Definitiva <span class="f-hint">(fab. + 20 años — auto)</span></label><input type="month" id="f-cad" readonly></div>
+          <div class="field"><label>Estado Actual</label>
+            <select id="f-estado"><option>Operativo</option><option>En mantenimiento</option><option>Vencido</option><option>De baja</option></select></div>
         </div>
       </div>
 
-      <!-- MATAFUEGO PROVISORIO -->
-      <div class="form-section">
-        <div class="form-section-title">🔄 Matafuego Provisorio</div>
-        <div class="form-grid">
-          <div class="field">
-            <label>¿Tiene provisorio asignado?</label>
-            <select id="f-tiene-prov">
-              <option value="no">No</option>
-              <option value="si">Sí</option>
-            </select>
-          </div>
-          <div class="field" id="f-prov-desc-wrap" style="display:none">
-            <label>Descripción del Provisorio</label>
-            <input type="text" id="f-prov-desc" placeholder="Ej: MAT-PROV-01 – ABC 4kg">
-          </div>
-          <div class="field" id="f-nuevo-fecha-wrap" style="display:none">
-            <label>Fecha prevista matafuego nuevo</label>
-            <input type="date" id="f-nuevo-fecha">
-          </div>
+      <div class="fs"><div class="fs-title">🔄 Matafuego Provisorio</div>
+        <div class="fg">
+          <div class="field"><label>¿Tiene provisorio?</label>
+            <select id="f-prov" onchange="togProv()"><option value="no">No</option><option value="si">Sí</option></select></div>
+          <div class="field" id="prov-desc-f" style="display:none"><label>Descripción Provisorio</label><input id="f-prov-desc" placeholder="Ej: MAT-PROV-01 — ABC 4kg"></div>
+          <div class="field" id="prov-fecha-f" style="display:none"><label>Fecha prevista matafuego nuevo</label><input type="date" id="f-nuevo-fecha"></div>
         </div>
       </div>
 
-      <!-- INSPECCIÓN SyH -->
-      <div class="form-section">
-        <div class="form-section-title">👷 Inspección — Seguridad e Higiene (IRAM 3517-2 §8)</div>
-        <div class="form-grid">
-          <div class="field">
-            <label>Fecha de Inspección</label>
-            <input type="date" id="f-fecha-insp">
-          </div>
-          <div class="field">
-            <label>Responsable SyH</label>
-            <input type="text" id="f-responsable" placeholder="Nombre y apellido">
-          </div>
-          <div class="field">
-            <label>Matrícula / CUIL</label>
-            <input type="text" id="f-matricula" placeholder="Ej: 20-12345678-9">
-          </div>
-          <div class="field">
-            <label>Próxima Inspección SyH</label>
-            <input type="date" id="f-prox-insp">
+      <div class="fs"><div class="fs-title">👷 Inspección — Seguridad e Higiene (IRAM 3517-2 §8)</div>
+        <div class="fg">
+          <div class="field"><label>Fecha de Inspección</label><input type="date" id="f-finsp"></div>
+          <div class="field"><label>Responsable SyH</label><input id="f-resp" placeholder="Nombre y apellido"></div>
+          <div class="field"><label>Matrícula / CUIL</label><input id="f-mat" placeholder="Ej: 20-12345678-9"></div>
+          <div class="field"><label>Próxima Inspección SyH</label><input type="date" id="f-prox-insp"></div>
+        </div>
+        <div style="margin-top:12px"><label style="display:block;margin-bottom:8px">Verificaciones visuales — IRAM 3517-2 §8.1</label>
+          <div class="syh-grid">
+            <div class="syh-row"><label>Presión / manómetro</label><select class="mini" id="c-pres"><option>✅ Conforme</option><option>⚠️ Regular</option><option>❌ No conforme</option><option>— N/A</option></select></div>
+            <div class="syh-row"><label>Precinto / pasador</label><select class="mini" id="c-prec"><option>✅ Conforme</option><option>⚠️ Regular</option><option>❌ No conforme</option><option>— N/A</option></select></div>
+            <div class="syh-row"><label>Manguera / manga</label><select class="mini" id="c-mang"><option>✅ Conforme</option><option>⚠️ Regular</option><option>❌ No conforme</option><option>— N/A</option></select></div>
+            <div class="syh-row"><label>Boquilla / tobera</label><select class="mini" id="c-boq"><option>✅ Conforme</option><option>⚠️ Regular</option><option>❌ No conforme</option><option>— N/A</option></select></div>
+            <div class="syh-row"><label>Soporte / gancho</label><select class="mini" id="c-sop"><option>✅ Conforme</option><option>⚠️ Regular</option><option>❌ No conforme</option><option>— N/A</option></select></div>
+            <div class="syh-row"><label>Señalización visible</label><select class="mini" id="c-sen"><option>✅ Conforme</option><option>⚠️ Regular</option><option>❌ No conforme</option><option>— N/A</option></select></div>
+            <div class="syh-row"><label>Oblea / etiqueta legible</label><select class="mini" id="c-etq"><option>✅ Conforme</option><option>⚠️ Regular</option><option>❌ No conforme</option><option>— N/A</option></select></div>
+            <div class="syh-row"><label>Accesibilidad</label><select class="mini" id="c-acc"><option>✅ Conforme</option><option>⚠️ Regular</option><option>❌ No conforme</option><option>— N/A</option></select></div>
           </div>
         </div>
-        <div style="margin-top:14px">
-          <label style="display:block;margin-bottom:10px">Verificaciones visuales (IRAM 3517-2 §8.1)</label>
-          <div class="syh-checks">
-            <div class="syh-check"><label>Presión manómetro</label><select class="mini" id="c-presion"><option>✅ OK</option><option>⚠️ Regular</option><option>❌ Falla</option><option>— N/A</option></select></div>
-            <div class="syh-check"><label>Precinto / pasador</label><select class="mini" id="c-precinto"><option>✅ OK</option><option>⚠️ Regular</option><option>❌ Falla</option><option>— N/A</option></select></div>
-            <div class="syh-check"><label>Manguera</label><select class="mini" id="c-manguera"><option>✅ OK</option><option>⚠️ Regular</option><option>❌ Falla</option><option>— N/A</option></select></div>
-            <div class="syh-check"><label>Boquilla / tobera</label><select class="mini" id="c-boquilla"><option>✅ OK</option><option>⚠️ Regular</option><option>❌ Falla</option><option>— N/A</option></select></div>
-            <div class="syh-check"><label>Soporte / gancho</label><select class="mini" id="c-soporte"><option>✅ OK</option><option>⚠️ Regular</option><option>❌ Falla</option><option>— N/A</option></select></div>
-            <div class="syh-check"><label>Señalización visible</label><select class="mini" id="c-senalizacion"><option>✅ OK</option><option>⚠️ Regular</option><option>❌ Falla</option><option>— N/A</option></select></div>
-            <div class="syh-check"><label>Etiqueta/oblea legible</label><select class="mini" id="c-etiqueta"><option>✅ OK</option><option>⚠️ Regular</option><option>❌ Falla</option><option>— N/A</option></select></div>
-            <div class="syh-check"><label>Accesibilidad</label><select class="mini" id="c-acceso"><option>✅ OK</option><option>⚠️ Regular</option><option>❌ Falla</option><option>— N/A</option></select></div>
-          </div>
-        </div>
-        <div class="field" style="margin-top:12px">
-          <label>Observaciones</label>
-          <textarea id="f-observaciones" placeholder="Notas de la inspección, estado general, reparaciones necesarias…"></textarea>
-        </div>
+        <div class="field" style="margin-top:10px"><label>Observaciones</label>
+          <textarea id="f-obs" placeholder="Notas de inspección, estado general, reparaciones…"></textarea></div>
       </div>
 
-      <!-- FOTOS -->
-      <div class="form-section">
-        <div class="form-section-title">📷 Documentación Fotográfica</div>
-        <div class="photo-grid">
-          <div class="photo-slot" id="slot-qr" onclick="triggerPhoto('qr')">
-            <svg class="photo-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="3" height="3" rx=".5"/><rect x="18" y="14" width="3" height="3" rx=".5"/><rect x="14" y="18" width="3" height="3" rx=".5"/><rect x="18" y="18" width="3" height="3" rx=".5"/></svg>
-            <span class="photo-empty-label">Foto / Scan QR del matafuego</span>
-            <div class="photo-overlay"><span>Cambiar</span></div>
-            <span class="photo-label">QR</span>
+      <div class="fs"><div class="fs-title">📷 Documentación Fotográfica</div>
+        <div class="photo-panel">
+          <div class="photo-slot" id="ps-qr" onclick="pickPhoto('qr')">
+            <div class="ph-empty-icon">📷</div>
+            <div class="ph-empty-text">Foto / QR del matafuego</div>
+            <div class="ph-hover"><span>📷 Cambiar</span></div>
+            <div class="ph-label">QR</div>
+            <button class="ph-remove" onclick="removePhoto(event,'qr')">✕</button>
           </div>
-          <div class="photo-slot" id="slot-oblea" onclick="triggerPhoto('oblea')">
-            <svg class="photo-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><rect x="5" y="2" width="14" height="20" rx="2"/><line x1="9" y1="7" x2="15" y2="7"/><line x1="9" y1="11" x2="15" y2="11"/><line x1="9" y1="15" x2="12" y2="15"/></svg>
-            <span class="photo-empty-label">Foto Oblea IRAM / tarjeta control</span>
-            <div class="photo-overlay"><span>Cambiar</span></div>
-            <span class="photo-label">Oblea IRAM</span>
+          <div class="photo-slot" id="ps-oblea" onclick="pickPhoto('oblea')">
+            <div class="ph-empty-icon">🏷</div>
+            <div class="ph-empty-text">Oblea IRAM / tarjeta control</div>
+            <div class="ph-hover"><span>📷 Cambiar</span></div>
+            <div class="ph-label">Oblea IRAM</div>
+            <button class="ph-remove" onclick="removePhoto(event,'oblea')">✕</button>
           </div>
-          <div class="photo-slot" id="slot-opds" onclick="triggerPhoto('opds')">
-            <svg class="photo-icon" width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
-            <span class="photo-empty-label">Etiqueta OPDS / habilitación recargadora</span>
-            <div class="photo-overlay"><span>Cambiar</span></div>
-            <span class="photo-label">OPDS</span>
+          <div class="photo-slot" id="ps-opds" onclick="pickPhoto('opds')">
+            <div class="ph-empty-icon">🛡</div>
+            <div class="ph-empty-text">Etiqueta OPDS / habilitación</div>
+            <div class="ph-hover"><span>📷 Cambiar</span></div>
+            <div class="ph-label">OPDS</div>
+            <button class="ph-remove" onclick="removePhoto(event,'opds')">✕</button>
           </div>
         </div>
-        <input type="file" id="photo-input" accept="image/*" style="display:none" onchange="handlePhotoUpload(event)">
+        <input type="file" id="ph-inp" accept="image/*" style="display:none" onchange="onPhoto(event)">
       </div>
 
-    </div><!-- /modal-body -->
-    <div class="modal-footer">
-      <button class="btn btn-outline" onclick="closeModal()">Cancelar</button>
-      <button class="btn btn-primary" onclick="saveMatafuego()">Guardar</button>
     </div>
+    <div class="modal-ftr">
+      <button class="btn btn-outline" onclick="closeModal('ov-mat')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveMat()">💾 Guardar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MODAL EMPRESA ═══ -->
+<div class="overlay hidden" id="ov-emp">
+  <div class="modal" onclick="event.stopPropagation()">
+    <div class="modal-hdr">
+      <h2>⚙️ Configuración de Empresa</h2>
+      <button class="btn-ghost" onclick="closeModal('ov-emp')">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="fs"><div class="fs-title">Datos de la Empresa</div>
+        <div style="display:flex;gap:16px;align-items:flex-start;margin-bottom:14px">
+          <div class="logo-upload" id="logo-slot" onclick="pickLogo()" title="Click para cambiar logo">
+            <img id="logo-preview" src="" alt="" style="display:none">
+            <span id="logo-ph">🏭</span>
+          </div>
+          <div style="flex:1">
+            <div class="fg c1">
+              <div class="field"><label>Nombre de la Empresa <span class="req">*</span></label><input id="emp-nombre" placeholder="Razón social"></div>
+            </div>
+          </div>
+        </div>
+        <div class="fg">
+          <div class="field"><label>CUIT</label><input id="emp-cuit" placeholder="Ej: 30-12345678-9"></div>
+          <div class="field"><label>Dirección</label><input id="emp-dir" placeholder="Calle N°, Ciudad"></div>
+          <div class="field"><label>Teléfono</label><input id="emp-tel" placeholder="Ej: +54 9 11 1234-5678"></div>
+          <div class="field"><label>Email</label><input type="email" id="emp-email" placeholder="contacto@empresa.com"></div>
+          <div class="field"><label>Actividad / Rubro</label><input id="emp-rubro" placeholder="Ej: Manufactura, Logística…"></div>
+          <div class="field"><label>N° Habilitación Municipal</label><input id="emp-hab" placeholder="Ej: HAB-4567/2020"></div>
+        </div>
+      </div>
+      <div class="fs"><div class="fs-title">Responsable de Seguridad e Higiene</div>
+        <div class="fg">
+          <div class="field"><label>Nombre y Apellido</label><input id="emp-syh-nombre" placeholder="Ing. García Lucía"></div>
+          <div class="field"><label>Matrícula / CUIL</label><input id="emp-syh-mat" placeholder="20-12345678-9"></div>
+          <div class="field"><label>Teléfono SyH</label><input id="emp-syh-tel" placeholder="+54 9 11 1234-5678"></div>
+          <div class="field"><label>Email SyH</label><input type="email" id="emp-syh-email" placeholder="syh@empresa.com"></div>
+        </div>
+      </div>
+    </div>
+    <div class="modal-ftr">
+      <button class="btn btn-outline" onclick="closeModal('ov-emp')">Cancelar</button>
+      <button class="btn btn-primary" onclick="saveCompany()">💾 Guardar</button>
+    </div>
+    <input type="file" id="logo-inp" accept="image/*" style="display:none" onchange="onLogo(event)">
   </div>
 </div>
 
 <!-- ═══ MODAL DETALLE ═══ -->
-<div class="overlay hidden" id="detail-overlay" onclick="this.classList.add('hidden')">
-  <div class="modal" style="max-width:800px" onclick="event.stopPropagation()">
-    <div class="modal-header">
-      <h2 id="detail-title">Detalle Matafuego</h2>
-      <button class="close-btn" onclick="document.getElementById('detail-overlay').classList.add('hidden')">✕</button>
+<div class="overlay hidden" id="ov-det">
+  <div class="modal wide" onclick="event.stopPropagation()">
+    <div class="modal-hdr">
+      <h2 id="det-title">Detalle</h2>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-outline btn-sm" id="det-edit-btn">✏️ Editar</button>
+        <button class="btn-ghost" onclick="closeModal('ov-det')">✕</button>
+      </div>
     </div>
-    <div class="modal-body" id="detail-body"></div>
+    <div class="modal-body" id="det-body"></div>
   </div>
 </div>
 
 <script>
-// ─── RING COLOR SYSTEM ─────────────────────────────────────────────────────
-const RING_COLORS = [
-  { year: 2024, color: 'Amarillo',   hex: '#F5D800', text: '#5C4400' },
-  { year: 2025, color: 'Verde',      hex: '#16A34A', text: '#fff' },
-  { year: 2026, color: 'Azul',       hex: '#2563EB', text: '#fff' },
-  { year: 2027, color: 'Violeta',    hex: '#7C3AED', text: '#fff' },
-  { year: 2028, color: 'Rojo',       hex: '#DC2626', text: '#fff' },
-  { year: 2029, color: 'Naranja',    hex: '#EA580C', text: '#fff' },
-  { year: 2030, color: 'Blanco',     hex: '#F8FAFC', text: '#1E293B', border: '#94A3B8' },
-  { year: 2031, color: 'Negro',      hex: '#1E293B', text: '#F8FAFC' },
-  { year: 2032, color: 'Amarillo',   hex: '#F5D800', text: '#5C4400' },
-  { year: 2033, color: 'Verde',      hex: '#16A34A', text: '#fff' },
-  { year: 2034, color: 'Azul',       hex: '#2563EB', text: '#fff' },
+// ─── RINGS ───────────────────────────────────────────────────────────────
+const RINGS=[
+  {yr:2024,name:'Amarillo',hex:'#F5D800',txt:'#5C4400'},
+  {yr:2025,name:'Verde',   hex:'#16A34A',txt:'#fff'},
+  {yr:2026,name:'Azul',    hex:'#2563EB',txt:'#fff'},
+  {yr:2027,name:'Violeta', hex:'#7C3AED',txt:'#fff'},
+  {yr:2028,name:'Rojo',    hex:'#DC2626',txt:'#fff'},
+  {yr:2029,name:'Naranja', hex:'#EA580C',txt:'#fff'},
+  {yr:2030,name:'Blanco',  hex:'#F8FAFC',txt:'#1E293B',brd:'#94A3B8'},
+  {yr:2031,name:'Negro',   hex:'#1E293B',txt:'#F8FAFC'},
+  {yr:2032,name:'Amarillo',hex:'#F5D800',txt:'#5C4400'},
+  {yr:2033,name:'Verde',   hex:'#16A34A',txt:'#fff'},
+  {yr:2034,name:'Azul',    hex:'#2563EB',txt:'#fff'},
 ];
+function ring(yr){return RINGS.find(r=>r.yr===parseInt(yr))||null}
 
-function getRingInfo(year) {
-  return RING_COLORS.find(r => r.year === parseInt(year)) || null;
-}
+// ─── STORAGE ──────────────────────────────────────────────────────────────
+function ld(k,def){try{return JSON.parse(localStorage.getItem(k))||def}catch{return def}}
+function sv(k,v){localStorage.setItem(k,JSON.stringify(v))}
 
-// ─── DATA LAYER ─────────────────────────────────────────────────────────────
-function loadData() {
-  try { return JSON.parse(localStorage.getItem('matafuegos') || '[]'); } catch(e) { return []; }
-}
-function saveData(data) {
-  localStorage.setItem('matafuegos', JSON.stringify(data));
-}
-let data = loadData();
-let editingId = null;
-let currentPhotoSlot = null;
-let tempPhotos = { qr: null, oblea: null, opds: null };
-let sortKey = 'proximaRecarga';
-let sortAsc = true;
-let alertFilter = 'all';
-let galleryFilter = 'all';
+let data=ld('mats',[]);
+let company=ld('company',{nombre:'Mi Empresa',logo:null});
+let editId=null,curSlot=null;
+let tmpPh={qr:null,oblea:null,opds:null};
+let srtKey='proximaRecarga',srtAsc=true,alFilt='all',galFilt='all';
 
-// ─── UTILS ─────────────────────────────────────────────────────────────────
-function today() {
-  return new Date().toISOString().split('T')[0];
+// ─── UTILS ────────────────────────────────────────────────────────────────
+const today=()=>new Date().toISOString().split('T')[0];
+function daysTo(d){
+  if(!d)return null;
+  const dt=new Date(d.length===7?d+'-01':d);
+  const now=new Date();now.setHours(0,0,0,0);
+  return Math.round((dt-now)/864e5);
 }
-function daysUntil(dateStr) {
-  if (!dateStr) return null;
-  const d = new Date(dateStr + (dateStr.length === 7 ? '-01' : ''));
-  const t = new Date(); t.setHours(0,0,0,0);
-  return Math.round((d - t) / 86400000);
+function fmt(d){
+  if(!d)return '—';
+  if(d.length===7){const[y,m]=d.split('-');return m+'/'+y}
+  const[y,m,dd]=d.split('-');return dd+'/'+m+'/'+y;
 }
-function fmtDate(d) {
-  if (!d) return '—';
-  if (d.length === 7) {
-    const [y,m] = d.split('-');
-    return `${m}/${y}`;
-  }
-  const [y,m,dd] = d.split('-');
-  return `${dd}/${m}/${y}`;
+function dayChip(d){
+  const n=daysTo(d);
+  if(n===null)return '<span class="chip grey">Sin fecha</span>';
+  if(n<0)return `<span class="chip crit">Venció hace ${Math.abs(n)}d</span>`;
+  if(n<=30)return `<span class="chip crit">${n}d</span>`;
+  if(n<=90)return `<span class="chip warn">${n}d</span>`;
+  return `<span class="chip ok">${n}d</span>`;
 }
-function dayChip(dateStr, label) {
-  const days = daysUntil(dateStr);
-  if (days === null) return '<span class="chip grey">Sin fecha</span>';
-  if (days < 0)   return `<span class="chip crit">Vencido hace ${Math.abs(days)}d</span>`;
-  if (days <= 30)  return `<span class="chip crit">${days}d para vencer</span>`;
-  if (days <= 90)  return `<span class="chip warn">${days}d para vencer</span>`;
-  return `<span class="chip ok">${days}d</span>`;
+function statChip(e){
+  const m={Operativo:'ok','En mantenimiento':'warn',Vencido:'crit','De baja':'grey'};
+  return `<span class="chip ${m[e]||'grey'}">${e||'—'}</span>`;
 }
-function chipStatus(estado) {
-  const map = {
-    'Operativo':       'ok',
-    'En mantenimiento':'warn',
-    'Vencido':         'crit',
-    'De baja':         'grey',
-  };
-  return `<span class="chip ${map[estado]||'grey'}">${estado||'—'}</span>`;
-}
-function uid() { return Date.now().toString(36) + Math.random().toString(36).slice(2); }
-function addMonths(dateStr, months) {
-  if (!dateStr) return '';
-  const d = new Date(dateStr + (dateStr.length === 7 ? '-01' : ''));
-  d.setMonth(d.getMonth() + months);
-  return d.toISOString().split('T')[0];
-}
-function addYears(monthStr, years) {
-  if (!monthStr) return '';
-  const [y, m] = monthStr.split('-');
-  return `${parseInt(y) + years}-${m}`;
-}
+function uid(){return Date.now().toString(36)+Math.random().toString(36).slice(2)}
+function addMo(d,n){const x=new Date(d.length===7?d+'-01':d);x.setMonth(x.getMonth()+n);return x.toISOString().split('T')[0]}
+function addYr(m,n){if(!m)return'';const[y,mo]=m.split('-');return(+y+n)+'-'+mo}
+function dcls(d){const n=daysTo(d);if(n===null)return'dim';if(n<0)return'crit';if(n<=90)return'warn';return'ok'}
 
-// ─── POPULATE ANILLO SELECT ───────────────────────────────────────────────
-function buildRingSelects() {
-  const sel = document.getElementById('f-anillo-color');
-  const fAnio = document.getElementById('filter-anillo');
-  RING_COLORS.forEach(r => {
-    sel.innerHTML += `<option value="${r.year}">${r.color} — ${r.year}</option>`;
-    fAnio.innerHTML += `<option value="${r.year}">${r.color} ${r.year}</option>`;
+// ─── RING SELECT INIT ─────────────────────────────────────────────────────
+(function initRings(){
+  const sel=document.getElementById('f-anillo-col');
+  const fsel=document.getElementById('fanillo');
+  RINGS.forEach(r=>{
+    sel.innerHTML+=`<option value="${r.yr}">${r.name} — ${r.yr}</option>`;
+    fsel.innerHTML+=`<option value="${r.yr}">${r.name} ${r.yr}</option>`;
   });
-  buildRingLegend();
-  buildRingsDisplay();
-}
-function buildRingLegend() {
-  const el = document.getElementById('ring-legend');
-  el.innerHTML = RING_COLORS.slice(0,6).map(r =>
-    `<span class="ring-label"><span class="ring-dot" style="background:${r.hex};border-color:${r.border||'rgba(0,0,0,.2)'}"></span>${r.year}</span>`
-  ).join('');
-}
-function buildRingsDisplay() {
-  const el = document.getElementById('rings-display');
-  el.innerHTML = RING_COLORS.map(r => {
-    const count = data.filter(m => parseInt(m.anilloAnio) === r.year).length;
-    return `<div style="background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:20px;box-shadow:var(--shadow);display:flex;align-items:center;gap:16px">
-      <div style="width:52px;height:52px;border-radius:50%;background:${r.hex};border:3px solid ${r.border||'rgba(0,0,0,.15)'};flex-shrink:0;display:flex;align-items:center;justify-content:center">
-        <span style="color:${r.text};font-family:'Barlow Condensed',sans-serif;font-size:14px;font-weight:800">${r.year.toString().slice(2)}</span>
+  sel.insertAdjacentHTML('afterbegin','<option value="">— Sin anillo —</option>');
+  buildRingCards();
+  // syh filter
+  renderSyhFilter();
+})();
+
+function buildRingCards(){
+  document.getElementById('rings-display').innerHTML=RINGS.map(r=>{
+    const cnt=data.filter(m=>parseInt(m.anilloYr)===r.yr).length;
+    return`<div class="ring-card">
+      <div class="ring-circle" style="background:${r.hex};color:${r.txt};border-color:${r.brd||'rgba(0,0,0,.12)'}">
+        ${r.yr.toString().slice(2)}
       </div>
-      <div>
-        <div style="font-family:'Barlow Condensed',sans-serif;font-size:20px;font-weight:800;color:var(--text)">${r.color}</div>
-        <div style="font-size:13px;color:var(--text2)">Vence en ${r.year}</div>
-        <div style="font-size:12px;color:var(--text3);margin-top:2px">${count} matafuego${count!==1?'s':''} registrado${count!==1?'s':''}</div>
+      <div class="ring-info">
+        <h4>${r.name}</h4>
+        <p>Vence en ${r.yr}</p>
+        <small>${cnt} matafuego${cnt!==1?'s':''}</small>
       </div>
     </div>`;
   }).join('');
 }
 
-// ─── ALERTS ENGINE ─────────────────────────────────────────────────────────
-function buildAlerts() {
-  const alerts = [];
-  data.forEach(m => {
-    const checks = [
-      { key: 'proximaRecarga', label: 'Recarga Anual',             tipo: m.tipo },
-      { key: 'proximoCPP',     label: 'Control Periódico Preventivo', tipo: m.tipo },
-      { key: 'proximaPH',      label: 'Prueba Hidráulica',         tipo: m.tipo },
-      { key: 'caducidad',      label: 'Caducidad Definitiva',      tipo: m.tipo },
+// ─── COMPANY ──────────────────────────────────────────────────────────────
+function applyCompany(){
+  document.getElementById('sb-empresa').textContent=company.nombre||'Mi Empresa';
+  const img=document.getElementById('sb-logo-img');
+  if(company.logo){
+    img.innerHTML=`<img src="${company.logo}" alt="logo">`;
+  } else {
+    img.innerHTML='🏭';
+  }
+}
+function openCompany(){
+  const c=company;
+  ['nombre','cuit','dir','tel','email','rubro','hab'].forEach(k=>{
+    const el=document.getElementById('emp-'+k);if(el)el.value=c[k]||'';
+  });
+  ['nombre','mat','tel','email'].forEach(k=>{
+    const el=document.getElementById('emp-syh-'+k);if(el)el.value=c['syh_'+k]||'';
+  });
+  const prev=document.getElementById('logo-preview');
+  const ph=document.getElementById('logo-ph');
+  if(c.logo){prev.src=c.logo;prev.style.display='';ph.style.display='none';}
+  else{prev.style.display='none';ph.style.display='';}
+  document.getElementById('ov-emp').classList.remove('hidden');
+}
+function pickLogo(){document.getElementById('logo-inp').click()}
+function onLogo(e){
+  const f=e.target.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=ev=>{
+    const prev=document.getElementById('logo-preview');
+    const ph=document.getElementById('logo-ph');
+    prev.src=ev.target.result;prev.style.display='';ph.style.display='none';
+    company._tmpLogo=ev.target.result;
+  };
+  r.readAsDataURL(f);e.target.value='';
+}
+function saveCompany(){
+  company={
+    nombre:v('emp-nombre')||'Mi Empresa',
+    cuit:v('emp-cuit'),dir:v('emp-dir'),tel:v('emp-tel'),
+    email:v('emp-email'),rubro:v('emp-rubro'),hab:v('emp-hab'),
+    syh_nombre:v('emp-syh-nombre'),syh_mat:v('emp-syh-mat'),
+    syh_tel:v('emp-syh-tel'),syh_email:v('emp-syh-email'),
+    logo:company._tmpLogo||company.logo||null,
+  };
+  sv('company',company);applyCompany();
+  closeModal('ov-emp');renderSyH();
+}
+
+// ─── ALERTS ENGINE ────────────────────────────────────────────────────────
+function buildAlerts(){
+  const res=[];
+  data.forEach(m=>{
+    const checks=[
+      {key:'proximaRecarga',lbl:'Recarga Anual'},
+      {key:'proximoCPP',lbl:'Control Periódico Preventivo'},
+      {key:'proximaPH',lbl:'Prueba Hidráulica'},
+      {key:'caducidad',lbl:'Caducidad Definitiva'},
     ];
-    checks.forEach(c => {
-      const days = daysUntil(m[c.key]);
-      if (days === null) return;
-      let severity = 'info';
-      if (days < 0)     severity = 'crit';
-      else if (days <= 30)  severity = 'crit';
-      else if (days <= 90)  severity = 'warn';
-      alerts.push({ id: m.id, lote: m.lote, sector: m.sector, label: c.label, date: m[c.key], days, severity, tipo: m.tipo });
+    checks.forEach(c=>{
+      const n=daysTo(m[c.key]);if(n===null)return;
+      const sev=n<0?'crit':n<=30?'crit':n<=90?'warn':'info';
+      res.push({id:m.id,lote:m.lote,sector:m.sector,tipo:m.tipo,lbl:c.lbl,date:m[c.key],days:n,sev});
     });
   });
-  return alerts.sort((a,b) => a.days - b.days);
+  return res.sort((a,b)=>a.days-b.days);
 }
-function renderAlertBanner() {
-  const crits = buildAlerts().filter(a => a.severity === 'crit');
-  const el = document.getElementById('alert-banner');
-  const badge = document.getElementById('alert-badge');
-  if (!crits.length) { el.innerHTML = ''; badge.style.display = 'none'; return; }
-  badge.textContent = crits.length;
-  badge.style.display = 'inline-flex';
-  el.innerHTML = `<div class="alert-strip critical">
-    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"/><line x1="12" y1="9" x2="12" y2="13"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
-    <div>⚡ <strong>${crits.length} alerta${crits.length!==1?'s':''} crítica${crits.length!==1?'s':''}:</strong>
-    ${crits.slice(0,3).map(a=>`<strong>${a.lote}</strong> — ${a.label} (${a.days<0?'venció':'vence en '+a.days+'d'})`).join(' · ')}${crits.length>3?' y '+(crits.length-3)+' más…':''}
-    </div>
+function renderBanner(){
+  const crits=buildAlerts().filter(a=>a.sev==='crit');
+  const el=document.getElementById('alert-band');
+  const nb=document.getElementById('nb-alertas');
+  if(!crits.length){el.innerHTML='';nb.classList.remove('show');return}
+  nb.textContent=crits.length;nb.classList.add('show');
+  el.innerHTML=`<div class="alert-strip crit">
+    ⚡ <strong>${crits.length} alerta${crits.length!==1?'s':''} crítica${crits.length!==1?'s':''}:</strong>
+    ${crits.slice(0,3).map(a=>`<strong>${a.lote}</strong> — ${a.lbl} (${a.days<0?'venció':'vence en '+a.days+'d'})`).join(' · ')}${crits.length>3?` y ${crits.length-3} más…`:''}
   </div>`;
 }
-function renderAlertsPage() {
-  const all = buildAlerts();
-  const filtered = alertFilter === 'all' ? all
-    : alertFilter === 'crit' ? all.filter(a => a.severity === 'crit')
-    : alertFilter === 'warn' ? all.filter(a => a.severity === 'warn')
-    : all.filter(a => a.severity === 'info');
-  const el = document.getElementById('alerts-list');
-  if (!filtered.length) { el.innerHTML = '<p style="color:var(--text3);text-align:center;padding:40px">Sin alertas en este rango</p>'; return; }
-  el.innerHTML = filtered.map(a => {
-    const daysLabel = a.days < 0 ? `Venció hace ${Math.abs(a.days)} día${Math.abs(a.days)!==1?'s':''}` : `${a.days} día${a.days!==1?'s':''}`;
-    const icon = a.severity==='crit' ? '🔴' : a.severity==='warn' ? '🟡' : '🔵';
-    return `<div class="alert-card ${a.severity}">
+function renderAlerts(){
+  const all=buildAlerts();
+  const filt=alFilt==='all'?all:all.filter(a=>a.sev===alFilt);
+  const el=document.getElementById('al-list');
+  if(!filt.length){el.innerHTML='<p style="text-align:center;padding:40px;color:var(--text3)">Sin alertas en este rango ✅</p>';return}
+  el.innerHTML=filt.map(a=>{
+    const icon=a.sev==='crit'?'🔴':a.sev==='warn'?'🟡':'🔵';
+    const dl=a.days<0?`Venció hace ${Math.abs(a.days)}d`:`${a.days}d`;
+    return`<div class="alert-card ${a.sev}">
       <div class="al-icon">${icon}</div>
-      <div class="al-info">
-        <div class="al-title">${a.lote} — ${a.label}</div>
-        <div class="al-sub">${a.sector} · ${a.tipo} · Fecha: ${fmtDate(a.date)}</div>
+      <div class="al-body">
+        <div class="al-title">${a.lote} — ${a.lbl}</div>
+        <div class="al-sub">${a.sector} · ${a.tipo} · ${fmt(a.date)}</div>
       </div>
-      <div class="al-days">${daysLabel}</div>
-      <button class="btn btn-outline btn-sm" onclick="openDetail('${a.id}')">Ver</button>
+      <div class="al-days">${dl}</div>
+      <button class="btn btn-outline btn-sm" onclick="openDet('${a.id}')">Ver</button>
     </div>`;
   }).join('');
 }
-function filterAlerts(type, btn) {
-  alertFilter = type;
-  document.querySelectorAll('#page-alertas .tab').forEach(t => t.classList.remove('active'));
-  btn.classList.add('active');
-  renderAlertsPage();
+function filtAl(t,btn){
+  alFilt=t;
+  document.querySelectorAll('#page-alertas .tab').forEach(x=>x.classList.remove('active'));
+  btn.classList.add('active');renderAlerts();
 }
 
-// ─── STATS ──────────────────────────────────────────────────────────────────
-function renderStats() {
-  const total = data.length;
-  const operativos = data.filter(m => m.estadoActual === 'Operativo').length;
-  const vencidos = data.filter(m => {
-    const days = Math.min(
-      daysUntil(m.proximaRecarga) ?? 999,
-      daysUntil(m.proximaCPP) ?? 999,
-      daysUntil(m.caducidad) ?? 999
-    );
-    return days < 0 || m.estadoActual === 'Vencido';
+// ─── STATS ────────────────────────────────────────────────────────────────
+function renderStats(){
+  const tot=data.length;
+  const op=data.filter(m=>m.estadoActual==='Operativo').length;
+  const ven=data.filter(m=>{
+    const n=Math.min(daysTo(m.proximaRecarga)??999,daysTo(m.caducidad)??999);
+    return n<0||m.estadoActual==='Vencido';
   }).length;
-  const proximos = buildAlerts().filter(a => a.days >= 0 && a.days <= 90).length;
-  const provisorios = data.filter(m => m.tieneProvisorio === 'si').length;
-  document.getElementById('stats-cards').innerHTML = `
-    <div class="stat-card"><div class="stat-label">Total</div><div class="stat-val">${total}</div><div class="stat-sub">matafuegos registrados</div></div>
-    <div class="stat-card ok"><div class="stat-label">Operativos</div><div class="stat-val">${operativos}</div><div class="stat-sub">en condición normal</div></div>
-    <div class="stat-card warn"><div class="stat-label">Alertas 90d</div><div class="stat-val">${proximos}</div><div class="stat-sub">vencimientos próximos</div></div>
-    <div class="stat-card crit"><div class="stat-label">Vencidos</div><div class="stat-val">${vencidos}</div><div class="stat-sub">requieren acción inmediata</div></div>
-    <div class="stat-card"><div class="stat-label">Con Provisorio</div><div class="stat-val">${provisorios}</div><div class="stat-sub">en reemplazo temporal</div></div>
-  `;
-}
-function renderDashAlerts() {
-  const alerts = buildAlerts().filter(a => a.days <= 90);
-  const el = document.getElementById('dash-alerts');
-  if (!alerts.length) { el.innerHTML = '<p style="color:var(--text3);text-align:center;padding:32px">✅ Sin vencimientos próximos en los próximos 90 días</p>'; return; }
-  el.innerHTML = alerts.slice(0,10).map(a => {
-    const daysLabel = a.days < 0 ? `Venció hace ${Math.abs(a.days)}d` : `${a.days}d`;
-    const icon = a.severity==='crit' ? '🔴' : '🟡';
-    return `<div class="alert-card ${a.severity}">
-      <div class="al-icon">${icon}</div>
-      <div class="al-info">
-        <div class="al-title">${a.lote} — ${a.label}</div>
-        <div class="al-sub">${a.sector} · ${fmtDate(a.date)}</div>
-      </div>
-      <div class="al-days">${daysLabel}</div>
-      <button class="btn btn-outline btn-sm" onclick="openDetail('${a.id}')">Ver</button>
-    </div>`;
-  }).join('');
+  const prox=buildAlerts().filter(a=>a.days>=0&&a.days<=90).length;
+  const prov=data.filter(m=>m.tieneProvisorio==='si').length;
+  document.getElementById('stats').innerHTML=`
+    <div class="stat"><div class="stat-lbl">Total</div><div class="stat-val">${tot}</div><div class="stat-sub">registrados</div></div>
+    <div class="stat ok"><div class="stat-lbl">Operativos</div><div class="stat-val">${op}</div><div class="stat-sub">en condición normal</div></div>
+    <div class="stat warn"><div class="stat-lbl">Alertas 90d</div><div class="stat-val">${prox}</div><div class="stat-sub">vencimientos próximos</div></div>
+    <div class="stat crit"><div class="stat-lbl">Vencidos/Críticos</div><div class="stat-val">${ven}</div><div class="stat-sub">acción inmediata</div></div>
+    <div class="stat info"><div class="stat-lbl">Con Provisorio</div><div class="stat-val">${prov}</div><div class="stat-sub">en reemplazo temp.</div></div>`;
+  document.getElementById('dash-alerts').innerHTML=
+    buildAlerts().filter(a=>a.days<=90).slice(0,8).map(a=>{
+      const dl=a.days<0?`Venció hace ${Math.abs(a.days)}d`:`${a.days}d`;
+      return`<div class="alert-card ${a.sev}">
+        <div class="al-icon">${a.sev==='crit'?'🔴':'🟡'}</div>
+        <div class="al-body"><div class="al-title">${a.lote} — ${a.lbl}</div>
+        <div class="al-sub">${a.sector} · ${fmt(a.date)}</div></div>
+        <div class="al-days">${dl}</div>
+        <button class="btn btn-outline btn-sm" onclick="openDet('${a.id}')">Ver</button>
+      </div>`;
+    }).join('')||'<p style="text-align:center;padding:32px;color:var(--text3)">✅ Sin vencimientos próximos en 90 días</p>';
 }
 
-// ─── TABLE ──────────────────────────────────────────────────────────────────
-function sortBy(key) {
-  if (sortKey === key) sortAsc = !sortAsc;
-  else { sortKey = key; sortAsc = true; }
-  document.querySelectorAll('th').forEach(th => th.classList.remove('sorted'));
-  renderTable();
-}
-function ringBadge(m) {
-  if (!m.anilloAnio) return '—';
-  const r = getRingInfo(m.anilloAnio);
-  if (!r) return m.anilloAnio;
-  return `<span class="ring-badge" style="background:${r.hex};color:${r.text};border:1px solid ${r.border||'transparent'}">
-    <span style="width:10px;height:10px;border-radius:50%;background:${r.text==='#fff'?'rgba(255,255,255,.3)':'rgba(0,0,0,.15)';};display:inline-block"></span>
-    ${r.color} ${r.year}
+// ─── TABLE ────────────────────────────────────────────────────────────────
+function sort(k){if(srtKey===k)srtAsc=!srtAsc;else{srtKey=k;srtAsc=true;}renderTbl()}
+function ringBadge(m){
+  if(!m.anilloYr)return'—';
+  const r=ring(m.anilloYr);if(!r)return m.anilloYr;
+  return`<span class="ring-badge" style="background:${r.hex};color:${r.txt};border:1px solid ${r.brd||'transparent'}">
+    <span class="ring-dot" style="background:${r.txt==='#fff'?'rgba(255,255,255,.35)':'rgba(0,0,0,.15)'}"></span>
+    ${r.name} ${r.yr}
   </span>`;
 }
-function renderTable() {
-  const q = document.getElementById('search').value.toLowerCase();
-  const fTipo = document.getElementById('filter-tipo').value;
-  const fEstado = document.getElementById('filter-estado').value;
-  const fAnillo = document.getElementById('filter-anillo').value;
-  let rows = data.filter(m => {
-    if (q && !`${m.lote} ${m.sector} ${m.tipo} ${m.agente}`.toLowerCase().includes(q)) return false;
-    if (fTipo   && m.tipo   !== fTipo)   return false;
-    if (fEstado && m.estadoActual !== fEstado) return false;
-    if (fAnillo && String(m.anilloAnio) !== fAnillo) return false;
+function renderTbl(){
+  const q=document.getElementById('srch').value.toLowerCase();
+  const ft=document.getElementById('ftipo').value;
+  const fe=document.getElementById('festado').value;
+  const fa=document.getElementById('fanillo').value;
+  let rows=data.filter(m=>{
+    if(q&&!`${m.lote} ${m.sector} ${m.tipo} ${m.agente}`.toLowerCase().includes(q))return false;
+    if(ft&&m.tipo!==ft)return false;
+    if(fe&&m.estadoActual!==fe)return false;
+    if(fa&&String(m.anilloYr)!==fa)return false;
     return true;
   });
-  rows.sort((a,b) => {
-    let va = a[sortKey] || '9999', vb = b[sortKey] || '9999';
-    return sortAsc ? va.localeCompare(vb) : vb.localeCompare(va);
+  rows.sort((a,b)=>{
+    const va=a[srtKey]||'9999',vb=b[srtKey]||'9999';
+    return srtAsc?va.localeCompare(vb):vb.localeCompare(va);
   });
-  const tbody = document.getElementById('table-body');
-  if (!rows.length) {
-    tbody.innerHTML = `<tr><td colspan="12" class="table-empty">
-      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
-      Sin resultados para esta búsqueda
-    </td></tr>`;
+  const tb=document.getElementById('tbl-body');
+  if(!rows.length){
+    tb.innerHTML=`<tr><td colspan="12" class="table-empty">Sin resultados. Hacé clic en <strong>+ Nuevo Matafuego</strong> para empezar.</td></tr>`;
     return;
   }
-  tbody.innerHTML = rows.map(m => {
-    const dRec = daysUntil(m.proximaRecarga);
-    const dCPP = daysUntil(m.proximoCPP);
-    const dPH  = daysUntil(m.proximaPH);
-    const dCad = daysUntil(m.caducidad);
-    const provBadge = m.tieneProvisorio==='si' ? `<span class="prov-badge">PROV.</span>` : '';
-    return `<tr>
-      <td><strong style="font-family:'JetBrains Mono',monospace;font-size:12px">${m.lote||'—'}</strong></td>
-      <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis">${m.sector||'—'}</td>
-      <td><span style="font-size:12px">${m.tipo||'—'}</span></td>
-      <td style="font-size:12px">${m.capacidad||'—'}</td>
-      <td>${ringBadge(m)}</td>
-      <td><div class="date-cell"><div class="date">${fmtDate(m.proximaRecarga)}</div><div class="days">${dayChip(m.proximaRecarga)}</div></div></td>
-      <td><div class="date-cell"><div class="date">${fmtDate(m.proximoCPP)}</div><div class="days">${dayChip(m.proximoCPP)}</div></div></td>
-      <td><div class="date-cell"><div class="date">${fmtDate(m.proximaPH)}</div><div class="days">${dayChip(m.proximaPH)}</div></div></td>
-      <td><div class="date-cell"><div class="date">${fmtDate(m.caducidad)}</div><div class="days">${dayChip(m.caducidad)}</div></div></td>
-      <td>${chipStatus(m.estadoActual)}</td>
-      <td>${provBadge}</td>
-      <td>
-        <div class="actions">
-          <button class="btn btn-icon btn-outline btn-sm" onclick="openDetail('${m.id}')" title="Ver detalle">👁</button>
-          <button class="btn btn-icon btn-outline btn-sm" onclick="openEditModal('${m.id}')" title="Editar">✏️</button>
-          <button class="btn btn-icon btn-outline btn-sm" onclick="deleteItem('${m.id}')" title="Eliminar">🗑</button>
+  tb.innerHTML=rows.map(m=>`<tr>
+    <td><strong style="font-family:'JetBrains Mono',monospace;font-size:12px">${m.lote||'—'}</strong></td>
+    <td style="max-width:150px;overflow:hidden;text-overflow:ellipsis">${m.sector||'—'}</td>
+    <td style="font-size:12px">${m.tipo||'—'}</td>
+    <td style="font-size:12px">${m.cap||'—'}</td>
+    <td>${ringBadge(m)}</td>
+    <td><div class="date-cell"><div class="date-val">${fmt(m.proximaRecarga)}</div>${dayChip(m.proximaRecarga)}</div></td>
+    <td><div class="date-cell"><div class="date-val">${fmt(m.proximoCPP)}</div>${dayChip(m.proximoCPP)}</div></td>
+    <td><div class="date-cell"><div class="date-val">${fmt(m.proximaPH)}</div>${dayChip(m.proximaPH)}</div></td>
+    <td><div class="date-cell"><div class="date-val">${fmt(m.caducidad)}</div>${dayChip(m.caducidad)}</div></td>
+    <td>${statChip(m.estadoActual)}</td>
+    <td>${m.tieneProvisorio==='si'?'<span class="prov-tag">PROV.</span>':''}</td>
+    <td><div style="display:flex;gap:4px">
+      <button class="btn btn-ghost btn-sm" onclick="openDet('${m.id}')" title="Ver detalle">👁</button>
+      <button class="btn btn-ghost btn-sm" onclick="openEdit('${m.id}')" title="Editar">✏️</button>
+      <button class="btn btn-ghost btn-sm" onclick="del('${m.id}')" title="Eliminar">🗑</button>
+    </div></td>
+  </tr>`).join('');
+}
+function del(id){if(!confirm('¿Eliminar este matafuego?'))return;data=data.filter(m=>m.id!==id);sv('mats',data);renderAll()}
+
+// ─── GALLERY ──────────────────────────────────────────────────────────────
+function renderGal(){
+  const types=galFilt==='all'?['qr','oblea','opds']:
+               galFilt==='qr'?['qr']:galFilt==='oblea'?['oblea']:['opds'];
+  const lbls={qr:'QR',oblea:'Oblea IRAM',opds:'OPDS'};
+  const items=[];
+  data.forEach(m=>{types.forEach(t=>{if(m['foto_'+t])items.push({m,t,lbl:lbls[t]})})});
+  const el=document.getElementById('gallery');
+  if(!items.length){el.innerHTML='<p style="color:var(--text3);text-align:center;padding:40px;grid-column:1/-1">Sin imágenes cargadas. Editá un matafuego y subí fotos de las obleas y QR.</p>';return}
+  el.innerHTML=items.map(({m,t,lbl})=>`<div class="gal-card">
+    <div class="gal-img">
+      <img src="${m['foto_'+t]}" alt="${lbl}">
+      <span class="gal-type">${lbl}</span>
+    </div>
+    <div class="gal-foot">
+      <div class="gal-lote">${m.lote||'—'}</div>
+      <div class="gal-sec">${m.sector||'—'}</div>
+    </div>
+  </div>`).join('');
+}
+function filtGal(t,btn){
+  galFilt=t;
+  document.querySelectorAll('#page-fotos .tab').forEach(x=>x.classList.remove('active'));
+  btn.classList.add('active');renderGal();
+}
+
+// ─── SYH PLANILLA ─────────────────────────────────────────────────────────
+function renderSyhFilter(){
+  const sel=document.getElementById('syh-filter');
+  if(!sel)return;
+  sel.innerHTML='<option value="">Todos los matafuegos</option>'+
+    data.map(m=>`<option value="${m.id}">${m.lote} — ${m.sector}</option>`).join('');
+}
+function renderSyH(){
+  renderSyhFilter();
+  const fid=document.getElementById('syh-filter')?.value||'';
+  const rows=fid?data.filter(m=>m.id===fid):data;
+  const c=company;
+  const logo=c.logo?`<img src="${c.logo}" style="height:48px;object-fit:contain">`:
+    `<div style="font-size:28px">🏭</div>`;
+  const checks=['cPres','cPrec','cMang','cBoq','cSop','cSen','cEtq','cAcc'];
+  const clbls=['Presión','Precinto','Manguera','Boquilla','Soporte','Señalización','Oblea','Acceso'];
+  document.getElementById('planilla-preview').innerHTML=`
+    <div class="planilla-header">
+      <div style="display:flex;align-items:center;gap:12px">
+        ${logo}
+        <div class="planilla-empresa">${c.nombre||'Empresa'}
+          <small>${c.dir||''}</small>
+          <small>CUIT: ${c.cuit||'—'}</small>
         </div>
-      </td>
-    </tr>`;
-  }).join('');
-}
-function deleteItem(id) {
-  if (!confirm('¿Eliminar este matafuego?')) return;
-  data = data.filter(m => m.id !== id);
-  saveData(data);
-  renderAll();
-}
-
-// ─── SYH TABLE ──────────────────────────────────────────────────────────────
-function renderSyHTable() {
-  const tbody = document.getElementById('syh-body');
-  if (!data.length) { tbody.innerHTML = '<tr><td colspan="13" class="table-empty">Sin registros</td></tr>'; return; }
-  tbody.innerHTML = data.map(m => {
-    const result = [m.cPresion,m.cPrecinto,m.cManguera,m.cBoquilla].some(v=>v&&v.includes('❌'))
-      ? '<span class="chip crit">Falla</span>'
-      : [m.cPresion,m.cPrecinto,m.cManguera,m.cBoquilla].some(v=>v&&v.includes('⚠️'))
-      ? '<span class="chip warn">Regular</span>'
-      : '<span class="chip ok">OK</span>';
-    return `<tr>
-      <td><strong style="font-family:'JetBrains Mono',monospace;font-size:12px">${m.lote||'—'}</strong></td>
-      <td>${m.sector||'—'}</td>
-      <td style="font-size:12px">${m.tipo||'—'}</td>
-      <td style="font-family:'JetBrains Mono',monospace;font-size:12px">${fmtDate(m.fechaInspeccion)}</td>
-      <td>${m.cPresion||'—'}</td><td>${m.cPrecinto||'—'}</td>
-      <td>${m.cManguera||'—'}</td><td>${m.cBoquilla||'—'}</td>
-      <td>${m.cSoporte||'—'}</td><td>${m.cSenalizacion||'—'}</td>
-      <td>${result}</td>
-      <td style="font-size:12px">${m.responsableSyH||'—'}</td>
-      <td style="font-size:12px;max-width:180px;white-space:normal">${m.observaciones||'—'}</td>
-    </tr>`;
-  }).join('');
-}
-
-// ─── GALLERY ─────────────────────────────────────────────────────────────────
-function renderGallery() {
-  const el = document.getElementById('gallery-grid');
-  const items = [];
-  data.forEach(m => {
-    if (galleryFilter === 'all' || galleryFilter === 'qr') {
-      items.push({ m, type: 'QR', img: m.fotoQR });
-    }
-    if (galleryFilter === 'all' || galleryFilter === 'oblea') {
-      items.push({ m, type: 'Oblea IRAM', img: m.fotoOblea });
-    }
-    if (galleryFilter === 'all' || galleryFilter === 'opds') {
-      items.push({ m, type: 'OPDS', img: m.fotoOPDS });
-    }
-  });
-  if (!items.length) { el.innerHTML = '<p style="color:var(--text3);text-align:center;padding:40px;grid-column:1/-1">Sin imágenes cargadas</p>'; return; }
-  el.innerHTML = items.map(({m, type, img}) => `
-    <div class="gallery-card">
-      <div class="gallery-img">
-        ${img ? `<img src="${img}" alt="${type}">` : `<span class="no-img" style="text-align:center;padding:8px">Sin imagen<br><small>${type}</small></span>`}
       </div>
-      <div class="gallery-footer">
-        <div class="gf-lote">${m.lote||'—'} · <span style="font-weight:400;color:var(--text3)">${type}</span></div>
-        <div class="gf-type">${m.sector||'—'}</div>
+      <div class="planilla-title">
+        <h2>PLANILLA DE CONTROL DE MATAFUEGOS</h2>
+        <p>Registro de Inspecciones Periódicas</p>
       </div>
-    </div>`).join('');
-}
-function filterGallery(type, btn) {
-  galleryFilter = type;
-  document.querySelectorAll('#page-galeria .tab').forEach(t => t.classList.remove('active'));
-  btn.classList.add('active');
-  renderGallery();
+      <div class="planilla-norm">
+        <strong>IRAM 3517-2 (ed. 2020)</strong>
+        Res. 349/07 OPDS<br>
+        Fecha: ${fmt(today())}
+        ${c.syh_nombre?`<br>Resp. SyH: ${c.syh_nombre}`:''}
+        ${c.syh_mat?`<br>Mat.: ${c.syh_mat}`:''}
+      </div>
+    </div>
+    <div class="tbl-scroll"><table style="font-size:11px">
+      <thead><tr>
+        <th>Lote/N°</th><th>Sector</th><th>Tipo / Cap.</th><th>Anillo</th>
+        <th>Fab.</th><th>Inst.</th><th>Últ. Recarga</th><th>Próx. Recarga</th>
+        <th>Últ. CPP</th><th>Próx. CPP</th><th>Últ. PH</th><th>Próx. PH</th>
+        <th>Caducidad</th><th>OPDS</th>
+        ${clbls.map(l=>`<th>${l}</th>`).join('')}
+        <th>Resul.</th><th>Insp.</th><th>Resp. SyH</th><th>Obs.</th>
+      </tr></thead>
+      <tbody>${rows.length?rows.map(m=>{
+        const r=ring(m.anilloYr);
+        const rb=r?`<span style="display:inline-flex;align-items:center;gap:4px;background:${r.hex};color:${r.txt};padding:1px 6px;border-radius:10px;font-size:10px;font-weight:700">${r.name}</span>`:'—';
+        const hasF=checks.some(k=>(m[k]||'').includes('❌'));
+        const hasW=checks.some(k=>(m[k]||'').includes('⚠️'));
+        const res=hasF?'<span class="chip crit">NO CONF.</span>':hasW?'<span class="chip warn">REGULAR</span>':'<span class="chip ok">CONF.</span>';
+        return`<tr>
+          <td><strong>${m.lote||'—'}</strong></td>
+          <td>${m.sector||'—'}</td>
+          <td>${(m.tipo||'—').replace(' — ',' ')}<br><small>${m.cap||''}</small></td>
+          <td>${rb}</td>
+          <td>${fmt(m.fabricacion)}</td><td>${fmt(m.instalacion)}</td>
+          <td>${fmt(m.ultimaRecarga)}</td><td>${fmt(m.proximaRecarga)}</td>
+          <td>${fmt(m.ultimoCPP)}</td><td>${fmt(m.proximoCPP)}</td>
+          <td>${fmt(m.ultimaPH)}</td><td>${fmt(m.proximaPH)}</td>
+          <td>${fmt(m.caducidad)}</td>
+          <td style="font-size:10px">${m.opds||'—'}</td>
+          ${checks.map(k=>`<td style="font-size:12px">${(m[k]||'—').split(' ')[0]}</td>`).join('')}
+          <td>${res}</td>
+          <td style="font-family:'JetBrains Mono',monospace;font-size:10px">${fmt(m.fechaInsp)}</td>
+          <td style="font-size:11px">${m.responsable||'—'}</td>
+          <td style="max-width:120px;white-space:normal;font-size:11px">${m.obs||'—'}</td>
+        </tr>`;
+      }).join(''):`<tr><td colspan="30" class="table-empty">Sin registros</td></tr>`}
+      </tbody>
+    </table></div>
+    <div style="margin-top:24px;display:flex;justify-content:space-between;gap:40px;font-size:12px">
+      <div style="flex:1;border-top:1px solid var(--text);padding-top:6px;text-align:center">
+        Firma Responsable SyH<br><small>${c.syh_nombre||'_______________________'}</small>
+      </div>
+      <div style="flex:1;border-top:1px solid var(--text);padding-top:6px;text-align:center">
+        Matrícula / CUIL<br><small>${c.syh_mat||'_______________________'}</small>
+      </div>
+      <div style="flex:1;border-top:1px solid var(--text);padding-top:6px;text-align:center">
+        Fecha<br><small>${fmt(today())}</small>
+      </div>
+    </div>
+    <div style="margin-top:12px;font-size:10px;color:var(--text3);border-top:1px solid var(--border);padding-top:8px">
+      Registro elaborado conforme IRAM 3517-2 (ed. 2020). Control Periódico Preventivo: cada 6 meses. Recarga anual: máx. 12 meses. Prueba Hidráulica: cada 5 años. Caducidad definitiva: 20 años desde fabricación.
+    </div>`;
 }
 
-// ─── DETAIL MODAL ─────────────────────────────────────────────────────────
-function openDetail(id) {
-  const m = data.find(x => x.id === id);
-  if (!m) return;
-  const r = getRingInfo(m.anilloAnio);
-  const ringHtml = r
-    ? `<span class="ring-badge" style="background:${r.hex};color:${r.text};padding:4px 12px;border-radius:20px;font-size:14px;font-weight:700">${r.color} — ${r.year}</span>`
-    : '—';
-  document.getElementById('detail-title').textContent = `${m.lote} — ${m.tipo||'Matafuego'}`;
-  document.getElementById('detail-body').innerHTML = `
+// ─── DETAIL ───────────────────────────────────────────────────────────────
+function openDet(id){
+  const m=data.find(x=>x.id===id);if(!m)return;
+  const r=ring(m.anilloYr);
+  const rb=r?`<span class="ring-badge" style="background:${r.hex};color:${r.txt};border:1px solid ${r.brd||'transparent'};font-size:14px;padding:4px 14px">${r.name} — ${r.yr}</span>`:'—';
+  document.getElementById('det-title').textContent=`${m.lote||'Matafuego'} — ${m.tipo||''}`;
+  document.getElementById('det-edit-btn').onclick=()=>{closeModal('ov-det');openEdit(id)};
+  document.getElementById('det-body').innerHTML=`
     <div class="detail-grid">
-      <div class="detail-card">
-        <h3>📋 Identificación</h3>
-        <div class="detail-row"><span class="detail-key">Lote / N°</span><span class="detail-val mono">${m.lote||'—'}</span></div>
-        <div class="detail-row"><span class="detail-key">Sector</span><span class="detail-val">${m.sector||'—'}</span></div>
-        <div class="detail-row"><span class="detail-key">Tipo</span><span class="detail-val">${m.tipo||'—'}</span></div>
-        <div class="detail-row"><span class="detail-key">Agente</span><span class="detail-val">${m.agente||'—'}</span></div>
-        <div class="detail-row"><span class="detail-key">Capacidad</span><span class="detail-val">${m.capacidad||'—'}</span></div>
-        <div class="detail-row"><span class="detail-key">Clase fuego</span><span class="detail-val">${m.claseFuego||'—'}</span></div>
-        <div class="detail-row"><span class="detail-key">Fabricante</span><span class="detail-val">${m.marca||'—'}</span></div>
-        <div class="detail-row"><span class="detail-key">N° Serie</span><span class="detail-val mono">${m.serie||'—'}</span></div>
-        <div class="detail-row"><span class="detail-key">N° OPDS</span><span class="detail-val mono">${m.opds||'—'}</span></div>
-        <div class="detail-row"><span class="detail-key">Empresa recargadora</span><span class="detail-val">${m.empresa||'—'}</span></div>
-        <div class="detail-row"><span class="detail-key">Estado</span><span class="detail-val">${chipStatus(m.estadoActual)}</span></div>
-        <div class="detail-row"><span class="detail-key">Anillo</span><span class="detail-val">${ringHtml}</span></div>
+      <div>
+        <div class="det-card" style="margin-bottom:14px">
+          <h4>📋 Identificación</h4>
+          ${dr('Lote / N°',`<span style="font-family:'JetBrains Mono',monospace">${m.lote||'—'}</span>`)}
+          ${dr('Sector',m.sector)}${dr('Tipo',m.tipo)}${dr('Agente',m.agente)}
+          ${dr('Capacidad',m.cap)}${dr('Clase de fuego',m.claseFuego)}
+          ${dr('Fabricante',m.marca)}${dr('N° Serie',`<span style="font-family:'JetBrains Mono',monospace">${m.serie||'—'}</span>`)}
+          ${dr('N° OPDS',m.opds)}${dr('Empresa recargadora',m.empresa)}
+          ${dr('Estado',statChip(m.estadoActual))}${dr('Anillo',rb)}
+        </div>
+        <div class="det-card">
+          <h4>👷 Inspección SyH</h4>
+          ${dr('Fecha inspección',`<span style="font-family:'JetBrains Mono',monospace">${fmt(m.fechaInsp)}</span>`)}
+          ${dr('Responsable',m.responsable)}${dr('Matrícula',m.matricula)}
+          ${dr('Próxima inspección',`<span style="font-family:'JetBrains Mono',monospace">${fmt(m.proximaInsp)}</span>`)}
+          <div style="margin-top:8px;display:grid;grid-template-columns:1fr 1fr;gap:4px;font-size:11px">
+            ${[['Presión',m.cPres],['Precinto',m.cPrec],['Manguera',m.cMang],['Boquilla',m.cBoq],['Soporte',m.cSop],['Señalización',m.cSen],['Oblea',m.cEtq],['Acceso',m.cAcc]].map(([l,val])=>
+              `<div style="background:var(--surface);border:1px solid var(--border);border-radius:4px;padding:4px 8px;display:flex;justify-content:space-between">
+                <span style="color:var(--text3)">${l}</span><span>${(val||'—').split(' ')[0]}</span>
+              </div>`).join('')}
+          </div>
+          ${m.obs?`<div style="margin-top:8px;background:var(--surface);border-radius:6px;padding:8px;font-size:12px;color:var(--text2)">${m.obs}</div>`:''}
+        </div>
       </div>
       <div>
-        <div class="detail-card" style="margin-bottom:16px">
-          <h3>📅 Plazos IRAM 3517-2</h3>
-          <div class="timeline">
-            ${tlItem('Fabricación',      m.fabricacion,      'future')}
-            ${tlItem('Instalación',      m.instalacion,      'ok')}
-            ${tlItem('Última Recarga',   m.ultimaRecarga,    'ok')}
-            ${tlItem('Próx. Recarga ★', m.proximaRecarga,   daysCls(m.proximaRecarga))}
-            ${tlItem('Último CPP',       m.ultimoCPP,        'ok')}
-            ${tlItem('Próx. CPP ★',     m.proximoCPP,       daysCls(m.proximoCPP))}
-            ${tlItem('Última Prueba H.', m.ultimaPH,         'ok')}
-            ${tlItem('Próx. Prueba H. ★', m.proximaPH,      daysCls(m.proximaPH))}
-            ${tlItem('Caducidad Def. ★', m.caducidad,       daysCls(m.caducidad))}
+        <div class="det-card" style="margin-bottom:14px">
+          <h4>📅 Plazos IRAM 3517-2</h4>
+          <div class="tl">
+            ${tli('Fabricación',m.fabricacion,'dim')}
+            ${tli('Instalación',m.instalacion,'ok')}
+            ${tli('Última Recarga',m.ultimaRecarga,'ok')}
+            ${tli('Próxima Recarga ★',m.proximaRecarga,dcls(m.proximaRecarga))}
+            ${tli('Último CPP',m.ultimoCPP,'ok')}
+            ${tli('Próximo CPP ★',m.proximoCPP,dcls(m.proximoCPP))}
+            ${tli('Última Prueba Hidr.',m.ultimaPH,'ok')}
+            ${tli('Próxima Prueba Hidr. ★',m.proximaPH,dcls(m.proximaPH))}
+            ${tli('Caducidad Definitiva ★',m.caducidad,dcls(m.caducidad))}
           </div>
         </div>
-        ${m.tieneProvisorio==='si'?`<div class="alert-strip info" style="margin:0 0 16px;border-radius:8px">
-          🔄 <strong>Provisorio asignado:</strong> ${m.provisorioDesc||'—'}
-          ${m.nuevoFecha?`<br>Nuevo previsto: ${fmtDate(m.nuevoFecha)}`:''}
+        ${m.tieneProvisorio==='si'?`<div class="alert-strip warn" style="margin:0 0 14px;border-radius:8px">
+          🔄 <strong>Provisorio activo:</strong> ${m.provDesc||'—'}
+          ${m.nuevoFecha?`<br>Nuevo previsto: ${fmt(m.nuevoFecha)}`:''}
+        </div>`:''}
+        ${(m.foto_qr||m.foto_oblea||m.foto_opds)?`<div class="det-card">
+          <h4>📷 Documentación</h4>
+          <div class="photo-panel">
+            ${['qr','oblea','opds'].map(t=>m['foto_'+t]?`<div class="photo-slot filled" style="cursor:default">
+              <img class="preview" src="${m['foto_'+t]}"><div class="ph-label">${t==='qr'?'QR':t==='oblea'?'Oblea IRAM':'OPDS'}</div>
+            </div>`:'').join('')}
+          </div>
         </div>`:''}
       </div>
-    </div>
-    ${(m.fotoQR||m.fotoOblea||m.fotoOPDS)?`
-    <div style="margin-top:16px"><h3 style="font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;margin-bottom:12px">📷 Documentación</h3>
-    <div class="photo-grid" style="max-width:500px">
-      ${m.fotoQR?`<div class="photo-slot has-photo"><img src="${m.fotoQR}"><span class="photo-label">QR</span></div>`:''}
-      ${m.fotoOblea?`<div class="photo-slot has-photo"><img src="${m.fotoOblea}"><span class="photo-label">Oblea IRAM</span></div>`:''}
-      ${m.fotoOPDS?`<div class="photo-slot has-photo"><img src="${m.fotoOPDS}"><span class="photo-label">OPDS</span></div>`:''}
-    </div></div>`:''}
-    <div style="margin-top:16px">
-      <h3 style="font-family:'Barlow Condensed',sans-serif;font-size:16px;font-weight:700;margin-bottom:10px">👷 Inspección SyH</h3>
-      <div class="detail-grid">
-        <div>
-          <div class="detail-row"><span class="detail-key">Responsable</span><span class="detail-val">${m.responsableSyH||'—'}</span></div>
-          <div class="detail-row"><span class="detail-key">Matrícula</span><span class="detail-val mono">${m.matriculaSyH||'—'}</span></div>
-          <div class="detail-row"><span class="detail-key">Fecha inspección</span><span class="detail-val mono">${fmtDate(m.fechaInspeccion)}</span></div>
-          <div class="detail-row"><span class="detail-key">Próxima inspección</span><span class="detail-val mono">${fmtDate(m.proximaInspeccion)}</span></div>
-        </div>
-        <div>
-          <div class="detail-row"><span class="detail-key">Presión</span><span class="detail-val">${m.cPresion||'—'}</span></div>
-          <div class="detail-row"><span class="detail-key">Precinto</span><span class="detail-val">${m.cPrecinto||'—'}</span></div>
-          <div class="detail-row"><span class="detail-key">Manguera</span><span class="detail-val">${m.cManguera||'—'}</span></div>
-          <div class="detail-row"><span class="detail-key">Boquilla</span><span class="detail-val">${m.cBoquilla||'—'}</span></div>
-          <div class="detail-row"><span class="detail-key">Soporte</span><span class="detail-val">${m.cSoporte||'—'}</span></div>
-          <div class="detail-row"><span class="detail-key">Señalización</span><span class="detail-val">${m.cSenalizacion||'—'}</span></div>
-          <div class="detail-row"><span class="detail-key">Etiqueta</span><span class="detail-val">${m.cEtiqueta||'—'}</span></div>
-          <div class="detail-row"><span class="detail-key">Accesibilidad</span><span class="detail-val">${m.cAcceso||'—'}</span></div>
-        </div>
-      </div>
-      ${m.observaciones?`<div style="margin-top:8px;font-size:13px;color:var(--text2);background:var(--surface2);padding:10px;border-radius:6px">${m.observaciones}</div>`:''}
-    </div>
-  `;
-  document.getElementById('detail-overlay').classList.remove('hidden');
+    </div>`;
+  document.getElementById('ov-det').classList.remove('hidden');
 }
-function tlItem(label, date, cls) {
-  return `<div class="tl-item">
-    <div class="tl-dot ${cls}"></div>
-    <div class="tl-line">
-      <div class="tl-type">${label}</div>
-      <div class="tl-date">${fmtDate(date)}</div>
-    </div>
-  </div>`;
-}
-function daysCls(d) {
-  const days = daysUntil(d);
-  if (days === null) return 'future';
-  if (days < 0) return 'crit';
-  if (days <= 90) return 'warn';
-  return 'ok';
-}
+function dr(k,v){return`<div class="det-row"><span class="det-k">${k}</span><span class="det-v">${v||'—'}</span></div>`}
+function tli(lbl,d,cls){return`<div class="tl-item"><div class="tl-dot ${cls}"></div><div class="tl-info"><div class="tl-type">${lbl}</div><div class="tl-date">${fmt(d)}</div></div></div>`}
 
-// ─── MODAL ────────────────────────────────────────────────────────────────
-function openAddModal() {
-  editingId = null;
-  tempPhotos = { qr: null, oblea: null, opds: null };
-  clearForm();
-  document.getElementById('modal-title').textContent = 'Nuevo Matafuego';
-  document.getElementById('modal-overlay').classList.remove('hidden');
+// ─── MODAL MATAFUEGO ──────────────────────────────────────────────────────
+function openAdd(){
+  editId=null;tmpPh={qr:null,oblea:null,opds:null};
+  clearF();document.getElementById('mat-title').textContent='Nuevo Matafuego';
+  document.getElementById('ov-mat').classList.remove('hidden');
 }
-function openEditModal(id) {
-  const m = data.find(x => x.id === id);
-  if (!m) return;
-  editingId = id;
-  tempPhotos = { qr: m.fotoQR||null, oblea: m.fotoOblea||null, opds: m.fotoOPDS||null };
-  fillForm(m);
-  document.getElementById('modal-title').textContent = `Editar — ${m.lote}`;
-  document.getElementById('modal-overlay').classList.remove('hidden');
+function openEdit(id){
+  const m=data.find(x=>x.id===id);if(!m)return;
+  editId=id;tmpPh={qr:m.foto_qr||null,oblea:m.foto_oblea||null,opds:m.foto_opds||null};
+  fillF(m);document.getElementById('mat-title').textContent=`Editar — ${m.lote}`;
+  document.getElementById('ov-mat').classList.remove('hidden');
 }
-function closeModal() {
-  document.getElementById('modal-overlay').classList.add('hidden');
-}
-function handleOverlayClick(e) {
-  if (e.target === document.getElementById('modal-overlay')) closeModal();
-}
-function clearForm() {
-  const ids = ['f-lote','f-sector','f-tipo','f-agente','f-capacidad','f-clase','f-marca','f-serie','f-opds','f-empresa','f-anillo-anio','f-ult-recarga','f-prox-recarga','f-ult-cpp','f-prox-cpp','f-ult-ph','f-prox-ph','f-caducidad','f-instalacion','f-fecha-insp','f-responsable','f-matricula','f-prox-insp','f-observaciones','f-prov-desc','f-nuevo-fecha'];
-  ids.forEach(id => { const el = document.getElementById(id); if(el) el.value = ''; });
-  document.getElementById('f-estado').value = 'Operativo';
-  document.getElementById('f-tiene-prov').value = 'no';
-  document.getElementById('f-anillo-color').value = '';
-  ['c-presion','c-precinto','c-manguera','c-boquilla','c-soporte','c-senalizacion','c-etiqueta','c-acceso'].forEach(id => {
-    const el = document.getElementById(id); if(el) el.value = '✅ OK';
+function clearF(){
+  const ids=['f-lote','f-sector','f-agente','f-cap','f-clase','f-marca','f-serie','f-opds',
+    'f-empresa','f-anillo-yr','f-ult-rec','f-prox-rec','f-ult-cpp','f-prox-cpp',
+    'f-ult-ph','f-prox-ph','f-cad','f-inst','f-finsp','f-resp','f-mat','f-prox-insp','f-obs','f-prov-desc','f-nuevo-fecha'];
+  ids.forEach(id=>{const el=document.getElementById(id);if(el)el.value=''});
+  document.getElementById('f-tipo').value='';
+  document.getElementById('f-estado').value='Operativo';
+  document.getElementById('f-prov').value='no';
+  document.getElementById('f-anillo-col').value='';
+  ['c-pres','c-prec','c-mang','c-boq','c-sop','c-sen','c-etq','c-acc'].forEach(id=>{
+    const el=document.getElementById(id);if(el)el.value='✅ Conforme';
   });
-  toggleProvisorio();
-  updatePhotoSlots();
+  togProv();updateSlots();
 }
-function fillForm(m) {
-  const set = (id, val) => { const el=document.getElementById(id); if(el) el.value=val||''; };
-  set('f-lote', m.lote); set('f-sector', m.sector); set('f-tipo', m.tipo);
-  set('f-agente', m.agente); set('f-capacidad', m.capacidad); set('f-clase', m.claseFuego);
-  set('f-marca', m.marca); set('f-serie', m.serie); set('f-opds', m.opds);
-  set('f-empresa', m.empresa); set('f-anillo-anio', m.anilloAnio);
-  set('f-ult-recarga', m.ultimaRecarga); set('f-prox-recarga', m.proximaRecarga);
-  set('f-ult-cpp', m.ultimoCPP); set('f-prox-cpp', m.proximoCPP);
-  set('f-ult-ph', m.ultimaPH); set('f-prox-ph', m.proximaPH);
-  set('f-caducidad', m.caducidad); set('f-estado', m.estadoActual);
-  set('f-instalacion', m.instalacion); set('f-fecha-insp', m.fechaInspeccion);
-  set('f-responsable', m.responsableSyH); set('f-matricula', m.matriculaSyH);
-  set('f-prox-insp', m.proximaInspeccion); set('f-observaciones', m.observaciones);
-  set('f-tiene-prov', m.tieneProvisorio||'no'); set('f-prov-desc', m.provisorioDesc);
-  set('f-nuevo-fecha', m.nuevoFecha); set('f-fabricacion', m.fabricacion);
-  if(m.anilloAnio) document.getElementById('f-anillo-color').value = m.anilloAnio;
-  ['c-presion','c-precinto','c-manguera','c-boquilla','c-soporte','c-senalizacion','c-etiqueta','c-acceso'].forEach(id => {
-    const key = 'c'+id.slice(1).replace(/-./g, x=>x[1].toUpperCase());
-    const el=document.getElementById(id); if(el && m[key]) el.value=m[key];
+function fillF(m){
+  const set=(id,val)=>{const el=document.getElementById(id);if(el)el.value=val||''};
+  set('f-lote',m.lote);set('f-sector',m.sector);set('f-agente',m.agente);
+  set('f-cap',m.cap);set('f-clase',m.claseFuego);set('f-marca',m.marca);
+  set('f-serie',m.serie);set('f-opds',m.opds);set('f-empresa',m.empresa);
+  set('f-anillo-yr',m.anilloYr);set('f-ult-rec',m.ultimaRecarga);
+  set('f-prox-rec',m.proximaRecarga);set('f-ult-cpp',m.ultimoCPP);
+  set('f-prox-cpp',m.proximoCPP);set('f-ult-ph',m.ultimaPH);
+  set('f-prox-ph',m.proximaPH);set('f-cad',m.caducidad);set('f-inst',m.instalacion);
+  set('f-finsp',m.fechaInsp);set('f-resp',m.responsable);set('f-mat',m.matricula);
+  set('f-prox-insp',m.proximaInsp);set('f-obs',m.obs);
+  set('f-prov-desc',m.provDesc);set('f-nuevo-fecha',m.nuevoFecha);
+  set('f-fab',m.fabricacion);
+  if(m.tipo)document.getElementById('f-tipo').value=m.tipo;
+  if(m.estadoActual)document.getElementById('f-estado').value=m.estadoActual;
+  if(m.tieneProvisorio)document.getElementById('f-prov').value=m.tieneProvisorio;
+  if(m.anilloYr)document.getElementById('f-anillo-col').value=m.anilloYr;
+  ['cPres','cPrec','cMang','cBoq','cSop','cSen','cEtq','cAcc'].forEach((k,i)=>{
+    const ids=['c-pres','c-prec','c-mang','c-boq','c-sop','c-sen','c-etq','c-acc'];
+    const el=document.getElementById(ids[i]);if(el&&m[k])el.value=m[k];
   });
-  toggleProvisorio();
-  updatePhotoSlots();
+  togProv();updateSlots();
+  showAnilloPrev();
 }
-function toggleProvisorio() {
-  const has = document.getElementById('f-tiene-prov').value === 'si';
-  document.getElementById('f-prov-desc-wrap').style.display = has ? '' : 'none';
-  document.getElementById('f-nuevo-fecha-wrap').style.display = has ? '' : 'none';
+function togProv(){
+  const has=document.getElementById('f-prov').value==='si';
+  document.getElementById('prov-desc-f').style.display=has?'':'none';
+  document.getElementById('prov-fecha-f').style.display=has?'':'none';
 }
-document.getElementById('f-tiene-prov').addEventListener('change', toggleProvisorio);
-
-// Auto-calcular caducidad desde fabricación
-document.getElementById('f-fabricacion').addEventListener('change', function() {
-  const val = this.value;
-  if (val) document.getElementById('f-caducidad').value = addYears(val, 20);
+document.getElementById('f-prov').addEventListener('change',togProv);
+document.getElementById('f-fab').addEventListener('change',function(){
+  if(this.value)document.getElementById('f-cad').value=addYr(this.value,20);
 });
-// Sync color anillo <> año
-document.getElementById('f-anillo-color').addEventListener('change', function() {
-  document.getElementById('f-anillo-anio').value = this.value;
-  showAnilloPreview();
+document.getElementById('f-anillo-col').addEventListener('change',function(){
+  document.getElementById('f-anillo-yr').value=this.value;showAnilloPrev();
 });
-document.getElementById('f-anillo-anio').addEventListener('change', function() {
-  document.getElementById('f-anillo-color').value = this.value;
-  showAnilloPreview();
+document.getElementById('f-anillo-yr').addEventListener('change',function(){
+  document.getElementById('f-anillo-col').value=this.value;showAnilloPrev();
 });
-function showAnilloPreview() {
-  const year = document.getElementById('f-anillo-anio').value;
-  const r = getRingInfo(year);
-  const el = document.getElementById('anillo-preview');
-  if (!r) { el.innerHTML = ''; return; }
-  el.innerHTML = `<span class="ring-badge" style="background:${r.hex};color:${r.text};padding:4px 14px;border-radius:20px;font-size:13px;font-weight:700;border:1px solid ${r.border||'transparent'}">
-    Anillo ${r.color} — vence ${r.year}
-  </span>`;
+function showAnilloPrev(){
+  const yr=document.getElementById('f-anillo-yr').value;
+  const r=ring(yr);const el=document.getElementById('anillo-prev');
+  if(!r){el.innerHTML='';return}
+  el.innerHTML=`<span class="ring-badge" style="background:${r.hex};color:${r.txt};border:1px solid ${r.brd||'transparent'};font-size:13px;padding:4px 14px;border-radius:20px">Anillo ${r.name} — vence ${r.yr}</span>`;
 }
 
-// ─── PHOTOS ──────────────────────────────────────────────────────────────
-function triggerPhoto(slot) {
-  currentPhotoSlot = slot;
-  document.getElementById('photo-input').click();
+// ─── PHOTOS ───────────────────────────────────────────────────────────────
+function pickPhoto(slot){curSlot=slot;document.getElementById('ph-inp').click()}
+function onPhoto(e){
+  const f=e.target.files[0];if(!f)return;
+  const r=new FileReader();
+  r.onload=ev=>{tmpPh[curSlot]=ev.target.result;updateSlots()};
+  r.readAsDataURL(f);e.target.value='';
 }
-function handlePhotoUpload(e) {
-  const file = e.target.files[0];
-  if (!file) return;
-  const reader = new FileReader();
-  reader.onload = ev => {
-    tempPhotos[currentPhotoSlot] = ev.target.result;
-    updatePhotoSlots();
-  };
-  reader.readAsDataURL(file);
-  e.target.value = '';
+function removePhoto(e,slot){
+  e.stopPropagation();tmpPh[slot]=null;updateSlots();
 }
-function updatePhotoSlots() {
-  ['qr','oblea','opds'].forEach(key => {
-    const slot = document.getElementById(`slot-${key}`);
-    if (!slot) return;
-    const existingImg = slot.querySelector('img.uploaded-img');
-    if (existingImg) existingImg.remove();
-    if (tempPhotos[key]) {
-      slot.classList.add('has-photo');
-      const img = document.createElement('img');
-      img.src = tempPhotos[key];
-      img.className = 'uploaded-img';
-      img.style.cssText = 'position:absolute;inset:0;width:100%;height:100%;object-fit:cover';
-      slot.insertBefore(img, slot.firstChild);
+function updateSlots(){
+  ['qr','oblea','opds'].forEach(k=>{
+    const sl=document.getElementById('ps-'+k);if(!sl)return;
+    const prev=sl.querySelector('img.preview');
+    if(prev)prev.remove();
+    if(tmpPh[k]){
+      sl.classList.add('filled');
+      const img=document.createElement('img');
+      img.src=tmpPh[k];img.className='preview';
+      sl.insertBefore(img,sl.firstChild);
     } else {
-      slot.classList.remove('has-photo');
+      sl.classList.remove('filled');
     }
   });
 }
 
-// ─── SAVE ─────────────────────────────────────────────────────────────────
-function saveMatafuego() {
-  const g = id => document.getElementById(id)?.value?.trim() || '';
-  const lote = g('f-lote');
-  const fabricacion = g('f-fabricacion');
-  const proximaRecarga = g('f-prox-recarga');
-  if (!lote) { alert('El N° de Lote es obligatorio.'); return; }
-  if (!fabricacion) { alert('La fecha de fabricación es obligatoria.'); return; }
-  if (!proximaRecarga) { alert('La próxima recarga anual es obligatoria.'); return; }
-  const obj = {
-    id: editingId || uid(),
-    lote, sector: g('f-sector'), tipo: g('f-tipo'), agente: g('f-agente'),
-    capacidad: g('f-capacidad'), claseFuego: g('f-clase'),
-    marca: g('f-marca'), serie: g('f-serie'), opds: g('f-opds'), empresa: g('f-empresa'),
-    fabricacion, instalacion: g('f-instalacion'),
-    anilloColor: document.getElementById('f-anillo-color').value,
-    anilloAnio: g('f-anillo-anio'),
-    ultimaRecarga: g('f-ult-recarga'), proximaRecarga,
-    ultimoCPP: g('f-ult-cpp'), proximoCPP: g('f-prox-cpp'),
-    ultimaPH: g('f-ult-ph'), proximaPH: g('f-prox-ph'),
-    caducidad: g('f-caducidad'),
-    estadoActual: g('f-estado'),
-    tieneProvisorio: document.getElementById('f-tiene-prov').value,
-    provisorioDesc: g('f-prov-desc'), nuevoFecha: g('f-nuevo-fecha'),
-    fechaInspeccion: g('f-fecha-insp'), responsableSyH: g('f-responsable'),
-    matriculaSyH: g('f-matricula'), proximaInspeccion: g('f-prox-insp'),
-    observaciones: g('f-observaciones'),
-    cPresion: document.getElementById('c-presion').value,
-    cPrecinto: document.getElementById('c-precinto').value,
-    cManguera: document.getElementById('c-manguera').value,
-    cBoquilla: document.getElementById('c-boquilla').value,
-    cSoporte: document.getElementById('c-soporte').value,
-    cSenalizacion: document.getElementById('c-senalizacion').value,
-    cEtiqueta: document.getElementById('c-etiqueta').value,
-    cAcceso: document.getElementById('c-acceso').value,
-    fotoQR: tempPhotos.qr, fotoOblea: tempPhotos.oblea, fotoOPDS: tempPhotos.opds,
+// ─── SAVE MAT ─────────────────────────────────────────────────────────────
+function v(id){return(document.getElementById(id)?.value||'').trim()}
+function saveMat(){
+  const lote=v('f-lote'),fab=v('f-fab'),prec=v('f-prox-rec');
+  if(!lote){alert('El N° de Lote es obligatorio.');return}
+  if(!fab){alert('La fecha de fabricación es obligatoria.');return}
+  if(!prec){alert('La próxima fecha de recarga es obligatoria.');return}
+  const m={
+    id:editId||uid(),
+    lote,sector:v('f-sector'),tipo:v('f-tipo'),agente:v('f-agente'),
+    cap:v('f-cap'),claseFuego:v('f-clase'),marca:v('f-marca'),serie:v('f-serie'),
+    opds:v('f-opds'),empresa:v('f-empresa'),fabricacion:fab,instalacion:v('f-inst'),
+    anilloYr:v('f-anillo-yr'),anilloCol:document.getElementById('f-anillo-col').value,
+    ultimaRecarga:v('f-ult-rec'),proximaRecarga:prec,
+    ultimoCPP:v('f-ult-cpp'),proximoCPP:v('f-prox-cpp'),
+    ultimaPH:v('f-ult-ph'),proximaPH:v('f-prox-ph'),
+    caducidad:v('f-cad'),estadoActual:v('f-estado'),
+    tieneProvisorio:document.getElementById('f-prov').value,
+    provDesc:v('f-prov-desc'),nuevoFecha:v('f-nuevo-fecha'),
+    fechaInsp:v('f-finsp'),responsable:v('f-resp'),matricula:v('f-mat'),
+    proximaInsp:v('f-prox-insp'),obs:v('f-obs'),
+    cPres:document.getElementById('c-pres').value,
+    cPrec:document.getElementById('c-prec').value,
+    cMang:document.getElementById('c-mang').value,
+    cBoq:document.getElementById('c-boq').value,
+    cSop:document.getElementById('c-sop').value,
+    cSen:document.getElementById('c-sen').value,
+    cEtq:document.getElementById('c-etq').value,
+    cAcc:document.getElementById('c-acc').value,
+    foto_qr:tmpPh.qr,foto_oblea:tmpPh.oblea,foto_opds:tmpPh.opds,
   };
-  if (editingId) {
-    data = data.map(m => m.id === editingId ? obj : m);
-  } else {
-    data.push(obj);
-  }
-  saveData(data);
-  closeModal();
-  renderAll();
+  if(editId){data=data.map(x=>x.id===editId?m:x)}else{data.push(m)}
+  sv('mats',data);closeModal('ov-mat');renderAll();
 }
 
-// ─── EXPORT CSV ──────────────────────────────────────────────────────────
-function exportCSV() {
-  const cols = ['lote','sector','tipo','agente','capacidad','fabricacion','ultimaRecarga','proximaRecarga','ultimoCPP','proximoCPP','ultimaPH','proximaPH','caducidad','estadoActual','anilloAnio','responsableSyH','observaciones'];
-  const header = ['Lote','Sector','Tipo','Agente','Capacidad','Fabricación','Últ. Recarga','Próx. Recarga','Últ. CPP','Próx. CPP','Últ. PH','Próx. PH','Caducidad','Estado','Anillo Año','Resp. SyH','Observaciones'];
-  const csv = [header.join(';'), ...data.map(m => cols.map(c => `"${(m[c]||'').replace(/"/g,'""')}"`).join(';'))].join('\n');
-  const a = document.createElement('a'); a.href = 'data:text/csv;charset=utf-8,﻿'+encodeURIComponent(csv);
-  a.download = `matafuegos_${today()}.csv`; a.click();
+// ─── EXPORT ───────────────────────────────────────────────────────────────
+function exportCSV(){
+  const cols=['lote','sector','tipo','agente','cap','fabricacion','ultimaRecarga','proximaRecarga','ultimoCPP','proximoCPP','ultimaPH','proximaPH','caducidad','estadoActual','anilloYr','responsable','obs'];
+  const hdrs=['Lote','Sector','Tipo','Agente','Capacidad','Fabricación','Últ.Recarga','Próx.Recarga','Últ.CPP','Próx.CPP','Últ.PH','Próx.PH','Caducidad','Estado','Anillo Año','Resp.SyH','Observaciones'];
+  const csv=[hdrs.join(';'),...data.map(m=>cols.map(c=>`"${(m[c]||'').replace(/"/g,'""')}"`).join(';'))].join('\n');
+  const a=document.createElement('a');
+  a.href='data:text/csv;charset=utf-8,﻿'+encodeURIComponent(csv);
+  a.download=`matafuegos_${today()}.csv`;a.click();
 }
 
-// ─── NAV ─────────────────────────────────────────────────────────────────
-function showPage(name) {
-  document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-  document.getElementById('page-'+name).classList.add('active');
-  document.querySelectorAll('.nav-item').forEach(n => n.classList.toggle('active', n.dataset.page===name));
-  const titles = {
-    dashboard: 'Dashboard <span>General</span>',
-    matafuegos: 'Matafuegos <span>Registrados</span>',
-    alertas: 'Alertas <span>de Vencimiento</span>',
-    galeria: 'Galería <span>Obleas y QRs</span>',
-    planillaSyH: 'Planilla <span>SyH — IRAM 3517-2</span>',
-    anillos: 'Sistema de <span>Anillos</span>',
-  };
-  document.getElementById('page-title').innerHTML = titles[name] || name;
-  if (name==='alertas') renderAlertsPage();
-  if (name==='galeria') renderGallery();
-  if (name==='planillaSyH') renderSyHTable();
-  if (name==='anillos') buildRingsDisplay();
+// ─── NAV ──────────────────────────────────────────────────────────────────
+const pgTitles={
+  dashboard:'Dashboard <span>General</span>',
+  matafuegos:'Matafuegos <span>Registrados</span>',
+  alertas:'Alertas <span>de Vencimiento</span>',
+  fotos:'Galería <span>Obleas y QRs</span>',
+  syh:'Planilla <span>SyH — IRAM 3517-2</span>',
+  anillos:'Sistema de <span>Anillos</span>',
+};
+function nav(p){
+  document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
+  document.getElementById('page-'+p).classList.add('active');
+  document.querySelectorAll('.nav-btn').forEach(x=>x.classList.toggle('active',x.dataset.p===p));
+  document.getElementById('pg-title').innerHTML=pgTitles[p]||p;
+  if(p==='alertas')renderAlerts();
+  if(p==='fotos')renderGal();
+  if(p==='syh')renderSyH();
+  if(p==='anillos')buildRingCards();
 }
-function toggleTheme() {
-  const root = document.documentElement;
-  root.dataset.theme = root.dataset.theme === 'dark' ? 'light' : 'dark';
+function toggleTheme(){
+  const r=document.documentElement;
+  r.dataset.theme=r.dataset.theme==='dark'?'light':'dark';
 }
-function toggleSidebar() {
-  document.getElementById('sidebar').classList.toggle('open');
-}
-function renderAll() {
-  renderStats();
-  renderDashAlerts();
-  renderTable();
-  renderAlertBanner();
-  buildRingsDisplay();
-}
+function closeModal(id){document.getElementById(id).classList.add('hidden')}
+document.querySelectorAll('.overlay').forEach(ov=>{
+  ov.addEventListener('click',function(e){if(e.target===this)closeModal(this.id)});
+});
 
-// ─── SEED DEMO DATA ──────────────────────────────────────────────────────
-function seedDemo() {
-  if (data.length > 0) return;
-  const demo = [
-    { id: uid(), lote:'MAT-001', sector:'Planta Baja — Pasillo Norte', tipo:'ABC — Polvo triclase', agente:'Polvo ABC monoamonio fosfato', capacidad:'6 kg', claseFuego:'A, B, C', marca:'Matafuegos Rojo', serie:'2024-001', opds:'OPDS-1234/07', empresa:'Extingas S.R.L.', fabricacion:'2024-01', instalacion:'2024-02-15', anilloAnio:'2027', anilloColor:'2027', ultimaRecarga:'2025-02-15', proximaRecarga:'2026-02-15', ultimoCPP:'2025-08-01', proximoCPP:'2026-02-01', ultimaPH:'2024-02-15', proximaPH:'2029-02-15', caducidad:'2044-01', estadoActual:'Operativo', tieneProvisorio:'no', fechaInspeccion:'2025-08-01', responsableSyH:'Ing. García Lucía', matriculaSyH:'20-12345678-9', proximaInspeccion:'2026-02-01', cPresion:'✅ OK', cPrecinto:'✅ OK', cManguera:'✅ OK', cBoquilla:'✅ OK', cSoporte:'✅ OK', cSenalizacion:'✅ OK', cEtiqueta:'✅ OK', cAcceso:'✅ OK', observaciones:'', fotoQR:null, fotoOblea:null, fotoOPDS:null },
-    { id: uid(), lote:'MAT-002', sector:'Planta Alta — Oficinas', tipo:'BC — CO₂ / Dióxido de carbono', agente:'CO₂ / Dióxido de carbono', capacidad:'5 kg', claseFuego:'B, C', marca:'Extingas', serie:'2022-087', opds:'OPDS-5678/07', empresa:'Extingas S.R.L.', fabricacion:'2022-06', instalacion:'2022-07-10', anilloAnio:'2026', anilloColor:'2026', ultimaRecarga:'2024-07-10', proximaRecarga:'2025-09-01', ultimoCPP:'2025-01-10', proximoCPP:'2025-10-01', ultimaPH:'2022-07-10', proximaPH:'2027-07-10', caducidad:'2042-06', estadoActual:'Operativo', tieneProvisorio:'no', fechaInspeccion:'2025-01-10', responsableSyH:'Ing. García Lucía', matriculaSyH:'20-12345678-9', proximaInspeccion:'2025-10-01', cPresion:'✅ OK', cPrecinto:'⚠️ Regular', cManguera:'✅ OK', cBoquilla:'✅ OK', cSoporte:'✅ OK', cSenalizacion:'✅ OK', cEtiqueta:'✅ OK', cAcceso:'✅ OK', observaciones:'Precinto con desgaste leve, reemplazar en próxima recarga.', fotoQR:null, fotoOblea:null, fotoOPDS:null },
-    { id: uid(), lote:'MAT-003', sector:'Depósito — Zona Carga', tipo:'ABC — Polvo triclase', agente:'Polvo ABC monoamonio fosfato', capacidad:'10 kg', claseFuego:'A, B, C', marca:'Kobalt', serie:'2020-334', opds:'OPDS-1234/07', empresa:'Extingas S.R.L.', fabricacion:'2020-03', instalacion:'2020-04-01', anilloAnio:'2025', anilloColor:'2025', ultimaRecarga:'2024-04-01', proximaRecarga:'2025-10-01', ultimoCPP:'2025-04-01', proximoCPP:'2025-10-01', ultimaPH:'2020-04-01', proximaPH:'2025-04-01', caducidad:'2040-03', estadoActual:'En mantenimiento', tieneProvisorio:'si', provisorioDesc:'MAT-PROV-01 — ABC 6kg en Zona Carga', nuevoFecha:'2025-11-15', fechaInspeccion:'2025-04-01', responsableSyH:'Ing. García Lucía', matriculaSyH:'20-12345678-9', proximaInspeccion:'2025-10-01', cPresion:'⚠️ Regular', cPrecinto:'✅ OK', cManguera:'⚠️ Regular', cBoquilla:'✅ OK', cSoporte:'✅ OK', cSenalizacion:'⚠️ Regular', cEtiqueta:'⚠️ Regular', cAcceso:'✅ OK', observaciones:'Enviado a recarga. Manguera con desgaste. Señalización deteriorada.', fotoQR:null, fotoOblea:null, fotoOPDS:null },
-    { id: uid(), lote:'MAT-004', sector:'Comedor', tipo:'ABC — Polvo triclase', agente:'Polvo ABC monoamonio fosfato', capacidad:'4 kg', claseFuego:'A, B, C', marca:'Matafuegos Rojo', serie:'2019-112', opds:'OPDS-1234/07', empresa:'Extingas S.R.L.', fabricacion:'2019-08', instalacion:'2019-09-01', anilloAnio:'2024', anilloColor:'2024', ultimaRecarga:'2024-09-01', proximaRecarga:'2025-09-01', ultimoCPP:'2025-03-01', proximoCPP:'2025-09-01', ultimaPH:'2024-09-01', proximaPH:'2029-09-01', caducidad:'2039-08', estadoActual:'Operativo', tieneProvisorio:'no', fechaInspeccion:'2025-03-01', responsableSyH:'Ing. García Lucía', matriculaSyH:'20-12345678-9', proximaInspeccion:'2025-09-01', cPresion:'✅ OK', cPrecinto:'✅ OK', cManguera:'✅ OK', cBoquilla:'✅ OK', cSoporte:'❌ Falla', cSenalizacion:'✅ OK', cEtiqueta:'✅ OK', cAcceso:'✅ OK', observaciones:'Soporte de pared roto. Matafuego apoyado. Reemplazar soporte antes de próximo CPP.', fotoQR:null, fotoOblea:null, fotoOPDS:null },
+// ─── DEMO SEED ────────────────────────────────────────────────────────────
+function seed(){
+  if(data.length>0)return;
+  data=[
+    {id:uid(),lote:'MAT-001',sector:'PB — Pasillo Norte',tipo:'ABC — Polvo triclase',agente:'Polvo ABC monoamonio fosfato',cap:'6 kg',claseFuego:'A, B, C',marca:'Matafuegos Rojo',serie:'2024-001',opds:'OPDS-1234/07',empresa:'Extingas S.R.L.',fabricacion:'2024-01',instalacion:'2024-02-15',anilloYr:'2027',anilloCol:'2027',ultimaRecarga:'2025-02-15',proximaRecarga:'2026-02-15',ultimoCPP:'2025-08-15',proximoCPP:'2026-02-15',ultimaPH:'2024-02-15',proximaPH:'2029-02-15',caducidad:'2044-01',estadoActual:'Operativo',tieneProvisorio:'no',provDesc:'',nuevoFecha:'',fechaInsp:'2025-08-15',responsable:'Ing. García Lucía',matricula:'20-12345678-9',proximaInsp:'2026-02-15',obs:'',cPres:'✅ Conforme',cPrec:'✅ Conforme',cMang:'✅ Conforme',cBoq:'✅ Conforme',cSop:'✅ Conforme',cSen:'✅ Conforme',cEtq:'✅ Conforme',cAcc:'✅ Conforme',foto_qr:null,foto_oblea:null,foto_opds:null},
+    {id:uid(),lote:'MAT-002',sector:'PA — Oficinas',tipo:'BC — CO₂',agente:'CO₂ / Dióxido de carbono',cap:'5 kg',claseFuego:'B, C',marca:'Extingas',serie:'2022-087',opds:'OPDS-5678/07',empresa:'Extingas S.R.L.',fabricacion:'2022-06',instalacion:'2022-07-10',anilloYr:'2026',anilloCol:'2026',ultimaRecarga:'2024-07-10',proximaRecarga:'2025-09-01',ultimoCPP:'2025-01-10',proximoCPP:'2025-10-01',ultimaPH:'2022-07-10',proximaPH:'2027-07-10',caducidad:'2042-06',estadoActual:'Operativo',tieneProvisorio:'no',provDesc:'',nuevoFecha:'',fechaInsp:'2025-01-10',responsable:'Ing. García Lucía',matricula:'20-12345678-9',proximaInsp:'2025-10-01',obs:'Precinto con desgaste leve.',cPres:'✅ Conforme',cPrec:'⚠️ Regular',cMang:'✅ Conforme',cBoq:'✅ Conforme',cSop:'✅ Conforme',cSen:'✅ Conforme',cEtq:'✅ Conforme',cAcc:'✅ Conforme',foto_qr:null,foto_oblea:null,foto_opds:null},
+    {id:uid(),lote:'MAT-003',sector:'Depósito — Zona Carga',tipo:'ABC — Polvo triclase',agente:'Polvo ABC monoamonio fosfato',cap:'10 kg',claseFuego:'A, B, C',marca:'Kobalt',serie:'2020-334',opds:'OPDS-1234/07',empresa:'Extingas S.R.L.',fabricacion:'2020-03',instalacion:'2020-04-01',anilloYr:'2025',anilloCol:'2025',ultimaRecarga:'2024-04-01',proximaRecarga:'2025-10-01',ultimoCPP:'2025-04-01',proximoCPP:'2025-10-01',ultimaPH:'2020-04-01',proximaPH:'2025-04-01',caducidad:'2040-03',estadoActual:'En mantenimiento',tieneProvisorio:'si',provDesc:'MAT-PROV-01 — ABC 6kg en Zona Carga',nuevoFecha:'2025-11-15',fechaInsp:'2025-04-01',responsable:'Ing. García Lucía',matricula:'20-12345678-9',proximaInsp:'2025-10-01',obs:'Enviado a recarga. Manguera con desgaste.',cPres:'⚠️ Regular',cPrec:'✅ Conforme',cMang:'⚠️ Regular',cBoq:'✅ Conforme',cSop:'✅ Conforme',cSen:'⚠️ Regular',cEtq:'⚠️ Regular',cAcc:'✅ Conforme',foto_qr:null,foto_oblea:null,foto_opds:null},
+    {id:uid(),lote:'MAT-004',sector:'Comedor',tipo:'ABC — Polvo triclase',agente:'Polvo ABC monoamonio fosfato',cap:'4 kg',claseFuego:'A, B, C',marca:'Matafuegos Rojo',serie:'2019-112',opds:'OPDS-1234/07',empresa:'Extingas S.R.L.',fabricacion:'2019-08',instalacion:'2019-09-01',anilloYr:'2024',anilloCol:'2024',ultimaRecarga:'2024-09-01',proximaRecarga:'2025-09-01',ultimoCPP:'2025-03-01',proximoCPP:'2025-09-01',ultimaPH:'2024-09-01',proximaPH:'2029-09-01',caducidad:'2039-08',estadoActual:'Operativo',tieneProvisorio:'no',provDesc:'',nuevoFecha:'',fechaInsp:'2025-03-01',responsable:'Ing. García Lucía',matricula:'20-12345678-9',proximaInsp:'2025-09-01',obs:'Soporte roto. Reemplazar.',cPres:'✅ Conforme',cPrec:'✅ Conforme',cMang:'✅ Conforme',cBoq:'✅ Conforme',cSop:'❌ No conforme',cSen:'✅ Conforme',cEtq:'✅ Conforme',cAcc:'✅ Conforme',foto_qr:null,foto_oblea:null,foto_opds:null},
   ];
-  data = demo;
-  saveData(data);
+  sv('mats',data);
 }
 
 // ─── INIT ─────────────────────────────────────────────────────────────────
-buildRingSelects();
-seedDemo();
-renderAll();
+function renderAll(){
+  renderStats();renderBanner();renderTbl();
+  renderSyhFilter();buildRingCards();
+}
+applyCompany();seed();renderAll();
 </script>
 </body>
 </html>
