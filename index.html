@@ -43,8 +43,8 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;background:radial-grad
 .sb{width:var(--sw);background:linear-gradient(180deg,#1C1C1C,#141414);min-height:100vh;position:fixed;top:0;left:0;z-index:100;display:flex;flex-direction:column;border-right:1px solid var(--border)}
 .sb-brand{padding:20px 18px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;border-bottom:1px solid var(--border)}
 .sb-brand .logo-box{width:44px;height:44px;border-radius:11px;background:var(--grad-red);display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 4px 16px var(--red-glow);overflow:hidden}
-.sb-brand .logo-box svg{width:30px;height:30px}
-.sb-brand .logo-box img{width:100%;height:100%;object-fit:cover}
+.sb-brand .logo-box svg{width:22px;height:29px}
+.sb-brand .logo-box img{width:100%;height:100%;object-fit:contain}
 .sb-brand .flama-word{font-size:21px}
 .sb-brand .sub{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.16em;margin-top:4px;font-weight:700}
 .sb-client{margin:12px 12px 4px;padding:10px 12px;background:var(--surface);border:1px solid var(--border);border-radius:9px}
@@ -589,6 +589,7 @@ img,svg{max-width:100%}
         <select id="festado" onchange="renderTbl()"><option value="">Todos los estados</option><option>Operativo</option><option>En mantenimiento</option><option>Vencido</option><option>De baja</option></select>
         <select id="fentrega" onchange="renderTbl()"><option value="">Toda entrega</option><option>Pendiente</option><option>En preparación</option><option>En tránsito</option><option>Entregado</option><option>Instalado</option></select>
         <select id="fanillo" onchange="renderTbl()"><option value="">Todos los anillos</option></select>
+        <button id="btn-mine" class="btn btn-outline btn-sm" onclick="toggleMine()" title="Mostrar solo tus equipos registrados">👁 Solo mis equipos</button>
       </div>
       <div class="tbl-wrap"><div class="tbl-scroll">
         <table><thead><tr>
@@ -955,7 +956,7 @@ img,svg{max-width:100%}
       <input id="ob-cuit" placeholder="30-12345678-9">
     </div>
     <button class="ob-btn" id="ob-btn" onclick="registerEmpresa()">Registrar empresa y comenzar →</button>
-    <div class="ob-demo">🧯 <strong>8 matafuegos de prueba</strong> aparecen para todas las empresas — son de solo lectura y te ayudan a explorar el panel.</div>
+    <div class="ob-demo">🧯 <strong>~100 matafuegos de prueba</strong> aparecen para todas las empresas — son de solo lectura y te ayudan a explorar el panel antes de cargar tus propios equipos.</div>
   </div>
 </div>
 
@@ -1061,54 +1062,79 @@ var db=firebase.firestore();
 /* ===== STORAGE (sesión por empresa → Firebase) ===== */
 var FB_EMP_KEY='flama_empresa_id';
 var data=[],company={nombre:'',cuit:'',logo:null},contract,fijos=[],editFj=null;
+var showOnlyMine=false;
 
 function defaultContract(){return {titulo:'Acuerdo Marco de Suministro',sub:'Provisión y mantenimiento de matafuegos',repFlama:'',repCli:'',cl:[]};}
 
-/* Genera matafuegos de prueba (visibles para todas las empresas, solo lectura) */
+/* Genera matafuegos de prueba (~100 unidades, visibles para todas las empresas, solo lectura) */
 function genDemoMats(){
   var now=new Date(),out=[];
-  var types=[
-    {base:'ABC',size:'5 kg',cl:'A, B, C',col:'red',sec:'Planta Baja — Pasillo Norte',off:45},
-    {base:'ABC',size:'10 kg',cl:'A, B, C',col:'red',sec:'Depósito — Zona Carga',off:8},
-    {base:'CO₂',size:'5 kg',cl:'B, C',col:'red',horn:true,sec:'Sala de Servidores',off:22},
-    {base:'AFFF',size:'10 l',cl:'A, B',col:'silver',sec:'Playa de Carga',off:95},
-    {base:'ABC',size:'2,5 kg',cl:'A, B, C',col:'red',sec:'Comedor',off:130},
-    {base:'BC',size:'5 kg',cl:'B, C',col:'red',sec:'Cocina Industrial',off:55},
-    {base:'Sales K',size:'6 l',cl:'K',col:'steel',sec:'Cocina Industrial',off:180},
-    {base:'HCFC/HFC',size:'5 kg',cl:'A,B,C',col:'red',hoseGreen:true,sec:'Laboratorio',off:210}
+  var sectors=[
+    {name:'Planta Baja — Pasillo Norte',mercat:'Edificios'},
+    {name:'Depósito — Zona Carga',mercat:'Industrias'},
+    {name:'Sala de Servidores',mercat:'Edificios'},
+    {name:'Playa de Carga',mercat:'Industrias'},
+    {name:'Comedor',mercat:'Hoteles'},
+    {name:'Cocina Industrial',mercat:'Hoteles'},
+    {name:'Laboratorio Químico',mercat:'Salud'},
+    {name:'Oficinas Piso 2',mercat:'Edificios'},
+    {name:'Taller Mecánico',mercat:'Automotor'},
+    {name:'Estacionamiento Subsuelo',mercat:'Automotor'},
+    {name:'Sala de Máquinas',mercat:'Industrias'},
+    {name:'Recepción — Lobby',mercat:'Hoteles'},
+    {name:'Archivo Central',mercat:'Educación'},
+    {name:'Aula Magna',mercat:'Educación'},
+    {name:'Pasillo Planta Alta',mercat:'Edificios'},
+    {name:'Depósito Materia Prima',mercat:'Industrias'}
   ];
-  types.forEach(function(t,i){
-    var prox=new Date(now.getFullYear(),now.getMonth(),now.getDate()+t.off);
-    var fabYr=2021+(i%4);
-    var c=null;for(var k=0;k<CATALOG.length;k++)if(CATALOG[k].base===t.base&&CATALOG[k].size===t.size){c=CATALOG[k];break;}
-    if(!c)return;
-    out.push({
-      id:'demo_'+i,_demo:true,
-      lote:'DEMO-'+String(i+1).padStart(3,'0'),tipoBase:t.base,tamano:t.size,clase:t.cl,
-      origen:c.origen,color:t.col,ruedas:!!c.ruedas,horn:!!t.horn,noHose:!!c.noHose,hoseGreen:!!t.hoseGreen,
-      agente:t.base.indexOf('CO')>=0?'CO₂':(t.base==='ABC'||t.base==='BC')?'Polvo químico':t.base==='AFFF'?'Espuma AFFF':t.base,
-      sector:t.sec,mercado:'Demo',marca:'FLAMA',serie:fabYr+'-D'+String(100+i),
-      cuit:'30504835126',opds:'OPDS-DEMO-'+(1000+i*7)+'/07',
-      entregaEstado:'Instalado',nroPedido:'',fentrega:'',
-      fabricacion:fabYr+'-01',instalacion:fabYr+'-06-01',anilloYr:String(2025+(i%5)),
-      ultimaRecarga:new Date(prox.getFullYear()-1,prox.getMonth(),prox.getDate()).toISOString().split('T')[0],
-      proximaRecarga:prox.toISOString().split('T')[0],
-      ultimoCPP:new Date(now.getFullYear(),now.getMonth()-3,10).toISOString().split('T')[0],
-      proximoCPP:new Date(now.getFullYear(),now.getMonth(),now.getDate()+Math.max(4,t.off-20)).toISOString().split('T')[0],
-      ultimaPH:new Date(now.getFullYear()-2,now.getMonth(),15).toISOString().split('T')[0],
-      proximaPH:new Date(now.getFullYear()+3,now.getMonth(),15).toISOString().split('T')[0],
-      caducidad:(fabYr+20)+'-01',
-      estadoActual:t.off<=30?'En mantenimiento':'Operativo',
-      tieneProvisorio:'no',provDesc:'',nuevoFecha:'',
-      fechaAlta:new Date(now.getFullYear(),now.getMonth()-1,5).toISOString().split('T')[0],
-      fechaInsp:new Date(now.getFullYear(),now.getMonth()-2,10).toISOString().split('T')[0],
-      responsable:'Ing. García Lucía',matricula:'20-12345678-9',
-      proximaInsp:new Date(now.getFullYear(),now.getMonth()+4,10).toISOString().split('T')[0],
-      obs:t.off<=30?'Próximo a vencer — coordinar recarga.':'',
-      cPres:'✅ Conforme',cPrec:'✅ Conforme',cMang:'✅ Conforme',cBoq:'✅ Conforme',
-      cSop:'✅ Conforme',cSen:'✅ Conforme',cEtq:'✅ Conforme',cAcc:'✅ Conforme',
-      foto_unit:null,foto_qr:null,foto_oblea:null,foto_remito:null
-    });
+  var templates=[
+    {base:'ABC',size:'5 kg'},{base:'ABC',size:'10 kg'},{base:'CO₂',size:'5 kg'},
+    {base:'AFFF',size:'10 l'},{base:'ABC',size:'2,5 kg'},{base:'BC',size:'5 kg'},
+    {base:'Sales K',size:'6 l'},{base:'HCFC/HFC',size:'5 kg'},{base:'CO₂',size:'2 kg'},
+    {base:'ABC',size:'1 kg'},{base:'Agua',size:'10 l'},{base:'AFFF',size:'50 l'},
+    {base:'ABC',size:'50 kg'},{base:'Clase D',size:'9 l'}
+  ];
+  var offsets=[-15,-5,8,22,30,45,55,75,95,110,130,160,180,210,240,300];
+  var idx=0;
+  sectors.forEach(function(sec,si){
+    var count=(si<8)?6:7;
+    for(var ti=0;ti<count;ti++){
+      var t=templates[(si*3+ti*2)%templates.length];
+      var c=null;for(var k=0;k<CATALOG.length;k++)if(CATALOG[k].base===t.base&&CATALOG[k].size===t.size){c=CATALOG[k];break;}
+      if(!c){idx++;continue;}
+      var off=offsets[idx%offsets.length];
+      var prox=new Date(now.getFullYear(),now.getMonth(),now.getDate()+off);
+      var fabYr=2019+(idx%6);
+      var cppOff=Math.max(4,off-20);
+      out.push({
+        id:'demo_'+idx,_demo:true,
+        lote:'DEMO-'+String(idx+1).padStart(3,'0'),tipoBase:t.base,tamano:t.size,clase:c.clase,
+        origen:c.origen,color:c.color||'red',ruedas:!!c.ruedas,horn:!!c.horn,noHose:!!c.noHose,hoseGreen:!!c.hoseGreen,
+        agente:t.base==='CO₂'?'CO₂':(t.base==='ABC'||t.base==='BC')?'Polvo químico':t.base==='AFFF'?'Espuma AFFF':t.base==='Agua'?'Agua a presión':t.base,
+        sector:sec.name,mercado:sec.mercat,marca:'FLAMA',serie:fabYr+'-D'+String(100+idx),
+        cuit:'30504835126',opds:'OPDS-DEMO-'+(1000+idx*7)+'/07',
+        entregaEstado:'Instalado',nroPedido:'',fentrega:'',
+        fabricacion:fabYr+'-01',instalacion:fabYr+'-06-01',anilloYr:String(2024+(idx%6)),
+        ultimaRecarga:new Date(prox.getFullYear()-1,prox.getMonth(),prox.getDate()).toISOString().split('T')[0],
+        proximaRecarga:prox.toISOString().split('T')[0],
+        ultimoCPP:new Date(now.getFullYear(),now.getMonth()-3,10).toISOString().split('T')[0],
+        proximoCPP:new Date(now.getFullYear(),now.getMonth(),now.getDate()+cppOff).toISOString().split('T')[0],
+        ultimaPH:new Date(now.getFullYear()-2,now.getMonth(),15).toISOString().split('T')[0],
+        proximaPH:new Date(now.getFullYear()+3,now.getMonth(),15).toISOString().split('T')[0],
+        caducidad:(fabYr+20)+'-01',
+        estadoActual:off<0?'Vencido':off<=30?'En mantenimiento':'Operativo',
+        tieneProvisorio:'no',provDesc:'',nuevoFecha:'',
+        fechaAlta:new Date(now.getFullYear(),now.getMonth()-1,5).toISOString().split('T')[0],
+        fechaInsp:new Date(now.getFullYear(),now.getMonth()-2,10).toISOString().split('T')[0],
+        responsable:'Ing. García Lucía',matricula:'20-12345678-9',
+        proximaInsp:new Date(now.getFullYear(),now.getMonth()+4,10).toISOString().split('T')[0],
+        obs:off<0?'VENCIDO — requiere recarga urgente.':off<=30?'Próximo a vencer — coordinar recarga.':'',
+        cPres:'✅ Conforme',cPrec:'✅ Conforme',cMang:'✅ Conforme',cBoq:'✅ Conforme',
+        cSop:'✅ Conforme',cSen:'✅ Conforme',cEtq:'✅ Conforme',cAcc:'✅ Conforme',
+        foto_unit:null,foto_qr:null,foto_oblea:null,foto_remito:null
+      });
+      idx++;
+    }
   });
   return out;
 }
@@ -1490,9 +1516,10 @@ function hideTip(){document.getElementById('tooltip').classList.remove('show');}
 /* ===== TABLE ===== */
 function sortT(k){if(srtKey===k)srtAsc=!srtAsc;else{srtKey=k;srtAsc=true;}renderTbl();}
 function ringBadge(m){if(!m.anilloYr)return '<span style="color:var(--text3)">—</span>';var r=ring(m.anilloYr);if(!r)return m.anilloYr;return '<span class="ring-badge" style="background:'+r.hex+';color:'+r.txt+';border:1px solid '+(r.brd||'transparent')+'"><span class="ring-dot" style="background:'+(r.txt==='#fff'?'rgba(255,255,255,.4)':'rgba(0,0,0,.2)')+'"></span>'+r.name+' '+r.yr+'</span>';}
+function toggleMine(){showOnlyMine=!showOnlyMine;var btn=document.getElementById('btn-mine');if(btn){btn.textContent=showOnlyMine?'🧯 Ver todos':'👁 Solo mis equipos';btn.style.borderColor=showOnlyMine?'var(--red)':'';}renderTbl();}
 function renderTbl(){
   var q=document.getElementById('srch').value.toLowerCase(),ft=document.getElementById('ftipo').value,fe=document.getElementById('festado').value,fen=document.getElementById('fentrega').value,fa=document.getElementById('fanillo').value;
-  var rows=data.filter(function(m){var tl=m.tipoBase+' '+m.tamano;if(q&&(codeOf(m)+' '+m.sector+' '+tl+' '+m.cuit).toLowerCase().indexOf(q)<0)return false;if(ft&&tl!==ft)return false;if(fe&&m.estadoActual!==fe)return false;if(fen&&m.entregaEstado!==fen)return false;if(fa&&String(m.anilloYr)!==fa)return false;return true;});
+  var rows=data.filter(function(m){var tl=m.tipoBase+' '+m.tamano;if(showOnlyMine&&m._demo)return false;if(q&&(codeOf(m)+' '+m.sector+' '+tl+' '+m.cuit).toLowerCase().indexOf(q)<0)return false;if(ft&&tl!==ft)return false;if(fe&&m.estadoActual!==fe)return false;if(fen&&m.entregaEstado!==fen)return false;if(fa&&String(m.anilloYr)!==fa)return false;return true;});
   rows.sort(function(a,b){var A=srtKey==='code'?codeOf(a):(a[srtKey]||'zzz'),B=srtKey==='code'?codeOf(b):(b[srtKey]||'zzz');return srtAsc?(''+A).localeCompare(B):(''+B).localeCompare(A);});
   var tb=document.getElementById('tbl-body');
   if(!rows.length){tb.innerHTML='<tr><td colspan="10" class="table-empty">Sin resultados. Hacé clic en <strong>+ Nuevo Matafuego</strong>.</td></tr>';return;}
