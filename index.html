@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#08080A">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<title>Flama Control</title>
+<title>Panel Vencimientos</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&family=Barlow+Condensed:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap">
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
@@ -490,7 +490,7 @@ img,svg{max-width:100%}
 #ov-onboarding.hidden{display:none}
 .ob-card{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:40px 36px;max-width:440px;width:100%;text-align:center;box-shadow:var(--shmd)}
 .ob-logo{width:64px;height:64px;border-radius:16px;background:var(--grad-red);display:flex;align-items:center;justify-content:center;margin:0 auto 20px;box-shadow:0 4px 24px var(--red-glow)}
-.ob-logo svg{width:42px;height:42px}
+.ob-logo svg{width:34px;height:39px}
 .ob-title{font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:800;text-transform:uppercase;letter-spacing:.02em;margin-bottom:6px}
 .ob-title span{color:var(--red)}
 .ob-sub{font-size:13px;color:var(--text2);margin-bottom:28px;line-height:1.5}
@@ -513,12 +513,15 @@ img,svg{max-width:100%}
 <body>
 <!-- FLAME LOGO SYMBOL -->
 <svg width="0" height="0" style="position:absolute"><defs>
-  <linearGradient id="fg1" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FF7A2E"/><stop offset=".5" stop-color="#ED1C24"/><stop offset="1" stop-color="#8A0F14"/></linearGradient>
-  <linearGradient id="fg2" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FF9A4A"/><stop offset="1" stop-color="#D1121A"/></linearGradient>
-  <symbol id="flameIcon" viewBox="0 0 100 130">
-    <path fill="url(#fg1)" d="M50 4C48 26 30 34 26 56c-4 20 4 40 24 46 22-6 30-24 26-44-2-10-10-16-12-26 8 6 14 16 13 28 6-10 5-24-2-34C67 16 54 16 50 4z"/>
-    <path fill="url(#fg2)" d="M52 40c-2 16-14 20-16 34-2 12 4 24 16 28 12-4 16-16 13-28-2-8-9-12-13-20 4 2 8 8 8 14 4-8 2-20-4-24-1-1-3-3-4-4z"/>
-    <path fill="#fff" opacity=".28" d="M46 30c-3 10-10 16-12 28-1 8 1 14 6 18-3-8-1-14 3-20 2-3 4-6 3-10-1-6 0-11 0-16z"/>
+  <linearGradient id="fg1" x1="0.3" y1="0" x2="0.7" y2="1">
+    <stop offset="0" stop-color="#FF7A2E"/><stop offset=".45" stop-color="#E8291E"/><stop offset="1" stop-color="#8A0F14"/>
+  </linearGradient>
+  <!-- FLAMA brand flame — matches logo official -->
+  <symbol id="flameIcon" viewBox="0 0 100 115">
+    <path fill="url(#fg1)" d="M50 3C47 18 37 27 32 44c-7 21 1 52 18 62 17-10 25-41 18-62C63 27 53 18 50 3z"/>
+    <path fill="#fff" opacity=".52" d="M56 22c-2 16-2 34-2 48 0 9 1 17 3 22 2-7 3-16 3-25C60 52 60 36 56 22z"/>
+    <path fill="#fff" opacity=".35" d="M49 14c-3 16-7 34-8 50-1 9 0 17 2 22 2-7 3-16 4-26C48 46 48 30 49 14z"/>
+    <path fill="#fff" opacity=".18" d="M42 32c-3 14-6 30-6 44 0 7 0 14 1 19 2-6 3-14 4-23C42 60 43 46 42 32z"/>
   </symbol>
 </defs></svg>
 
@@ -526,7 +529,7 @@ img,svg{max-width:100%}
 <nav class="sb" id="sidebar">
   <div class="sb-brand">
     <div class="logo-box" id="sb-logo"><svg><use href="#flameIcon"/></svg></div>
-    <div><div class="flama-word">FLAMA</div><div class="sub">Control de Matafuegos</div></div>
+    <div><div class="flama-word">FLAMA</div><div class="sub">Panel Vencimientos</div></div>
   </div>
   <div class="sb-client">
     <div class="lbl">Empresa activa</div>
@@ -936,16 +939,19 @@ img,svg{max-width:100%}
 <div id="ov-onboarding" class="hidden">
   <div class="ob-card">
     <div class="ob-logo">
-      <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path d="M16 3C16 3 13 8 13 12C13 15 16 17 16 17C16 17 19 15 19 12C19 8 16 3 16 3Z" fill="#F15A24"/>
-        <path d="M16 3C16 3 12 9 12 13C12 16.5 14.5 18.5 16 20C17.5 18.5 20 16.5 20 13C20 9 16 3 16 3Z" fill="#E8291E"/>
-        <ellipse cx="16" cy="22" rx="7" ry="6" fill="#7A1512"/>
-        <ellipse cx="16" cy="21" rx="6" ry="5" fill="#E8291E"/>
-        <ellipse cx="16" cy="20" rx="4" ry="3.5" fill="#F15A24"/>
-        <path d="M8 29h16" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+      <svg viewBox="0 0 100 115" xmlns="http://www.w3.org/2000/svg">
+        <defs>
+          <linearGradient id="ob-fg" x1="0.3" y1="0" x2="0.7" y2="1">
+            <stop offset="0" stop-color="#FF7A2E"/><stop offset=".45" stop-color="#E8291E"/><stop offset="1" stop-color="#8A0F14"/>
+          </linearGradient>
+        </defs>
+        <path fill="url(#ob-fg)" d="M50 3C47 18 37 27 32 44c-7 21 1 52 18 62 17-10 25-41 18-62C63 27 53 18 50 3z"/>
+        <path fill="#fff" opacity=".52" d="M56 22c-2 16-2 34-2 48 0 9 1 17 3 22 2-7 3-16 3-25C60 52 60 36 56 22z"/>
+        <path fill="#fff" opacity=".35" d="M49 14c-3 16-7 34-8 50-1 9 0 17 2 22 2-7 3-16 4-26C48 46 48 30 49 14z"/>
+        <path fill="#fff" opacity=".18" d="M42 32c-3 14-6 30-6 44 0 7 0 14 1 19 2-6 3-14 4-23C42 60 43 46 42 32z"/>
       </svg>
     </div>
-    <div class="ob-title">FLAMA <span>Control</span></div>
+    <div class="ob-title">PANEL <span>VENCIMIENTOS</span></div>
     <div class="ob-sub">Registrá tu empresa para comenzar a gestionar tus matafuegos.<br>Tus datos se guardan de forma segura en la nube.</div>
     <div class="ob-field">
       <label>Razón social *</label>
@@ -1035,7 +1041,7 @@ var MATERIALS={'Madera / muebles':4400,'Papel / cartón':4000,'Textiles / algod�
 var PC_MADERA=4400;
 
 /* ===== PRINT HELPER ===== */
-var FLAME_INLINE='<svg class="doc-logo" viewBox="0 0 100 130" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="pfg" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#FF7A2E"/><stop offset=".5" stop-color="#ED1C24"/><stop offset="1" stop-color="#8A0F14"/></linearGradient></defs><path fill="url(#pfg)" d="M50 4C48 26 30 34 26 56c-4 20 4 40 24 46 22-6 30-24 26-44-2-10-10-16-12-26 8 6 14 16 13 28 6-10 5-24-2-34C67 16 54 16 50 4z"/></svg>';
+var FLAME_INLINE='<svg class="doc-logo" viewBox="0 0 100 135" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="pfg" x1=".3" y1="0" x2=".7" y2="1"><stop offset="0" stop-color="#FF7A2E"/><stop offset=".45" stop-color="#E8291E"/><stop offset="1" stop-color="#8A0F14"/></linearGradient></defs><path fill="url(#pfg)" d="M50 3C47 18 37 27 32 44c-7 21 1 52 18 62 17-10 25-41 18-62C63 27 53 18 50 3z"/><path fill="#fff" opacity=".52" d="M56 22c-2 16-2 34-2 48 0 9 1 17 3 22 2-7 3-16 3-25C60 52 60 36 56 22z"/><path fill="#fff" opacity=".35" d="M49 14c-3 16-7 34-8 50-1 9 0 17 2 22 2-7 3-16 4-26C48 46 48 30 49 14z"/><path fill="#fff" opacity=".18" d="M42 32c-3 14-6 30-6 44 0 7 0 14 1 19 2-6 3-14 4-23C42 60 43 46 42 32z"/><text x="50" y="130" font-family="Arial Black,sans-serif" font-weight="900" font-size="22" text-anchor="middle" fill="#1a1a1a" letter-spacing="2">FLAMA</text></svg>';
 function docLogo(){return company.logo?'<img class="doc-logo" src="'+company.logo+'">':FLAME_INLINE;}
 function printDoc(html,landscape){
   var st=document.getElementById('print-orient');if(!st){st=document.createElement('style');st.id='print-orient';document.head.appendChild(st);}
@@ -1918,7 +1924,7 @@ function fichaFrom(obj,m){
   var extra='';
   if(m){extra=row('Control Periódico Preventivo',fmt(m.proximoCPP)+' · '+dayChip(m.proximoCPP))+row('Prueba Hidráulica',fmt(m.proximaPH)+' · '+dayChip(m.proximaPH))+row('Caducidad definitiva',fmt(m.caducidad))+row('Entrega',entChip(m.entregaEstado));}
   document.getElementById('ficha').innerHTML=
-   '<div class="ficha-top">'+FLAME_INLINE.replace('doc-logo','fl')+'<div><h1>FLAMA · Ficha de Matafuego</h1><div class="cl">Escaneá · IRAM 3517-2 · Res. 349/07 OPDS</div></div></div>'
+   '<div class="ficha-top">'+FLAME_INLINE.replace('doc-logo','fl')+'<div><h1>FLAMA · Panel Vencimientos</h1><div class="cl">Escaneá · IRAM 3517-2 · Res. 349/07 OPDS</div></div></div>'
    +'<div class="ficha-wrap"><div class="ficha-photo"><div class="ficha-badges">'+badges+'</div>'+photo+'</div>'
    +'<div class="ficha-code">'+(obj.code||'—')+'</div><div class="ficha-sub">'+(obj.sector||'')+'</div>'
    +'<div class="ficha-rows">'+row('Estado','<b>'+(obj.estado||'—')+'</b>')+row('Próxima recarga anual',fmt(obj.recarga))+row('Anillo',r?r.name+' '+r.yr:'—')+row('N° OPDS/ODS',obj.opds)+extra+'</div>'
