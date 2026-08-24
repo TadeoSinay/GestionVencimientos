@@ -501,6 +501,8 @@ img,svg{max-width:100%}
 .ob-btn{width:100%;padding:13px;background:var(--grad-red);color:#fff;border:none;border-radius:9px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:6px;transition:opacity .13s}
 .ob-btn:hover{opacity:.88}.ob-btn:disabled{opacity:.5;cursor:default}
 .ob-demo{font-size:11px;color:var(--text3);margin-top:18px;line-height:1.6;background:var(--surface2);border-radius:8px;padding:10px 14px;border:1px solid var(--border)}
+.ob-demo-link{width:100%;background:transparent;border:1px solid var(--border2);color:var(--text3);border-radius:9px;padding:11px;font-size:13px;font-weight:600;cursor:pointer;font-family:inherit;margin-top:10px;transition:all .13s}
+.ob-demo-link:hover{color:var(--text);border-color:var(--text3)}
 /* ===== LOADING OVERLAY ===== */
 #fb-loading{position:fixed;inset:0;z-index:9998;background:rgba(10,10,10,.88);display:none;align-items:center;justify-content:center;flex-direction:column;gap:14px}
 .fb-spin{width:44px;height:44px;border:3px solid var(--border2);border-top-color:var(--red);border-radius:50%;animation:spin .7s linear infinite}
@@ -973,7 +975,7 @@ img,svg{max-width:100%}
       <input id="ob-cuit" placeholder="30-12345678-9">
     </div>
     <button class="ob-btn" id="ob-btn" onclick="registerEmpresa()">Registrar empresa y comenzar →</button>
-    <div class="ob-demo">🧯 <strong>~100 matafuegos de prueba</strong> aparecen para todas las empresas — son de solo lectura y te ayudan a explorar el panel antes de cargar tus propios equipos.</div>
+    <button class="ob-demo-link" onclick="enterDemoMode()">👁 Ver modo prueba sin registrarse</button>
   </div>
 </div>
 
@@ -1160,6 +1162,14 @@ function showLoading(){var el=document.getElementById('fb-loading');if(el)el.sty
 function hideLoading(){var el=document.getElementById('fb-loading');if(el)el.style.display='none';}
 function showOnboarding(){document.getElementById('ov-onboarding').classList.remove('hidden');}
 function hideOnboarding(){document.getElementById('ov-onboarding').classList.add('hidden');}
+function enterDemoMode(){
+  company={nombre:'Modo Prueba',cuit:'',logo:null,dir:'',tel:'',email:'',loc:'',hab:'',syh_nombre:'',syh_mat:'',syh_tel:'',syh_email:''};
+  contract=defaultContract();fijos=[];
+  data=genDemoMats();
+  hideOnboarding();
+  hideLoading();
+  initApp();
+}
 
 function persist(){
   var id=localStorage.getItem(FB_EMP_KEY);if(!id)return;
@@ -1181,7 +1191,7 @@ function loadEmpresa(callback){
     company=d.company||{nombre:'Mi Empresa',cuit:'',logo:null};
     contract=d.contract||defaultContract();
     fijos=d.fijos||[];
-    data=genDemoMats().concat(d.mats||[]);
+    data=d.mats||[];
     callback();
   }).catch(function(e){
     hideLoading();
@@ -1208,7 +1218,7 @@ function registerEmpresa(){
   db.collection('empresas').doc(id).set(emp).then(function(){
     localStorage.setItem(FB_EMP_KEY,id);
     company=emp.company;contract=emp.contract;fijos=[];
-    data=genDemoMats();
+    data=[];
     hideOnboarding();
     initApp();
   }).catch(function(e){
