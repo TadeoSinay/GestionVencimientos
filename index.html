@@ -6,7 +6,7 @@
 <meta name="theme-color" content="#08080A">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
-<title>Panel Vencimientos</title>
+<title>Panel de Gestión Vencimientos</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&family=Barlow+Condensed:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap">
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
@@ -489,9 +489,9 @@ img,svg{max-width:100%}
 #ov-onboarding{position:fixed;inset:0;z-index:9999;background:rgba(10,10,10,.97);display:flex;align-items:center;justify-content:center;padding:20px}
 #ov-onboarding.hidden{display:none}
 .ob-card{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:40px 36px;max-width:440px;width:100%;text-align:center;box-shadow:var(--shmd)}
-.ob-logo{width:64px;height:64px;border-radius:16px;background:var(--grad-red);display:flex;align-items:center;justify-content:center;margin:0 auto 20px;box-shadow:0 4px 24px var(--red-glow)}
-.ob-logo svg{width:34px;height:39px}
-.ob-title{font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:800;text-transform:uppercase;letter-spacing:.02em;margin-bottom:6px}
+.ob-logo{width:90px;height:104px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px}
+.ob-logo svg,.ob-logo img{width:90px;height:104px;object-fit:contain}
+.ob-title{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800;text-transform:uppercase;letter-spacing:.02em;margin-bottom:6px}
 .ob-title span{color:var(--red)}
 .ob-sub{font-size:13px;color:var(--text2);margin-bottom:28px;line-height:1.5}
 .ob-field{margin-bottom:14px;text-align:left}
@@ -529,7 +529,7 @@ img,svg{max-width:100%}
 <nav class="sb" id="sidebar">
   <div class="sb-brand">
     <div class="logo-box" id="sb-logo"><svg><use href="#flameIcon"/></svg></div>
-    <div><div class="flama-word">FLAMA</div><div class="sub">Panel Vencimientos</div></div>
+    <div><div class="flama-word">FLAMA</div><div class="sub">Panel de Gestión Venc.</div></div>
   </div>
   <div class="sb-client">
     <div class="lbl">Empresa activa</div>
@@ -951,7 +951,7 @@ img,svg{max-width:100%}
         <path fill="#fff" opacity=".18" d="M42 32c-3 14-6 30-6 44 0 7 0 14 1 19 2-6 3-14 4-23C42 60 43 46 42 32z"/>
       </svg>
     </div>
-    <div class="ob-title">PANEL <span>VENCIMIENTOS</span></div>
+    <div class="ob-title">PANEL DE GESTIÓN <span>VENCIMIENTOS</span></div>
     <div class="ob-sub">Registrá tu empresa para comenzar a gestionar tus matafuegos.<br>Tus datos se guardan de forma segura en la nube.</div>
     <div class="ob-field">
       <label>Razón social *</label>
