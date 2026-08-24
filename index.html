@@ -489,8 +489,8 @@ img,svg{max-width:100%}
 #ov-onboarding{position:fixed;inset:0;z-index:9999;background:rgba(10,10,10,.97);display:flex;align-items:center;justify-content:center;padding:20px}
 #ov-onboarding.hidden{display:none}
 .ob-card{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:40px 36px;max-width:440px;width:100%;text-align:center;box-shadow:var(--shmd)}
-.ob-logo{width:90px;height:104px;display:flex;align-items:center;justify-content:center;margin:0 auto 16px}
-.ob-logo svg,.ob-logo img{width:90px;height:104px;object-fit:contain}
+.ob-logo{width:130px;height:162px;display:flex;align-items:center;justify-content:center;margin:0 auto 12px}
+.ob-logo svg,.ob-logo img{width:130px;height:162px;object-fit:contain}
 .ob-title{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800;text-transform:uppercase;letter-spacing:.02em;margin-bottom:6px}
 .ob-title span{color:var(--red)}
 .ob-sub{font-size:13px;color:var(--text2);margin-bottom:28px;line-height:1.5}
@@ -511,17 +511,18 @@ img,svg{max-width:100%}
 </style>
 </head>
 <body>
-<!-- FLAME LOGO SYMBOL -->
+<!-- FLAME LOGO SYMBOL — recreated from FLAMA brand logo -->
 <svg width="0" height="0" style="position:absolute"><defs>
-  <linearGradient id="fg1" x1="0.3" y1="0" x2="0.7" y2="1">
-    <stop offset="0" stop-color="#FF7A2E"/><stop offset=".45" stop-color="#E8291E"/><stop offset="1" stop-color="#8A0F14"/>
+  <linearGradient id="fg1" x1="0.45" y1="0" x2="0.55" y2="1">
+    <stop offset="0" stop-color="#FF6218"/><stop offset=".35" stop-color="#E01010"/><stop offset=".75" stop-color="#A80808"/><stop offset="1" stop-color="#7A0808"/>
   </linearGradient>
-  <!-- FLAMA brand flame — matches logo official -->
-  <symbol id="flameIcon" viewBox="0 0 100 115">
-    <path fill="url(#fg1)" d="M50 3C47 18 37 27 32 44c-7 21 1 52 18 62 17-10 25-41 18-62C63 27 53 18 50 3z"/>
-    <path fill="#fff" opacity=".52" d="M56 22c-2 16-2 34-2 48 0 9 1 17 3 22 2-7 3-16 3-25C60 52 60 36 56 22z"/>
-    <path fill="#fff" opacity=".35" d="M49 14c-3 16-7 34-8 50-1 9 0 17 2 22 2-7 3-16 4-26C48 46 48 30 49 14z"/>
-    <path fill="#fff" opacity=".18" d="M42 32c-3 14-6 30-6 44 0 7 0 14 1 19 2-6 3-14 4-23C42 60 43 46 42 32z"/>
+  <symbol id="flameIcon" viewBox="0 0 100 108">
+    <!-- Main flame body: wide base, narrow tip, symmetric -->
+    <path fill="url(#fg1)" d="M50 4 C48 16 40 26 33 42 C24 62 24 88 50 100 C76 88 76 62 67 42 C60 26 52 16 50 4Z"/>
+    <!-- White band 1 (right — wider, the main visible swoosh) -->
+    <path fill="#fff" d="M59 18 C65 34 67 58 63 78 C61 88 58 95 56 100 C53 95 51 87 50 77 C47 57 46 33 51 17 C53 15 56 15 59 18Z"/>
+    <!-- White band 2 (left — slightly narrower) -->
+    <path fill="#fff" d="M47 14 C53 30 56 54 52 74 C50 84 47 92 45 97 C42 91 40 83 39 73 C36 53 35 29 40 13 C42 11 45 11 47 14Z"/>
   </symbol>
 </defs></svg>
 
@@ -939,16 +940,26 @@ img,svg{max-width:100%}
 <div id="ov-onboarding" class="hidden">
   <div class="ob-card">
     <div class="ob-logo">
-      <svg viewBox="0 0 100 115" xmlns="http://www.w3.org/2000/svg">
+      <svg viewBox="0 0 200 250" xmlns="http://www.w3.org/2000/svg">
         <defs>
-          <linearGradient id="ob-fg" x1="0.3" y1="0" x2="0.7" y2="1">
-            <stop offset="0" stop-color="#FF7A2E"/><stop offset=".45" stop-color="#E8291E"/><stop offset="1" stop-color="#8A0F14"/>
+          <linearGradient id="ob-fg" x1="0.45" y1="0" x2="0.55" y2="1">
+            <stop offset="0" stop-color="#FF6218"/>
+            <stop offset=".35" stop-color="#E01010"/>
+            <stop offset=".75" stop-color="#A80808"/>
+            <stop offset="1" stop-color="#7A0808"/>
           </linearGradient>
         </defs>
-        <path fill="url(#ob-fg)" d="M50 3C47 18 37 27 32 44c-7 21 1 52 18 62 17-10 25-41 18-62C63 27 53 18 50 3z"/>
-        <path fill="#fff" opacity=".52" d="M56 22c-2 16-2 34-2 48 0 9 1 17 3 22 2-7 3-16 3-25C60 52 60 36 56 22z"/>
-        <path fill="#fff" opacity=".35" d="M49 14c-3 16-7 34-8 50-1 9 0 17 2 22 2-7 3-16 4-26C48 46 48 30 49 14z"/>
-        <path fill="#fff" opacity=".18" d="M42 32c-3 14-6 30-6 44 0 7 0 14 1 19 2-6 3-14 4-23C42 60 43 46 42 32z"/>
+        <!-- Main flame body -->
+        <path fill="url(#ob-fg)" d="M100 8 C96 32 80 52 66 84 C48 124 48 176 100 200 C152 176 152 124 134 84 C120 52 104 32 100 8Z"/>
+        <!-- White band 1 (right) -->
+        <path fill="#fff" d="M118 36 C130 68 134 116 126 156 C122 176 116 190 112 200 C106 190 102 174 100 154 C94 114 92 66 102 34 C106 30 112 30 118 36Z"/>
+        <!-- White band 2 (left) -->
+        <path fill="#fff" d="M94 28 C106 60 110 108 102 148 C100 168 94 184 90 194 C84 182 80 166 78 146 C72 106 70 58 80 26 C84 22 90 22 94 28Z"/>
+        <!-- FLAMA text -->
+        <text x="100" y="238" font-family="'Barlow Condensed','Arial Black',Arial,sans-serif" font-weight="900" font-size="54" text-anchor="middle" fill="#fff" letter-spacing="3">FLAMA</text>
+        <!-- Red triangle accent (A's) -->
+        <polygon fill="#E01010" points="64,230 70,221 76,230"/>
+        <polygon fill="#E01010" points="158,230 164,221 170,230"/>
       </svg>
     </div>
     <div class="ob-title">PANEL DE GESTIÓN <span>VENCIMIENTOS</span></div>
@@ -1041,7 +1052,7 @@ var MATERIALS={'Madera / muebles':4400,'Papel / cartón':4000,'Textiles / algod�
 var PC_MADERA=4400;
 
 /* ===== PRINT HELPER ===== */
-var FLAME_INLINE='<svg class="doc-logo" viewBox="0 0 100 135" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="pfg" x1=".3" y1="0" x2=".7" y2="1"><stop offset="0" stop-color="#FF7A2E"/><stop offset=".45" stop-color="#E8291E"/><stop offset="1" stop-color="#8A0F14"/></linearGradient></defs><path fill="url(#pfg)" d="M50 3C47 18 37 27 32 44c-7 21 1 52 18 62 17-10 25-41 18-62C63 27 53 18 50 3z"/><path fill="#fff" opacity=".52" d="M56 22c-2 16-2 34-2 48 0 9 1 17 3 22 2-7 3-16 3-25C60 52 60 36 56 22z"/><path fill="#fff" opacity=".35" d="M49 14c-3 16-7 34-8 50-1 9 0 17 2 22 2-7 3-16 4-26C48 46 48 30 49 14z"/><path fill="#fff" opacity=".18" d="M42 32c-3 14-6 30-6 44 0 7 0 14 1 19 2-6 3-14 4-23C42 60 43 46 42 32z"/><text x="50" y="130" font-family="Arial Black,sans-serif" font-weight="900" font-size="22" text-anchor="middle" fill="#1a1a1a" letter-spacing="2">FLAMA</text></svg>';
+var FLAME_INLINE='<svg class="doc-logo" viewBox="0 0 100 108" xmlns="http://www.w3.org/2000/svg"><defs><linearGradient id="pfg" x1=".45" y1="0" x2=".55" y2="1"><stop offset="0" stop-color="#FF6218"/><stop offset=".35" stop-color="#E01010"/><stop offset=".75" stop-color="#A80808"/><stop offset="1" stop-color="#7A0808"/></linearGradient></defs><path fill="url(#pfg)" d="M50 4C48 16 40 26 33 42 24 62 24 88 50 100 76 88 76 62 67 42 60 26 52 16 50 4Z"/><path fill="#fff" d="M59 18C65 34 67 58 63 78 61 88 58 95 56 100 53 95 51 87 50 77 47 57 46 33 51 17 53 15 56 15 59 18Z"/><path fill="#fff" d="M47 14C53 30 56 54 52 74 50 84 47 92 45 97 42 91 40 83 39 73 36 53 35 29 40 13 42 11 45 11 47 14Z"/></svg>';
 function docLogo(){return company.logo?'<img class="doc-logo" src="'+company.logo+'">':FLAME_INLINE;}
 function printDoc(html,landscape){
   var st=document.getElementById('print-orient');if(!st){st=document.createElement('style');st.id='print-orient';document.head.appendChild(st);}
