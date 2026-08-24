@@ -42,7 +42,7 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;background:radial-grad
 /* SIDEBAR (redesigned) */
 .sb{width:var(--sw);background:linear-gradient(180deg,#1C1C1C,#141414);min-height:100vh;position:fixed;top:0;left:0;z-index:100;display:flex;flex-direction:column;border-right:1px solid var(--border)}
 .sb-brand{padding:20px 18px 16px;display:flex;align-items:center;gap:12px;cursor:pointer;border-bottom:1px solid var(--border)}
-.sb-brand .logo-box{width:44px;height:44px;border-radius:11px;background:var(--grad-red);display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 4px 16px var(--red-glow);overflow:hidden}
+.sb-brand .logo-box{width:44px;height:44px;border-radius:11px;background:transparent;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden}
 .sb-brand .logo-box svg{width:22px;height:29px}
 .sb-brand .logo-box img{width:100%;height:100%;object-fit:contain}
 .sb-brand .flama-word{font-size:21px}
@@ -1107,7 +1107,7 @@ function genDemoMats(){
     {base:'ABC',size:'1 kg'},{base:'Agua',size:'10 l'},{base:'AFFF',size:'50 l'},
     {base:'ABC',size:'50 kg'},{base:'Clase D',size:'9 l'}
   ];
-  var offsets=[-3,-1,2,8,15,22,30,45,60,75,90,110,130,160,200,270];
+  var offsets=[2,4,6,8,15,22,30,45,60,75,90,110,130,160,200,270];
   var idx=0;
   sectors.forEach(function(sec,si){
     var count=(si<8)?6:7;
@@ -1653,9 +1653,12 @@ function recommendExt(qf,riesgo,area){
   var used=cfRows.filter(function(r){return (r.kg||0)>0;}).map(function(r){return r.mat;});
   var hasLiquid=used.some(function(m){return LIQUIDS.indexOf(m)>=0;});
   var hasSolid=used.some(function(m){return SOLIDS.indexOf(m)>=0;})||used.length===0;
+  var hasElec=used.some(function(m){return m==='Cables / cableado eléctrico'||m==='Equipos electrónicos';});
+  var hasMetalMat=used.some(function(m){return /aluminio|magnesio|litio/i.test(m);});
+  var hasCocinaOil=used.some(function(m){return m==='Aceite vegetal / animal';});
   var sector=((document.getElementById('cf-sector')||{}).value||'');
-  var isCocina=/cocina|gastro|comedor/i.test(sector);
-  var isMetal=/metal|magnesio|aluminio|litio|torno|fundici/i.test(sector);
+  var isCocina=/cocina|gastro|comedor/i.test(sector)||hasCocinaOil;
+  var isMetal=/metal|magnesio|aluminio|litio|torno|fundici/i.test(sector)||hasMetalMat;
   // Clase A — sólidos (ABC polvo triclase, cubre A/B/C)
   if(hasSolid||riesgo>=3){
     var rowA=TAB_A.filter(function(r){return qf<=r.max;})[0];var potA=rowA.v[riesgo]||rowA.v[3]||'2 A';var reqA=parseInt(potA);if(isNaN(reqA))reqA=10;
@@ -1664,15 +1667,15 @@ function recommendExt(qf,riesgo,area){
     add('ABC',chosen,nBy,'Fuegos clase A (sólidos) — polvo ABC, potencial ≥ '+potA);
   }
   // Clase B — líquidos inflamables (espuma AFFF)
-  if(hasLiquid||riesgo<=2){
+  if(hasLiquid){
     add(area>800?'AFFF':'AFFF',area>800?'50 l':'10 l',Math.max(1,Math.ceil(area/250)),'Líquidos inflamables (clase B) — espuma AFFF forma film sobre el derrame');
   }
   // Clase C — equipos eléctricos / electrónicos (CO₂, no deja residuo)
-  add('CO₂','5 kg',nEl,'Equipos eléctricos y electrónicos (clase C) — CO₂ no conductivo, sin residuo');
+  if(hasElec||used.length===0){add('CO₂','5 kg',nEl,'Equipos eléctricos y electrónicos (clase C) — CO₂ no conductivo, sin residuo');}
   // Clase K — cocinas (aceites y grasas)
   if(isCocina)add('Sales K','6 l',Math.max(1,Math.ceil(area/300)),'Cocina — aceites y grasas vegetales/animales (clase K)');
   // Clase D — metales combustibles
-  if(isMetal)add('Clase D','9 l',Math.max(1,Math.ceil(area/300)),'Metales combustibles (clase D) — polvo especial');
+  if(isMetal)add('Clase D','9 l',Math.max(1,Math.ceil(area/300)),'Metales combustibles (Clase D) — polvo seco especial para litio, aluminio, magnesio');
   if(!items.length)add('ABC','5 kg',nBy,'Protección general clase A/B/C');
   var totNo=items.reduce(function(a,b){return a+b.subNo;},0);
   return {items:items,totNo:totNo,totIva:totNo*(1+IVA),nBy:nBy};
@@ -1774,7 +1777,7 @@ function renderTray(){
   else if(filt==='ahorro'){yBase=ahorroCPP;col='#22A859';lbl='Ahorro anual — CPP bonificado';}
   else{yBase=totBruto;col='#ED1C24';lbl='Evolución del gasto total año 1 (equipos + recargas + PH)';}
   var years=[hoyYear()-4,hoyYear()-3,hoyYear()-2,hoyYear()-1,hoyYear()];
-  var vals=years.map(function(y,i){return Math.round(yBase*(0.55+i*0.11));});
+  var vals=years.map(function(y,i){return i===years.length-1?yBase:Math.round(yBase*(0.5+i*0.12));});
   document.getElementById('tray-curve').innerHTML='<div style="font-size:12px;color:var(--text3);margin-bottom:6px">'+lbl+' — pasá el mouse por cada año</div>'+lineCurveMoney(vals,years,col);
   document.getElementById('tray-table').innerHTML=rows||'<tr><td colspan="5" class="table-empty">Sin datos</td></tr>';
 }
@@ -1923,7 +1926,7 @@ function seedFijos(){
   function d(mo){return new Date(now.getFullYear(),now.getMonth()+mo,15).toISOString().split('T')[0];}
   fijos=[
    {id:uid(),tipo:'Red de hidrantes',ident:'HID-01',ubic:'Playa de carga',marca:'Rafitrol',per:'6',ult:d(-5),prox:d(1),estado:'Operativo',resp:'Ing. García Lucía',obs:''},
-   {id:uid(),tipo:'Bocas de incendio / mangueras',ident:'BIE-03',ubic:'Pasillo Central 1° piso',marca:'',per:'12',ult:d(-14),prox:d(-2),estado:'Observado',resp:'Ing. García Lucía',obs:'Manguera con desgaste, reemplazar.'},
+   {id:uid(),tipo:'Bocas de incendio / mangueras',ident:'BIE-03',ubic:'Pasillo Central 1° piso',marca:'',per:'12',ult:d(-14),prox:d(3),estado:'Observado',resp:'Ing. García Lucía',obs:'Manguera con desgaste, reemplazar. Programar reemplazo.'},
    {id:uid(),tipo:'Sistema fijo (rociadores)',ident:'SPK-A',ubic:'Depósito general',marca:'Tyco',per:'6',ult:d(-2),prox:d(4),estado:'Operativo',resp:'',obs:''},
    {id:uid(),tipo:'Detección y alarma',ident:'DET-01',ubic:'Sala de servidores',marca:'Notifier',per:'3',ult:d(-1),prox:d(2),estado:'Operativo',resp:'',obs:''},
    {id:uid(),tipo:'Bomba de incendio',ident:'BBA-01',ubic:'Sala de bombas',marca:'',per:'12',ult:d(-11),prox:d(1),estado:'En mantenimiento',resp:'',obs:'Revisión anual de presurización.'},
