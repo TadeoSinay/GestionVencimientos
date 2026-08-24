@@ -8,6 +8,8 @@
 <meta name="mobile-web-app-capable" content="yes">
 <title>Flama Control</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&family=Barlow+Condensed:wght@500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap">
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <style>
 :root,:root[data-theme="dark"]{
   --bg:#141414;--bg2:#1C1C1C;--surface:#1C1C1C;--surface2:#242424;
@@ -482,6 +484,30 @@ html,body{max-width:100%;overflow-x:hidden}
 img,svg{max-width:100%}
 @media(max-width:900px){input:not([type=range]),select,textarea{font-size:16px}}
 @media(prefers-reduced-motion:reduce){*{transition:none!important;animation:none!important}}
+
+/* ===== ONBOARDING MODAL ===== */
+#ov-onboarding{position:fixed;inset:0;z-index:9999;background:rgba(10,10,10,.97);display:flex;align-items:center;justify-content:center;padding:20px}
+#ov-onboarding.hidden{display:none}
+.ob-card{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:40px 36px;max-width:440px;width:100%;text-align:center;box-shadow:var(--shmd)}
+.ob-logo{width:64px;height:64px;border-radius:16px;background:var(--grad-red);display:flex;align-items:center;justify-content:center;margin:0 auto 20px;box-shadow:0 4px 24px var(--red-glow)}
+.ob-logo svg{width:42px;height:42px}
+.ob-title{font-family:'Barlow Condensed',sans-serif;font-size:28px;font-weight:800;text-transform:uppercase;letter-spacing:.02em;margin-bottom:6px}
+.ob-title span{color:var(--red)}
+.ob-sub{font-size:13px;color:var(--text2);margin-bottom:28px;line-height:1.5}
+.ob-field{margin-bottom:14px;text-align:left}
+.ob-field label{display:block;font-size:11px;font-weight:700;text-transform:uppercase;letter-spacing:.1em;color:var(--text3);margin-bottom:6px}
+.ob-field input{width:100%;background:var(--bg2);border:1px solid var(--border2);color:var(--text);border-radius:8px;padding:11px 14px;font-size:14px;font-family:inherit;outline:none;transition:border-color .13s}
+.ob-field input:focus{border-color:var(--red)}
+.ob-btn{width:100%;padding:13px;background:var(--grad-red);color:#fff;border:none;border-radius:9px;font-size:15px;font-weight:700;cursor:pointer;font-family:inherit;margin-top:6px;transition:opacity .13s}
+.ob-btn:hover{opacity:.88}.ob-btn:disabled{opacity:.5;cursor:default}
+.ob-demo{font-size:11px;color:var(--text3);margin-top:18px;line-height:1.6;background:var(--surface2);border-radius:8px;padding:10px 14px;border:1px solid var(--border)}
+/* ===== LOADING OVERLAY ===== */
+#fb-loading{position:fixed;inset:0;z-index:9998;background:rgba(10,10,10,.88);display:none;align-items:center;justify-content:center;flex-direction:column;gap:14px}
+.fb-spin{width:44px;height:44px;border:3px solid var(--border2);border-top-color:var(--red);border-radius:50%;animation:spin .7s linear infinite}
+@keyframes spin{to{transform:rotate(360deg)}}
+.fb-spin-lbl{font-size:13px;color:var(--text2)}
+/* Demo badge en tabla */
+.demo-badge{background:var(--border2);color:var(--text3);font-size:9px;font-weight:700;text-transform:uppercase;letter-spacing:.08em;padding:2px 5px;border-radius:4px;margin-left:4px;vertical-align:middle}
 </style>
 </head>
 <body>
@@ -504,11 +530,11 @@ img,svg{max-width:100%}
   </div>
   <div class="sb-client">
     <div class="lbl">Empresa activa</div>
-    <select id="ws-select" onchange="switchWs(this.value)"></select>
-    <div class="cuit" id="sb-cli-cuit" style="margin-top:5px">CUIT —</div>
+    <div class="name" id="sb-cli-name" style="margin-top:4px">—</div>
+    <div class="cuit" id="sb-cli-cuit">CUIT —</div>
     <div style="display:flex;gap:6px;margin-top:8px">
-      <button class="ws-btn" onclick="promptNewWs()">＋ Empresa</button>
       <button class="ws-btn" onclick="openCompany()">⚙️ Editar</button>
+      <button class="ws-btn" onclick="cambiarEmpresa()" title="Cerrar sesión y cambiar empresa">↺ Cambiar</button>
     </div>
   </div>
   <div class="sb-nav">
@@ -898,6 +924,41 @@ img,svg{max-width:100%}
   </div>
   <div class="modal-ftr"><button class="btn btn-outline" onclick="closeM('ov-fijo')">Cancelar</button><button class="btn btn-primary" onclick="saveFijo()">💾 Guardar</button></div>
 </div></div>
+
+<!-- LOADING OVERLAY (Firebase) -->
+<div id="fb-loading">
+  <div class="fb-spin"></div>
+  <div class="fb-spin-lbl">Cargando tu empresa…</div>
+</div>
+
+<!-- ONBOARDING MODAL -->
+<div id="ov-onboarding" class="hidden">
+  <div class="ob-card">
+    <div class="ob-logo">
+      <svg viewBox="0 0 32 32" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <path d="M16 3C16 3 13 8 13 12C13 15 16 17 16 17C16 17 19 15 19 12C19 8 16 3 16 3Z" fill="#F15A24"/>
+        <path d="M16 3C16 3 12 9 12 13C12 16.5 14.5 18.5 16 20C17.5 18.5 20 16.5 20 13C20 9 16 3 16 3Z" fill="#E8291E"/>
+        <ellipse cx="16" cy="22" rx="7" ry="6" fill="#7A1512"/>
+        <ellipse cx="16" cy="21" rx="6" ry="5" fill="#E8291E"/>
+        <ellipse cx="16" cy="20" rx="4" ry="3.5" fill="#F15A24"/>
+        <path d="M8 29h16" stroke="#fff" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+    </div>
+    <div class="ob-title">FLAMA <span>Control</span></div>
+    <div class="ob-sub">Registrá tu empresa para comenzar a gestionar tus matafuegos.<br>Tus datos se guardan de forma segura en la nube.</div>
+    <div class="ob-field">
+      <label>Razón social *</label>
+      <input id="ob-nombre" placeholder="Ej: Empresa SA / Nombre y Apellido" autofocus>
+    </div>
+    <div class="ob-field">
+      <label>CUIT (opcional)</label>
+      <input id="ob-cuit" placeholder="30-12345678-9">
+    </div>
+    <button class="ob-btn" id="ob-btn" onclick="registerEmpresa()">Registrar empresa y comenzar →</button>
+    <div class="ob-demo">🧯 <strong>8 matafuegos de prueba</strong> aparecen para todas las empresas — son de solo lectura y te ayudan a explorar el panel.</div>
+  </div>
+</div>
+
 <script>
 /* ===== Real QR generator (Nayuki port, MIT) — byte mode, ECC M, v1-10 ===== */
 var QRGen=(function(){
@@ -982,13 +1043,143 @@ function printDoc(html,landscape){
   window.print();
 }
 
-/* ===== STORAGE (multi-empresa) ===== */
-function ld(k,d){try{var v=JSON.parse(localStorage.getItem(k));return v==null?d:v;}catch(e){return d;}}
-function sv(k,v){localStorage.setItem(k,JSON.stringify(v));}
-/* Cada empresa es un workspace independiente y persistente */
-var workspaces=ld('flama_ws',null);
-var currentWs=ld('flama_current',null);
+/* ===== FIREBASE CONFIG ===== */
+// Creá tu proyecto en https://console.firebase.google.com
+// Firestore Database → modo producción → región us-central1 (o southamerica-east1)
+// En "Agregar app web" copiá la config y reemplazá los valores de abajo:
+var FIREBASE_CFG={
+  apiKey:"TU_API_KEY",
+  authDomain:"TU_PROJECT.firebaseapp.com",
+  projectId:"TU_PROJECT_ID",
+  storageBucket:"TU_PROJECT.firebasestorage.app",
+  messagingSenderId:"TU_SENDER_ID",
+  appId:"TU_APP_ID"
+};
+if(!firebase.apps.length)firebase.initializeApp(FIREBASE_CFG);
+var db=firebase.firestore();
+
+/* ===== STORAGE (sesión por empresa → Firebase) ===== */
+var FB_EMP_KEY='flama_empresa_id';
+var data=[],company={nombre:'',cuit:'',logo:null},contract,fijos=[],editFj=null;
+
 function defaultContract(){return {titulo:'Acuerdo Marco de Suministro',sub:'Provisión y mantenimiento de matafuegos',repFlama:'',repCli:'',cl:[]};}
+
+/* Genera matafuegos de prueba (visibles para todas las empresas, solo lectura) */
+function genDemoMats(){
+  var now=new Date(),out=[];
+  var types=[
+    {base:'ABC',size:'5 kg',cl:'A, B, C',col:'red',sec:'Planta Baja — Pasillo Norte',off:45},
+    {base:'ABC',size:'10 kg',cl:'A, B, C',col:'red',sec:'Depósito — Zona Carga',off:8},
+    {base:'CO₂',size:'5 kg',cl:'B, C',col:'red',horn:true,sec:'Sala de Servidores',off:22},
+    {base:'AFFF',size:'10 l',cl:'A, B',col:'silver',sec:'Playa de Carga',off:95},
+    {base:'ABC',size:'2,5 kg',cl:'A, B, C',col:'red',sec:'Comedor',off:130},
+    {base:'BC',size:'5 kg',cl:'B, C',col:'red',sec:'Cocina Industrial',off:55},
+    {base:'Sales K',size:'6 l',cl:'K',col:'steel',sec:'Cocina Industrial',off:180},
+    {base:'HCFC/HFC',size:'5 kg',cl:'A,B,C',col:'red',hoseGreen:true,sec:'Laboratorio',off:210}
+  ];
+  types.forEach(function(t,i){
+    var prox=new Date(now.getFullYear(),now.getMonth(),now.getDate()+t.off);
+    var fabYr=2021+(i%4);
+    var c=null;for(var k=0;k<CATALOG.length;k++)if(CATALOG[k].base===t.base&&CATALOG[k].size===t.size){c=CATALOG[k];break;}
+    if(!c)return;
+    out.push({
+      id:'demo_'+i,_demo:true,
+      lote:'DEMO-'+String(i+1).padStart(3,'0'),tipoBase:t.base,tamano:t.size,clase:t.cl,
+      origen:c.origen,color:t.col,ruedas:!!c.ruedas,horn:!!t.horn,noHose:!!c.noHose,hoseGreen:!!t.hoseGreen,
+      agente:t.base.indexOf('CO')>=0?'CO₂':(t.base==='ABC'||t.base==='BC')?'Polvo químico':t.base==='AFFF'?'Espuma AFFF':t.base,
+      sector:t.sec,mercado:'Demo',marca:'FLAMA',serie:fabYr+'-D'+String(100+i),
+      cuit:'30504835126',opds:'OPDS-DEMO-'+(1000+i*7)+'/07',
+      entregaEstado:'Instalado',nroPedido:'',fentrega:'',
+      fabricacion:fabYr+'-01',instalacion:fabYr+'-06-01',anilloYr:String(2025+(i%5)),
+      ultimaRecarga:new Date(prox.getFullYear()-1,prox.getMonth(),prox.getDate()).toISOString().split('T')[0],
+      proximaRecarga:prox.toISOString().split('T')[0],
+      ultimoCPP:new Date(now.getFullYear(),now.getMonth()-3,10).toISOString().split('T')[0],
+      proximoCPP:new Date(now.getFullYear(),now.getMonth(),now.getDate()+Math.max(4,t.off-20)).toISOString().split('T')[0],
+      ultimaPH:new Date(now.getFullYear()-2,now.getMonth(),15).toISOString().split('T')[0],
+      proximaPH:new Date(now.getFullYear()+3,now.getMonth(),15).toISOString().split('T')[0],
+      caducidad:(fabYr+20)+'-01',
+      estadoActual:t.off<=30?'En mantenimiento':'Operativo',
+      tieneProvisorio:'no',provDesc:'',nuevoFecha:'',
+      fechaAlta:new Date(now.getFullYear(),now.getMonth()-1,5).toISOString().split('T')[0],
+      fechaInsp:new Date(now.getFullYear(),now.getMonth()-2,10).toISOString().split('T')[0],
+      responsable:'Ing. García Lucía',matricula:'20-12345678-9',
+      proximaInsp:new Date(now.getFullYear(),now.getMonth()+4,10).toISOString().split('T')[0],
+      obs:t.off<=30?'Próximo a vencer — coordinar recarga.':'',
+      cPres:'✅ Conforme',cPrec:'✅ Conforme',cMang:'✅ Conforme',cBoq:'✅ Conforme',
+      cSop:'✅ Conforme',cSen:'✅ Conforme',cEtq:'✅ Conforme',cAcc:'✅ Conforme',
+      foto_unit:null,foto_qr:null,foto_oblea:null,foto_remito:null
+    });
+  });
+  return out;
+}
+
+function showLoading(){var el=document.getElementById('fb-loading');if(el)el.style.display='flex';}
+function hideLoading(){var el=document.getElementById('fb-loading');if(el)el.style.display='none';}
+function showOnboarding(){document.getElementById('ov-onboarding').classList.remove('hidden');}
+function hideOnboarding(){document.getElementById('ov-onboarding').classList.add('hidden');}
+
+function persist(){
+  var id=localStorage.getItem(FB_EMP_KEY);if(!id)return;
+  var realMats=data.filter(function(m){return !m._demo;});
+  db.collection('empresas').doc(id).set({
+    company:company,mats:realMats,fijos:fijos,contract:contract,
+    updatedAt:firebase.firestore.FieldValue.serverTimestamp()
+  },{merge:true}).catch(function(e){console.error('Flama persist:',e);});
+}
+
+function loadEmpresa(callback){
+  var id=localStorage.getItem(FB_EMP_KEY);
+  if(!id){showOnboarding();return;}
+  showLoading();
+  db.collection('empresas').doc(id).get().then(function(doc){
+    hideLoading();
+    if(!doc.exists){localStorage.removeItem(FB_EMP_KEY);showOnboarding();return;}
+    var d=doc.data();
+    company=d.company||{nombre:'Mi Empresa',cuit:'',logo:null};
+    contract=d.contract||defaultContract();
+    fijos=d.fijos||[];
+    data=genDemoMats().concat(d.mats||[]);
+    callback();
+  }).catch(function(e){
+    hideLoading();
+    console.error('Firebase load error:',e);
+    company={nombre:'Mi Empresa',cuit:'',logo:null};
+    contract=defaultContract();fijos=[];
+    data=genDemoMats();
+    callback();
+  });
+}
+
+function registerEmpresa(){
+  var n=(document.getElementById('ob-nombre').value||'').trim();
+  if(!n){alert('Ingresá el nombre de tu empresa para continuar.');return;}
+  var cuit=(document.getElementById('ob-cuit').value||'').trim();
+  var btn=document.getElementById('ob-btn');
+  btn.disabled=true;btn.textContent='Registrando…';
+  var id='emp'+Date.now()+Math.random().toString(36).slice(2,5);
+  var emp={
+    company:{nombre:n,cuit:cuit,logo:null,dir:'',tel:'',email:'',loc:'',hab:'',syh_nombre:'',syh_mat:'',syh_tel:'',syh_email:''},
+    mats:[],fijos:[],contract:defaultContract(),
+    createdAt:firebase.firestore.FieldValue.serverTimestamp()
+  };
+  db.collection('empresas').doc(id).set(emp).then(function(){
+    localStorage.setItem(FB_EMP_KEY,id);
+    company=emp.company;contract=emp.contract;fijos=[];
+    data=genDemoMats();
+    hideOnboarding();
+    initApp();
+  }).catch(function(e){
+    btn.disabled=false;btn.textContent='Registrar empresa y comenzar →';
+    alert('Error al conectar con Firebase: '+e.message+'\n\nVerificá que la config de Firebase esté completa en el código.');
+  });
+}
+
+function cambiarEmpresa(){
+  if(!confirm('¿Cambiar de empresa? Se cerrará la sesión actual y deberás registrar otra empresa.'))return;
+  localStorage.removeItem(FB_EMP_KEY);
+  location.reload();
+}
+
 var CLAUSES=[
  {t:'Primera — Objeto',def:'El presente tiene por objeto establecer las condiciones generales bajo las cuales EL PROVEEDOR suministrará a EL CLIENTE matafuegos y los servicios de recarga, control periódico preventivo, prueba hidráulica y mantenimiento, conforme la Norma IRAM 3517-2, la Ley N° 19.587 de Higiene y Seguridad en el Trabajo y su Decreto Reglamentario N° 351/79.'},
  {t:'Segunda — Modalidad de contratación',def:'El presente constituye un acuerdo marco. No fija por sí cantidades ni precios. Cada provisión o servicio se instrumentará mediante órdenes de compra particulares emitidas por EL CLIENTE y aceptadas por EL PROVEEDOR, las que se regirán por este Acuerdo y por la lista de precios vigente al momento de cada operación.'},
@@ -1002,17 +1193,6 @@ var CLAUSES=[
  {t:'Décima — Jurisdicción y domicilios',def:'Para todos los efectos legales derivados del presente, LAS PARTES se someten a la jurisdicción de los Tribunales Ordinarios de la Ciudad Autónoma de Buenos Aires, renunciando a cualquier otro fuero, y constituyen domicilios en los indicados en el encabezamiento, donde serán válidas todas las notificaciones.'}
 ];
 function clauseText(i){return (contract.cl&&contract.cl[i])?contract.cl[i]:CLAUSES[i].def;}
-function migrateOld(){
-  // migración desde versión anterior (single-company) si existía
-  var oldMats=ld('flama_mats',null);
-  if(oldMats&&!workspaces){var oc=ld('flama_company',{nombre:'Mi Empresa',logo:null,cuit:''});var id='ws'+Date.now();workspaces={};workspaces[id]={company:oc,mats:oldMats,contract:defaultContract()};currentWs=id;sv('flama_ws',workspaces);sv('flama_current',currentWs);}
-}
-migrateOld();
-if(!workspaces){workspaces={};}
-var data,company,contract,fijos,editFj=null;
-function bindWs(id){currentWs=id;var w=workspaces[id];data=w.mats;company=w.company;contract=w.contract||defaultContract();w.contract=contract;fijos=w.fijos||[];w.fijos=fijos;sv('flama_current',currentWs);}
-function persist(){var w=workspaces[currentWs];if(w){w.mats=data;w.company=company;w.contract=contract;w.fijos=fijos;}sv('flama_ws',workspaces);sv('flama_current',currentWs);}
-function newWorkspace(nombre,cuit,doSeed){var id='ws'+Date.now()+Math.random().toString(36).slice(2,5);workspaces[id]={company:{nombre:nombre||'Nueva empresa',cuit:cuit||'',logo:null},mats:[],contract:defaultContract(),fijos:[]};bindWs(id);if(doSeed){seed();seedFijos();}persist();return id;}
 var editId=null,curSlot=null,tmpPh={unit:null,qr:null,oblea:null,remito:null};
 var srtKey='proximaRecarga',srtAsc=true,alFilt='all',galFilt='all',boardMode='estado',logoTarget='company';
 
@@ -1316,9 +1496,9 @@ function renderTbl(){
   rows.sort(function(a,b){var A=srtKey==='code'?codeOf(a):(a[srtKey]||'zzz'),B=srtKey==='code'?codeOf(b):(b[srtKey]||'zzz');return srtAsc?(''+A).localeCompare(B):(''+B).localeCompare(A);});
   var tb=document.getElementById('tbl-body');
   if(!rows.length){tb.innerHTML='<tr><td colspan="10" class="table-empty">Sin resultados. Hacé clic en <strong>+ Nuevo Matafuego</strong>.</td></tr>';return;}
-  tb.innerHTML=rows.map(function(m){var prov=m.tieneProvisorio==='si'?'<span class="prov-badge" title="Tiene provisorio">🔄 PROV</span>':'';
+  tb.innerHTML=rows.map(function(m){var prov=m.tieneProvisorio==='si'?'<span class="prov-badge" title="Tiene provisorio">🔄 PROV</span>':'';var demo=m._demo?'<span class="demo-badge" title="Solo lectura — dato de prueba">DEMO</span>':'';
    return '<tr onmouseenter="showTip(event,\''+m.id+'\')" onmousemove="moveTip(event)" onmouseleave="hideTip()">'
-   +'<td><div class="code-cell">'+codeOf(m)+' '+prov+'</div><small style="color:var(--text3)">'+m.lote+' · '+m.tipoBase+' '+m.tamano+'</small></td>'
+   +'<td><div class="code-cell">'+codeOf(m)+' '+prov+demo+'</div><small style="color:var(--text3)">'+m.lote+' · '+m.tipoBase+' '+m.tamano+'</small></td>'
    +'<td style="max-width:150px;overflow:hidden;text-overflow:ellipsis">'+(m.sector||'—')+'</td>'
    +'<td>'+ringBadge(m)+'</td>'
    +'<td><div class="date-cell"><div class="date-val">'+fmt(m.proximaRecarga)+'</div>'+dayChip(m.proximaRecarga)+'</div></td>'
@@ -1330,7 +1510,7 @@ function renderTbl(){
    +'<td><div style="display:flex;gap:2px"><button class="btn-ghost" onclick="openDet(\''+m.id+'\')" title="Ver">👁</button><button class="btn-ghost" onclick="openEdit(\''+m.id+'\')" title="Editar">✏️</button><button class="btn-ghost" onclick="del(\''+m.id+'\')" title="Borrar">🗑</button></div></td></tr>';
   }).join('');
 }
-function del(id){if(!confirm('¿Eliminar este matafuego?'))return;data=data.filter(function(m){return m.id!==id;});persist();renderAll();}
+function del(id){var m=data.find(function(x){return x.id===id;});if(m&&m._demo){alert('Los matafuegos de prueba son de solo lectura y no se pueden eliminar.');return;}if(!confirm('¿Eliminar este matafuego?'))return;data=data.filter(function(m){return m.id!==id;});persist();renderAll();}
 
 /* ===== BOARD ===== */
 function setBoard(mode){boardMode=mode;document.getElementById('vt-estado').classList.toggle('active',mode==='estado');document.getElementById('vt-anillo').classList.toggle('active',mode==='anillo');renderBoard();}
@@ -1582,7 +1762,7 @@ function openDet(id){
 
 /* ===== CRUD ===== */
 function openAdd(){closeSidebar();editId=null;tmpPh={unit:null,qr:null,oblea:null,remito:null};clearF();document.getElementById('mat-title').textContent='Nuevo Matafuego';document.getElementById('ov-mat').classList.remove('hidden');}
-function openEdit(id){var m=null;for(var i=0;i<data.length;i++)if(data[i].id===id)m=data[i];if(!m)return;editId=id;tmpPh={unit:m.foto_unit||null,qr:m.foto_qr||null,oblea:m.foto_oblea||null,remito:m.foto_remito||null};fillF(m);document.getElementById('mat-title').textContent='Editar — '+codeOf(m);document.getElementById('ov-mat').classList.remove('hidden');}
+function openEdit(id){var m=null;for(var i=0;i<data.length;i++)if(data[i].id===id)m=data[i];if(!m)return;if(m._demo){alert('Los matafuegos de prueba son de solo lectura. Cargá tus propios equipos con "+ Nuevo Matafuego".');return;}editId=id;tmpPh={unit:m.foto_unit||null,qr:m.foto_qr||null,oblea:m.foto_oblea||null,remito:m.foto_remito||null};fillF(m);document.getElementById('mat-title').textContent='Editar — '+codeOf(m);document.getElementById('ov-mat').classList.remove('hidden');}
 function gv(id){var e=document.getElementById(id);return e?(e.value||'').trim():'';}
 function clearF(){
   ['f-lote','f-sector','f-serie','f-cuit','f-opds','f-pedido','f-fentrega','f-anillo-yr','f-ult-rec','f-prox-rec','f-ult-cpp','f-prox-cpp','f-ult-ph','f-prox-ph','f-cad','f-inst','f-finsp','f-resp','f-mat','f-prox-insp','f-obs','f-prov-desc','f-nuevo-fecha','f-fab','f-clase','f-origen'].forEach(function(id){var e=document.getElementById(id);if(e)e.value='';});
@@ -1635,10 +1815,12 @@ function rmPhoto(e,s){e.stopPropagation();tmpPh[s]=null;updSlots();}
 function updSlots(){['unit','qr','oblea','remito'].forEach(function(k){var sl=document.getElementById('ps-'+k);if(!sl)return;var p=sl.querySelector('img.preview');if(p)p.remove();if(tmpPh[k]){sl.classList.add('filled');var img=document.createElement('img');img.src=tmpPh[k];img.className='preview';sl.insertBefore(img,sl.firstChild);}else sl.classList.remove('filled');});}
 
 /* ===== COMPANY ===== */
-function applyCompany(){document.getElementById('sb-cli-cuit').textContent='CUIT '+(company.cuit||'—');var box=document.getElementById('sb-logo');box.innerHTML=company.logo?'<img src="'+company.logo+'">':'<svg><use href="#flameIcon"/></svg>';renderWsSwitcher();}
-function renderWsSwitcher(){var s=document.getElementById('ws-select');if(!s)return;s.innerHTML=Object.keys(workspaces).map(function(id){return '<option value="'+id+'" '+(id===currentWs?'selected':'')+'>'+(workspaces[id].company.nombre||'Empresa')+'</option>';}).join('');}
-function switchWs(id){if(!workspaces[id])return;bindWs(id);applyCompany();renderAll();nav('dashboard');}
-function promptNewWs(){var n=prompt('Nombre / razón social de la nueva empresa:');if(n===null)return;var cuit=prompt('CUIT (opcional):')||'';newWorkspace(n||'Nueva empresa',cuit,false);applyCompany();renderAll();nav('dashboard');alert('✅ Empresa "'+(n||'Nueva empresa')+'" creada. Sus datos se guardan por separado. Cargá sus matafuegos con "+ Nuevo Matafuego".');}
+function applyCompany(){
+  var ne=document.getElementById('sb-cli-name');if(ne)ne.textContent=company.nombre||'Mi Empresa';
+  document.getElementById('sb-cli-cuit').textContent='CUIT '+(company.cuit||'—');
+  var box=document.getElementById('sb-logo');box.innerHTML=company.logo?'<img src="'+company.logo+'">':'<svg><use href="#flameIcon"/></svg>';
+}
+function renderWsSwitcher(){/* no-op: sesión única por empresa */}
 function openCompany(){closeSidebar();['nombre','cuit','dir','tel','email','loc','hab'].forEach(function(k){var e=document.getElementById('emp-'+k);if(e)e.value=company[k]||'';});['nombre','mat','tel','email'].forEach(function(k){var e=document.getElementById('emp-syh-'+k);if(e)e.value=company['syh_'+k]||'';});var pv=document.getElementById('logo-prev'),ph=document.getElementById('logo-ph');if(company.logo){pv.src=company.logo;pv.style.display='';ph.style.display='none';}else{pv.style.display='none';ph.style.display='';}document.getElementById('ov-emp').classList.remove('hidden');}
 function pickLogo(){logoTarget='company';document.getElementById('logo-inp').click();}
 function onLogo(e){var f=e.target.files[0];if(!f)return;var r=new FileReader();r.onload=function(ev){company.logo=ev.target.result;persist();var pv=document.getElementById('logo-prev'),ph=document.getElementById('logo-ph');if(pv){pv.src=ev.target.result;pv.style.display='';ph.style.display='none';}applyCompany();if(logoTarget==='planilla')renderSyH();};r.readAsDataURL(f);e.target.value='';}
@@ -1773,32 +1955,37 @@ function seed(force){
       cPres:chk(i%4),cPrec:chk(i%3),cMang:chk(i%5),cBoq:chk(1),cSop:chk(i%6),cSen:chk(i%3),cEtq:chk(1),cAcc:chk(1),
       foto_unit:null,foto_qr:null,foto_oblea:null,foto_remito:null});
   }
-  data=out;if(workspaces[currentWs])workspaces[currentWs].mats=data;persist();
+  data=out;persist();
 }
 
 /* ===== INIT ===== */
 function renderAll(){renderTrends();renderKpis();renderTbl();renderSyhFilter();renderWsSwitcher();
   var c=buildAlerts().filter(function(a){return a.sev>=3;}).length,nb=document.getElementById('nb-al');if(c){nb.textContent=c;nb.classList.add('show');}else nb.classList.remove('show');
   var fc=(fijos||[]).filter(function(f){var n=daysTo(f.prox);return n!=null&&n<=30;}).length,fb=document.getElementById('nb-fj');if(fb){if(fc){fb.textContent=fc;fb.classList.add('show');}else fb.classList.remove('show');}}
-/* boot */
-initSelects();
-var SEEDVER='6';
-function isDemoWs(w){return !!(w._demo||(w.company&&w.company.nombre==='FLAMA — Empresa Demo')||(w.company&&(w.company.cuit||'').replace(/\D/g,'')==='30504835126'&&(w.mats||[]).length>=50));}
-var wsIds=Object.keys(workspaces);
-if(!wsIds.length){var demoId=newWorkspace('FLAMA — Empresa Demo','30504835126',true);workspaces[demoId]._demo=true;persist();}
-else{bindWs((currentWs&&workspaces[currentWs])?currentWs:wsIds[0]);}
-// Re-generar SOLO la empresa demo cuando cambia la versión de datos (no toca empresas creadas por el usuario)
-if(ld('flama_seedver',null)!==SEEDVER){
-  var target=currentWs;
-  Object.keys(workspaces).forEach(function(id){
-    if(isDemoWs(workspaces[id])){workspaces[id]._demo=true;bindWs(id);data.length=0;seed(true);fijos.length=0;seedFijos();}
-  });
-  if(workspaces[target]&&currentWs!==target)bindWs(target);
-  sv('flama_seedver',SEEDVER);
+
+function initApp(){
+  initSelects();
+  applyCompany();
+  renderAll();
+  routeHash();
 }
-if((!fijos||!fijos.length)&&data.length>=50)seedFijos();
-function resetDemo(){if(!confirm('Recargar los datos de ejemplo en ESTA empresa? Se reemplazan los matafuegos y sistemas por el set de demostración.'))return;data.length=0;seed(true);fijos.length=0;seedFijos();applyCompany();renderAll();nav('dashboard');}
-applyCompany();renderAll();routeHash();
+
+function resetDemo(){if(!confirm('¿Recargar los datos de prueba? Reemplaza los matafuegos DEMO por los originales (tus propios equipos no se tocan).'))return;var real=data.filter(function(m){return !m._demo;});data=genDemoMats().concat(real);renderAll();alert('✅ Datos de prueba recargados.');}
+
+/* boot: verificar Firebase config y arrancar */
+(function(){
+  if(FIREBASE_CFG.apiKey==='TU_API_KEY'){
+    // Config no completada → modo offline con demo data
+    console.warn('Flama: Firebase no configurado. Usando datos solo en memoria.');
+    company={nombre:'Demo (sin Firebase)',cuit:'',logo:null};
+    contract=defaultContract();fijos=[];
+    data=genDemoMats();
+    document.getElementById('fb-loading').style.display='none';
+    setTimeout(function(){initApp();},0);
+    return;
+  }
+  loadEmpresa(initApp);
+})();
 </script>
 </body>
 </html>
