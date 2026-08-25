@@ -41,12 +41,14 @@ body::before{content:'';position:fixed;inset:0;z-index:-1;background:radial-grad
 
 /* SIDEBAR (redesigned) */
 .sb{width:var(--sw);background:linear-gradient(180deg,#1C1C1C,#141414);min-height:100vh;position:fixed;top:0;left:0;z-index:100;display:flex;flex-direction:column;border-right:1px solid var(--border)}
-.sb-brand{padding:14px 14px 12px;display:flex;justify-content:center;align-items:center;cursor:pointer;border-bottom:1px solid var(--border)}
+.sb-brand{padding:16px 14px 14px;display:flex;flex-direction:column;justify-content:center;align-items:center;cursor:pointer;border-bottom:1px solid var(--border);gap:6px}
 .sb-brand .logo-box{width:44px;height:44px;border-radius:11px;background:transparent;display:flex;align-items:center;justify-content:center;flex-shrink:0;overflow:hidden}
 .sb-brand .logo-box svg{width:22px;height:29px}
 .sb-brand .logo-box img{width:100%;height:100%;object-fit:contain}
 .sb-brand .flama-word{font-size:21px}
-.sb-brand .sub{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.16em;margin-top:4px;font-weight:700}
+.sb-brand>img{display:block;margin:0 auto;border-radius:10px;box-shadow:0 4px 18px rgba(0,0,0,.6),0 0 0 1px rgba(255,255,255,.08)}
+.sb-brand .sub{font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.16em;margin-top:2px;font-weight:700;text-align:center}
+.sb-brand::after{content:'Panel de Gestión';display:block;font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.15em;font-weight:700;text-align:center;margin-top:2px}
 .sb-client{margin:12px 12px 4px;padding:10px 12px;background:var(--surface);border:1px solid var(--border);border-radius:9px}
 .sb-client .lbl{font-size:8px;text-transform:uppercase;letter-spacing:.14em;color:var(--text3);font-weight:700}
 .sb-client .name{font-size:13px;font-weight:700;margin-top:2px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
@@ -489,8 +491,8 @@ img,svg{max-width:100%}
 #ov-onboarding{position:fixed;inset:0;z-index:9999;background:rgba(10,10,10,.97);display:flex;align-items:center;justify-content:center;padding:20px}
 #ov-onboarding.hidden{display:none}
 .ob-card{background:var(--surface);border:1px solid var(--border);border-radius:18px;padding:40px 36px;max-width:440px;width:100%;text-align:center;box-shadow:var(--shmd)}
-.ob-logo{width:180px;display:flex;flex-direction:column;align-items:center;justify-content:center;margin:0 auto 16px;gap:0}
-.ob-logo img{width:150px;height:auto;object-fit:contain;border-radius:10px}
+.ob-logo{display:flex;flex-direction:column;align-items:center;justify-content:center;margin:0 auto 20px;gap:0}
+.ob-logo img{width:160px;height:auto;object-fit:contain;border-radius:12px;display:block;margin:0 auto;box-shadow:0 6px 24px rgba(0,0,0,.5),0 0 0 1px rgba(255,255,255,.06)}
 .ob-logo-name{font-family:'Barlow Condensed','Arial Black',Arial,sans-serif;font-weight:900;font-size:30px;letter-spacing:4px;color:#fff;line-height:1}
 .ob-logo-name span{color:var(--red)}
 .ob-title{font-family:'Barlow Condensed',sans-serif;font-size:22px;font-weight:800;text-transform:uppercase;letter-spacing:.02em;margin-bottom:6px}
